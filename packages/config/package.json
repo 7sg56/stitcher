@@ -1,13 +1,13 @@
 {
-  "name": "config",
+  "name": "@stitcher/config",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "description": "Shared configuration for Stitcher monorepo",
+  "files": [
+    "eslint.config.mjs",
+    "prettier.config.mjs",
+    "base.json",
+    "tsconfig.json"
+  ],
+  "keywords": ["config", "eslint", "prettier", "typescript"],
+  "license": "ISC"
 }

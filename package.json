@@ -4,6 +4,10 @@
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
     "dev:web": "npm run dev --workspace=apps/web",
-    "dev:api": "npm run dev --workspace=apps/api"
+    "dev:api": "npm run dev --workspace=apps/api",
+    "build": "npm run build --workspace=packages/types --workspace=apps/api --workspace=apps/web",
+    "build:types": "npm run build --workspace=packages/types",
+    "build:api": "npm run build --workspace=apps/api",
+    "build:web": "npm run build --workspace=apps/web"
   }
 }
