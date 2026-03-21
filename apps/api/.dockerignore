@@ -1,0 +1,39 @@
+# Dependencies
+node_modules
+
+# Build outputs
+dist/
+build/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Prisma
+prisma/migrations/
+
+# Testing
+__tests__/
+*.test.ts
+*.spec.ts
+coverage/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# OS
+.DS_Store

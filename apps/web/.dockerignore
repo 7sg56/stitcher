@@ -1,0 +1,38 @@
+# Dependencies
+node_modules
+
+# Build outputs
+.next/
+out/
+.turbo/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile*
+.dockerignore
+
+# Testing
+__tests__/
+*.test.ts
+*.test.tsx
+*.spec.ts
+coverage/
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+
+# Logs
+*.log
