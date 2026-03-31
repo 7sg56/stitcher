@@ -3,13 +3,23 @@
 import { useAuth, useSignUp } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function SignUpPage() {
     const { signUp, errors, fetchStatus } = useSignUp();
-    const { isSignedIn } = useAuth();
+    const { isLoaded, isSignedIn } = useAuth();
     const router = useRouter();
     const [passwordError, setPasswordError] = useState("");
+
+    useEffect(() => {
+        if (isLoaded && isSignedIn) {
+            router.push("/dashboard");
+        }
+    }, [isLoaded, isSignedIn, router]);
+
+    if (!isLoaded || isSignedIn) {
+        return null;
+    }
 
     const handleGoogleSignUp = async () => {
         if (!signUp) return;
@@ -74,7 +84,7 @@ export default function SignUpPage() {
         }
     };
 
-    if (signUp.status === "complete" || isSignedIn) {
+    if (signUp?.status === "complete") {
         return null;
     }
 

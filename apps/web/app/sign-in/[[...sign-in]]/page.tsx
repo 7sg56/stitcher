@@ -1,12 +1,24 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useEffect } from "react";
 
 export default function SignInPage() {
     const { signIn, errors, fetchStatus } = useSignIn();
+    const { isLoaded, isSignedIn } = useAuth();
     const router = useRouter();
+
+    useEffect(() => {
+        if (isLoaded && isSignedIn) {
+            router.push("/dashboard");
+        }
+    }, [isLoaded, isSignedIn, router]);
+
+    if (!isLoaded || isSignedIn) {
+        return null;
+    }
 
     const handleGoogleSignIn = async () => {
         if (!signIn) return;
