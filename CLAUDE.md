@@ -8,7 +8,7 @@ Stack:
 - Frontend: Next.js (apps/web)
 - Backend: Fastify (apps/api)
 - Auth: Clerk
-- DB: PostgreSQL (Prisma ORM)
+- DB: Supabase
 - Infra: Docker (Postgres, Redis)
 
 ---
