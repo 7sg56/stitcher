@@ -1,9 +1,14 @@
+```mermaid
+---
+config:
+  layout: elk
+---
 erDiagram
-  ROLE {
-    uuid id PK
-    string name
-    string permissions
-  }
+ROLE {
+  uuid id PK
+  enum name  "student | teacher | admin"
+}
+
   USER {
     uuid id PK
     uuid role_id FK
@@ -15,6 +20,7 @@ erDiagram
     int profanity_score
     timestamp created_at
   }
+
   ALIAS {
     uuid id PK
     uuid user_id FK
@@ -22,6 +28,7 @@ erDiagram
     string avatar_url
     boolean is_active
   }
+
   VIOLATION {
     uuid id PK
     uuid user_id FK
@@ -31,6 +38,7 @@ erDiagram
     string content_ref
     timestamp created_at
   }
+
   COURSE {
     uuid id PK
     string name
@@ -39,6 +47,7 @@ erDiagram
     string department
     boolean is_active
   }
+
   ENROLLMENT {
     uuid id PK
     uuid user_id FK
@@ -46,6 +55,7 @@ erDiagram
     string status
     timestamp enrolled_at
   }
+
   PORTFOLIO {
     uuid id PK
     uuid teacher_id FK
@@ -53,20 +63,7 @@ erDiagram
     float avg_feedback_score
     timestamp updated_at
   }
-  ROLE ||--o{ USER : classifies
-  USER ||--o{ ALIAS : has
-  USER ||--o{ VIOLATION : receives
-  USER ||--o{ ENROLLMENT : has
-  USER ||--o{ PORTFOLIO : owns
-  ENROLLMENT }o--|| COURSE : links
 
-  COURSE {
-    uuid id PK
-    string name
-    string code
-    int semester_number
-    string department
-  }
   SEMESTER_SUBJECT {
     uuid id PK
     uuid course_id FK
@@ -74,6 +71,7 @@ erDiagram
     string code
     int unit_count
   }
+
   UNIT {
     uuid id PK
     uuid subject_id FK
@@ -81,6 +79,7 @@ erDiagram
     string title
     string description
   }
+
   EXAM_SECTION {
     uuid id PK
     uuid subject_id FK
@@ -88,6 +87,7 @@ erDiagram
     int year
     string exam_board
   }
+
   RESOURCE {
     uuid id PK
     uuid uploaded_by FK
@@ -100,31 +100,6 @@ erDiagram
     int download_count
     timestamp uploaded_at
   }
-  SESSION {
-    uuid id PK
-    uuid course_id FK
-    uuid teacher_id FK
-    string topic
-    timestamp started_at
-    timestamp ended_at
-    string location
-  }
-  LMS_SYNC {
-    uuid id PK
-    string lms_provider
-    string external_course_id
-    uuid internal_course_id FK
-    uuid user_id FK
-    string sync_status
-    timestamp last_synced_at
-  }
-  COURSE ||--o{ SEMESTER_SUBJECT : contains
-  COURSE ||--o{ SESSION : holds
-  COURSE ||--o{ LMS_SYNC : mapped_in
-  SEMESTER_SUBJECT ||--o{ UNIT : divided_into
-  SEMESTER_SUBJECT ||--o{ EXAM_SECTION : has
-  UNIT ||--o{ RESOURCE : stores_notes
-  EXAM_SECTION ||--o{ RESOURCE : stores_pyq
 
   SESSION {
     uuid id PK
@@ -133,7 +108,10 @@ erDiagram
     string topic
     timestamp started_at
     timestamp ended_at
+    string location
+    boolean is_cancelled
   }
+
   ATTENDANCE {
     uuid id PK
     uuid student_id FK
@@ -143,6 +121,7 @@ erDiagram
     string source
     timestamp marked_at
   }
+
   FEEDBACK {
     uuid id PK
     uuid student_id FK
@@ -152,12 +131,12 @@ erDiagram
     boolean is_anonymous
     timestamp submitted_at
   }
+
   DOUBT {
     uuid id PK
     uuid raised_by FK
     uuid assigned_teacher_id FK
     uuid session_id FK
-    uuid subject_id FK
     string topic
     string type
     string content
@@ -166,12 +145,14 @@ erDiagram
     timestamp asked_at
     timestamp resolved_at
   }
+
   DOUBT_VOTE {
     uuid id PK
     uuid doubt_id FK
     uuid user_id FK
     timestamp voted_at
   }
+
   QUIZ {
     uuid id PK
     uuid course_id FK
@@ -182,16 +163,24 @@ erDiagram
     boolean is_active
     timestamp created_at
   }
+
   QUIZ_QUESTION {
     uuid id PK
-    uuid quiz_id FK
     uuid subject_id FK
     string topic
     string question_text
-    string options
+    json options
     string correct_answer
     string difficulty
   }
+
+  QUIZ_QUESTION_POOL {
+    uuid id PK
+    uuid quiz_id FK
+    uuid question_id FK
+    int display_order
+  }
+
   QUIZ_ATTEMPT {
     uuid id PK
     uuid quiz_id FK
@@ -199,9 +188,12 @@ erDiagram
     int score
     int total_questions
     float percentage
+    json question_order
+    string status
     timestamp started_at
     timestamp completed_at
   }
+
   QUIZ_RESPONSE {
     uuid id PK
     uuid attempt_id FK
@@ -210,23 +202,18 @@ erDiagram
     boolean is_correct
     int time_taken_seconds
   }
-  SESSION ||--o{ ATTENDANCE : recorded_in
-  SESSION ||--o{ FEEDBACK : collected_in
-  SESSION ||--o{ DOUBT : raised_in
-  DOUBT ||--o{ DOUBT_VOTE : receives
-  QUIZ ||--o{ QUIZ_QUESTION : draws_from
-  QUIZ ||--o{ QUIZ_ATTEMPT : generates
-  QUIZ_ATTEMPT ||--o{ QUIZ_RESPONSE : contains
-  QUIZ_QUESTION ||--o{ QUIZ_RESPONSE : answered_by
-  
-  USER {
+
+  LMS_SYNC {
     uuid id PK
-    string real_name
+    string lms_provider
+    string external_course_id
+    string external_user_id
+    uuid internal_course_id FK
+    uuid user_id FK
+    string sync_status
+    timestamp last_synced_at
   }
-  COURSE {
-    uuid id PK
-    string name
-  }
+
   ATTENDANCE_PREDICTION {
     uuid id PK
     uuid student_id FK
@@ -234,30 +221,21 @@ erDiagram
     float current_percentage
     float predicted_percentage
     string risk_level
-    string pattern_data
+    json pattern_data
+    string model_version
     timestamp computed_at
   }
+
   STUDENT_DASHBOARD {
     uuid id PK
     uuid student_id FK
     uuid course_id FK
     float attendance_percentage
     float avg_quiz_score
-    string weak_concepts
     string marks_summary
     timestamp refreshed_at
   }
-  TEACHER_INSIGHT {
-    uuid id PK
-    uuid teacher_id FK
-    uuid course_id FK
-    float class_avg_quiz_score
-    float avg_feedback_rating
-    string poor_feedback_entries
-    string attendance_trend
-    string topic_weakness_map
-    timestamp generated_at
-  }
+
   WEAK_CONCEPT {
     uuid id PK
     uuid student_id FK
@@ -267,10 +245,59 @@ erDiagram
     int attempts
     timestamp last_assessed_at
   }
+
+  TEACHER_INSIGHT {
+    uuid id PK
+    uuid teacher_id FK
+    uuid course_id FK
+    float class_avg_quiz_score
+    float avg_feedback_rating
+    json poor_feedback_entries
+    string attendance_trend
+    json topic_weakness_map
+    timestamp generated_at
+  }
+
+  ROLE ||--o{ USER : classifies
+  USER ||--o{ ALIAS : has
+  USER ||--o{ VIOLATION : receives
+  USER ||--o{ ENROLLMENT : has
+  USER ||--o{ PORTFOLIO : owns
+  ENROLLMENT }o--|| COURSE : links
+
+  COURSE ||--o{ SEMESTER_SUBJECT : contains
+  COURSE ||--o{ SESSION : holds
+  COURSE ||--o{ LMS_SYNC : mapped_in
+
+  SEMESTER_SUBJECT ||--o{ UNIT : divided_into
+  SEMESTER_SUBJECT ||--o{ EXAM_SECTION : has
+  SEMESTER_SUBJECT ||--o{ QUIZ : scopes
+  SEMESTER_SUBJECT ||--o{ QUIZ_QUESTION : tagged_to
+  SEMESTER_SUBJECT ||--o{ WEAK_CONCEPT : tracked_in
+
+  UNIT ||--o{ RESOURCE : stores_notes
+  EXAM_SECTION ||--o{ RESOURCE : stores_pyq
+
+  SESSION ||--o{ ATTENDANCE : recorded_in
+  SESSION ||--o{ FEEDBACK : collected_in
+  SESSION ||--o{ DOUBT : raised_in
+
+  DOUBT ||--o{ DOUBT_VOTE : receives
+  USER ||--o{ DOUBT_VOTE : casts
+  DOUBT }o--|| USER : assigned_to
+
+  QUIZ ||--o{ QUIZ_QUESTION_POOL : has
+  QUIZ_QUESTION ||--o{ QUIZ_QUESTION_POOL : included_in
+  QUIZ ||--o{ QUIZ_ATTEMPT : generates
+  QUIZ_ATTEMPT ||--o{ QUIZ_RESPONSE : contains
+  QUIZ_QUESTION ||--o{ QUIZ_RESPONSE : answered_by
+
   USER ||--o{ ATTENDANCE_PREDICTION : has
   USER ||--o{ STUDENT_DASHBOARD : has
-  USER ||--o{ TEACHER_INSIGHT : generates
   USER ||--o{ WEAK_CONCEPT : has
+  USER ||--o{ TEACHER_INSIGHT : generates
+
   COURSE ||--o{ ATTENDANCE_PREDICTION : covers
   COURSE ||--o{ STUDENT_DASHBOARD : scoped_to
   COURSE ||--o{ TEACHER_INSIGHT : covers
+```

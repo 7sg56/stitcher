@@ -1,28 +1,22 @@
 erDiagram
+  ROLE ||--o{ USER : classifies
   USER ||--o{ ALIAS : has
   USER ||--o{ VIOLATION : receives
-  USER ||--o{ ATTENDANCE : has
-  USER ||--o{ FEEDBACK : gives
-  USER ||--o{ DOUBT : raises
-  USER ||--o{ QUIZ_ATTEMPT : takes
-  USER ||--o{ RESOURCE : uploads
+  USER ||--o{ ENROLLMENT : has
   USER ||--o{ PORTFOLIO : owns
+  ENROLLMENT }o--|| COURSE : links
 
-  ROLE ||--o{ USER : classifies
-
-  COURSE ||--o{ ENROLLMENT : has
   COURSE ||--o{ SEMESTER_SUBJECT : contains
   COURSE ||--o{ SESSION : holds
-  COURSE ||--o{ QUIZ : belongs_to
-
-  ENROLLMENT }o--|| USER : links
+  COURSE ||--o{ LMS_SYNC : mapped_in
 
   SEMESTER_SUBJECT ||--o{ UNIT : divided_into
   SEMESTER_SUBJECT ||--o{ EXAM_SECTION : has
-  SEMESTER_SUBJECT ||--o{ DOUBT : tagged_to
+  SEMESTER_SUBJECT ||--o{ QUIZ : scopes
   SEMESTER_SUBJECT ||--o{ QUIZ_QUESTION : tagged_to
+  SEMESTER_SUBJECT ||--o{ WEAK_CONCEPT : tracked_in
 
-  UNIT ||--o{ RESOURCE : stores
+  UNIT ||--o{ RESOURCE : stores_notes
   EXAM_SECTION ||--o{ RESOURCE : stores_pyq
 
   SESSION ||--o{ ATTENDANCE : recorded_in
@@ -31,18 +25,19 @@ erDiagram
 
   DOUBT ||--o{ DOUBT_VOTE : receives
   USER ||--o{ DOUBT_VOTE : casts
-  DOUBT }o--|| USER : assigned_to_teacher
+  DOUBT }o--|| USER : assigned_to
 
-  QUIZ ||--o{ QUIZ_QUESTION : draws_from
+  QUIZ ||--o{ QUIZ_QUESTION_POOL : has
+  QUIZ_QUESTION ||--o{ QUIZ_QUESTION_POOL : included_in
   QUIZ ||--o{ QUIZ_ATTEMPT : generates
   QUIZ_ATTEMPT ||--o{ QUIZ_RESPONSE : contains
   QUIZ_QUESTION ||--o{ QUIZ_RESPONSE : answered_by
 
-  ATTENDANCE_PREDICTION ||--|| USER : predicts_for
-  ATTENDANCE_PREDICTION }o--|| COURSE : covers
+  USER ||--o{ ATTENDANCE_PREDICTION : has
+  USER ||--o{ STUDENT_DASHBOARD : has
+  USER ||--o{ WEAK_CONCEPT : has
+  USER ||--o{ TEACHER_INSIGHT : generates
 
-  TEACHER_INSIGHT }o--|| USER : for_teacher
-  TEACHER_INSIGHT }o--|| COURSE : covers
-
-  LMS_SYNC ||--o{ COURSE : maps
-  LMS_SYNC ||--o{ USER : maps
+  COURSE ||--o{ ATTENDANCE_PREDICTION : covers
+  COURSE ||--o{ STUDENT_DASHBOARD : scoped_to
+  COURSE ||--o{ TEACHER_INSIGHT : covers
