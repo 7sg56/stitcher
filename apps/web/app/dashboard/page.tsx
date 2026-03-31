@@ -18,6 +18,21 @@ async function syncUserToDb(token: string, userData: { real_name?: string; real_
     }
 }
 
+async function fetchMe(token: string) {
+    const apiUrl = process.env.API_URL || "http://localhost:3001";
+    try {
+        const res = await fetch(`${apiUrl}/auth/me`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+            return await res.json();
+        }
+    } catch (error) {
+        console.error("Failed to fetch user:", error);
+    }
+    return null;
+}
+
 export default async function DashboardPage() {
     const user = await currentUser();
 
@@ -33,6 +48,31 @@ export default async function DashboardPage() {
             real_name: [user.firstName, user.lastName].filter(Boolean).join(" ") || undefined,
             real_email: user.emailAddresses[0]?.emailAddress || undefined,
         });
+
+        // Check onboarding status
+        const meData = await fetchMe(token);
+        if (meData?.user?.onboarding_status === "pending") {
+            redirect("/onboard");
+        }
+    }
+
+    // Get display info from backend
+    let displayName = [user.firstName, user.lastName].filter(Boolean).join(" ");
+    let roleName = "student";
+    let aliasName: string | null = null;
+
+    if (token) {
+        const meData = await fetchMe(token);
+        if (meData?.user) {
+            roleName = meData.user.role?.name || "student";
+            if (meData.user.alias?.display_name) {
+                aliasName = meData.user.alias.display_name;
+            }
+            // For students, show alias instead of real name
+            if (roleName === "student" && aliasName) {
+                displayName = aliasName;
+            }
+        }
     }
 
     return (
@@ -42,7 +82,12 @@ export default async function DashboardPage() {
                     <h1 className="text-lg font-semibold text-white tracking-tight">
                         Stitcher
                     </h1>
-                    <SignOutButton />
+                    <div className="flex items-center gap-4">
+                        <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-800 px-2.5 py-1 rounded-full">
+                            {roleName}
+                        </span>
+                        <SignOutButton />
+                    </div>
                 </div>
             </nav>
 
@@ -62,8 +107,13 @@ export default async function DashboardPage() {
                             )}
                             <div>
                                 <p className="text-white font-medium text-lg">
-                                    {user.firstName} {user.lastName}
+                                    {displayName}
                                 </p>
+                                {aliasName && roleName === "student" && (
+                                    <p className="text-indigo-400 text-sm">
+                                        Alias: {aliasName}
+                                    </p>
+                                )}
                                 <p className="text-zinc-400 text-sm">
                                     {user.emailAddresses[0]?.emailAddress}
                                 </p>
@@ -74,10 +124,10 @@ export default async function DashboardPage() {
                             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-                                        Clerk ID
+                                        Role
                                     </dt>
-                                    <dd className="mt-1 text-sm text-zinc-300 font-mono">
-                                        {user.id}
+                                    <dd className="mt-1 text-sm text-zinc-300 capitalize">
+                                        {roleName}
                                     </dd>
                                 </div>
                                 <div>
