@@ -5,6 +5,7 @@
 Stitcher is a modular monorepo application built to connect students and teachers through features like attendance, feedback, and analytics.
 
 Stack:
+
 - Frontend: Next.js (apps/web)
 - Backend: Fastify (apps/api)
 - Auth: Clerk
@@ -79,11 +80,12 @@ module/
 
 ---
 
-## 🗄️ Database (Prisma)
+## Database (Supabase)
 
-- Located in apps/api/prisma/
-- All schema defined in schema.prisma
-- Use Prisma Client in services only
+- Uses @supabase/supabase-js directly (no ORM)
+- SQL migrations in apps/api/supabase/migrations/
+- Types defined in apps/api/src/types/database.ts
+- Access via Fastify decorator (fastify.supabase) in services only
 
 ---
 

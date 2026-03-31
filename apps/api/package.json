@@ -15,14 +15,15 @@
   "dependencies": {
     "@clerk/fastify": "^3.1.4",
     "@fastify/cors": "^11.0.0",
-    "@stitcher/types": "workspace:*",
+    "@stitcher/types": "*",
     "@supabase/supabase-js": "^2.49.0",
     "dotenv": "^16.5.0",
     "fastify": "^5.3.0",
+    "fastify-plugin": "^5.0.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@stitcher/config": "workspace:*",
+    "@stitcher/config": "*",
     "@types/node": "^20.19.37",
     "ts-node-dev": "^2.0.0",
     "typescript": "^5.9.3"
