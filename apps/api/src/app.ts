@@ -12,6 +12,7 @@ import cors from "@fastify/cors";
 import supabasePlugin from "./core/plugins/supabase";
 import { clerkPlugin } from "@clerk/fastify";
 import authRoutes from "./modules/auth/auth.route";
+import usersRoutes from "./modules/users/users.route";
 
 const app = Fastify({ logger: true });
 
@@ -26,6 +27,7 @@ app.register(supabasePlugin);
 
 // --- Routes ---
 app.register(authRoutes, { prefix: "/auth" });
+app.register(usersRoutes, { prefix: "/users" });
 
 // --- Health check ---
 app.get("/health", async () => ({ status: "ok" }));

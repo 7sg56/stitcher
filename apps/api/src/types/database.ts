@@ -4,6 +4,7 @@
 // ============================================
 
 export type RoleName = "student" | "teacher" | "admin";
+export type OnboardingStatus = "pending" | "complete";
 
 export interface Role {
     id: string;
@@ -19,11 +20,13 @@ export interface User {
     real_phone: string | null;
     is_shadow_banned: boolean;
     profanity_score: number;
+    onboarding_status: OnboardingStatus;
     created_at: string;
 }
 
 export interface UserWithRole extends User {
     role: Role;
+    alias?: Alias | null;
 }
 
 export interface Alias {
@@ -32,6 +35,27 @@ export interface Alias {
     display_name: string;
     avatar_url: string | null;
     is_active: boolean;
+}
+
+export interface AliasPool {
+    id: string;
+    adjective: string;
+    noun: string;
+    is_used: boolean;
+}
+
+// Visibility-filtered profile returned by API
+export interface UserProfile {
+    id: string;
+    display_name: string;
+    avatar_url: string | null;
+    role: RoleName;
+    real_name?: string | null;
+    real_email?: string | null;
+    real_phone?: string | null;
+    is_shadow_banned?: boolean;
+    onboarding_status: OnboardingStatus;
+    created_at: string;
 }
 
 export interface Violation {
