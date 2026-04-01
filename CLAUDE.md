@@ -42,14 +42,14 @@ src/
 
 ---
 
-## 📦 Modules (MVP only)
+## 📦 Modules & Phases
 
-- auth
-- users
-- attendance
-- feedback
-- dashboard
-- quiz
+1. Foundation: auth, users, roles
+2. Core Academics: courses, subjects, enrollment
+3. Class Management: sessions, attendance
+4. Engagement: resources, quiz, doubts (chat), feedback
+5. Analytics & Moderation: violations, dashboard, insights
+6. Future: lms-sync, predictions
 
 Each module MUST follow:
 
@@ -89,10 +89,11 @@ module/
 
 ---
 
-## 🔁 Async Jobs (Future)
+## 🔁 Async Jobs (Phase 5+)
 
-- Use Redis + BullMQ
-- For analytics, reports, predictions
+- Use Redis + BullMQ (or serverless Upstash)
+- Critical for End-of-Session Aggregation: When a session ends, defer heavy tasks (Teacher rating calculation, outline "Weak Concept" from quiz/feedback) to a Redis queue. This prevents the synchronous 30-sec feedback burst from crashing the database.
+- Needed for: Weak concept generation, LMS Sync, Attendance predictions, and heavy analytical reports.
 
 ---
 
