@@ -1,0 +1,106 @@
+version: "3.9"
+
+services:
+  # ========================================
+  # PostgreSQL Database (Local Dev)
+  # ========================================
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: stitcher
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ../apps/api/supabase/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # Redis Cache (Local Dev)
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_dev:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ========================================
+  # API (Fastify)
+  # ========================================
+  api:
+    build:
+      context: ..
+      dockerfile: docker/api.dev.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/stitcher?schema=public
+      REDIS_URL: redis://redis:6379
+      CLERK_SECRET_KEY: ${CLERK_SECRET_KEY}
+      CLERK_WEBHOOK_SECRET: ${CLERK_WEBHOOK_SECRET}
+      CORS_ORIGIN: http://localhost:3000
+    ports:
+      - "3001:3001"
+    volumes:
+      - ../apps/api/src:/app/apps/api/src
+      - ../apps/api/supabase:/app/apps/api/supabase
+      - ../packages:/app/packages
+    networks:
+      - stitcher_network_dev
+
+  # ========================================
+  # Web (Next.js)
+  # ========================================
+  web:
+    build:
+      context: ..
+      dockerfile: docker/web.dev.Dockerfile
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+      NEXT_PUBLIC_CLERK_SIGN_IN_URL: /sign-in
+      NEXT_PUBLIC_CLERK_SIGN_UP_URL: /sign-up
+    ports:
+      - "3000:3000"
+    volumes:
+      # Specific mounts to avoid overriding linux node_modules with macOS ones
+      - ../apps/web/app:/app/apps/web/app
+      - ../apps/web/components:/app/apps/web/components
+      - ../apps/web/public:/app/apps/web/public
+      - ../apps/web/lib:/app/apps/web/lib
+      - ../packages:/app/packages
+    networks:
+      - stitcher_network_dev
+
+volumes:
+  postgres_data_dev:
+  redis_data_dev:
+
+
+networks:
+  stitcher_network_dev:
+    driver: bridge

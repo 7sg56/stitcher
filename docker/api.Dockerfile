@@ -7,9 +7,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
+COPY packages ./packages
 
 # Install dependencies
-RUN npm ci --only=production && \
+RUN npm ci && \
     npm cache clean --force
 
 # ========================================
@@ -20,14 +21,14 @@ WORKDIR /app
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 
 # Copy source
 COPY package*.json ./
 COPY apps/api ./apps/api
+COPY packages ./packages
 
-# Prisma generate
-RUN cd apps/api && npx prisma generate
+# Build the api
+RUN cd apps/api && npm run build
 
 # ========================================
 # Stage 3: Runner
@@ -40,13 +41,9 @@ RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 appuser
 
 # Copy necessary files
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /app/apps/api/node_modules/.prisma ./apps/api/node_modules/.prisma
-COPY --from=builder /app/apps/api/src ./apps/api/src
-COPY --from=builder /app/apps/api/prisma/schema.prisma ./apps/api/prisma/schema.prisma
-
-# Install tsc for runtime compilation (or build ts first)
-RUN cd apps/api && npm install --production typescript tsx
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+COPY --from=builder /app/packages ./packages
 
 # Set permissions
 RUN chown -R appuser:nodejs /app
@@ -59,4 +56,4 @@ ENV PORT=3001
 EXPOSE 3001
 
 # Run
-CMD ["node", "-r", "dotenv/config", "apps/api/src/server.ts"]
+CMD ["node", "-r", "dotenv/config", "apps/api/dist/server.js"]

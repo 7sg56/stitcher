@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 COPY apps/web/package*.json ./apps/web/
+COPY packages ./packages
 
 # Install dependencies
 RUN npm ci && npm cache clean --force
@@ -19,7 +20,6 @@ WORKDIR /app
 
 # Copy dependencies
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 
 # Copy source
 COPY package*.json ./
@@ -27,7 +27,7 @@ COPY apps/web ./apps/web
 COPY packages ./packages
 
 # Build Next.js
-RUN cd apps/web && npm run build
+RUN cd apps/web && npm run build > /tmp/build.log 2>&1 || (cat /tmp/build.log && exit 1)
 
 # ========================================
 # Stage 3: Runner
@@ -55,4 +55,4 @@ USER appuser
 EXPOSE 3000
 
 # Run Next.js standalone
-CMD ["node", "server.js"]
+CMD ["node", "apps/web/server.js"]

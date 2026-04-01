@@ -1,5 +1,6 @@
 import { currentUser, auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import Image from "next/image";
 import SignOutButton from "./sign-out-button";
 
 async function syncUserToDb(token: string, userData: { real_name?: string; real_email?: string }) {
@@ -99,9 +100,11 @@ export default async function DashboardPage() {
                     <div className="space-y-4">
                         <div className="flex items-center gap-4">
                             {user.imageUrl && (
-                                <img
+                                <Image
                                     src={user.imageUrl}
                                     alt="Avatar"
+                                    width={64}
+                                    height={64}
                                     className="w-16 h-16 rounded-full border-2 border-zinc-700"
                                 />
                             )}
