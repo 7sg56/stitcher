@@ -92,7 +92,7 @@ export default async function DashboardPage() {
                 </div>
             </nav>
 
-            <main className="max-w-5xl mx-auto px-4 py-12">
+            <main className="max-w-5xl mx-auto px-4 py-12 space-y-8">
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
                     <h2 className="text-xl font-semibold text-white mb-6">
                         Your Profile
@@ -148,6 +148,26 @@ export default async function DashboardPage() {
                             </dl>
                         </div>
                     </div>
+                </div>
+
+                {/* Courses Section */}
+                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xl font-semibold text-white">
+                            {roleName === "student" ? "My Courses" : "Course Management"}
+                        </h2>
+                        <a
+                            href="/dashboard/courses"
+                            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+                        >
+                            {roleName === "student" ? "Browse Courses" : "Manage Courses"} &rarr;
+                        </a>
+                    </div>
+                    <p className="text-zinc-400 text-sm">
+                        {roleName === "student"
+                            ? "View your enrolled courses, browse available courses, and manage your enrollment."
+                            : "Create and manage courses, add subjects, units, and exam sections."}
+                    </p>
                 </div>
             </main>
         </div>

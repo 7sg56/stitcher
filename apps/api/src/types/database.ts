@@ -77,12 +77,51 @@ export interface Course {
     is_active: boolean;
 }
 
+export type EnrollmentStatus = "active" | "dropped" | "completed";
+
 export interface Enrollment {
     id: string;
     user_id: string;
     course_id: string;
-    status: string;
+    status: EnrollmentStatus;
     enrolled_at: string;
+}
+
+export interface EnrollmentWithCourse extends Enrollment {
+    course: Course;
+}
+
+export interface SemesterSubject {
+    id: string;
+    course_id: string;
+    name: string;
+    code: string;
+    unit_count: number;
+}
+
+export interface Unit {
+    id: string;
+    subject_id: string;
+    unit_number: number;
+    title: string;
+    description: string | null;
+}
+
+export interface ExamSection {
+    id: string;
+    subject_id: string;
+    type: string;
+    year: number;
+    exam_board: string | null;
+}
+
+export interface SubjectWithDetails extends SemesterSubject {
+    units: Unit[];
+    exam_sections: ExamSection[];
+}
+
+export interface CourseWithSubjects extends Course {
+    subjects: SemesterSubject[];
 }
 
 export interface Session {

@@ -13,6 +13,9 @@ import supabasePlugin from "./core/plugins/supabase";
 import { clerkPlugin } from "@clerk/fastify";
 import authRoutes from "./modules/auth/auth.route";
 import usersRoutes from "./modules/users/users.route";
+import coursesRoutes from "./modules/courses/courses.route";
+import subjectsRoutes from "./modules/subjects/subjects.route";
+import enrollmentRoutes from "./modules/enrollment/enrollment.route";
 
 const app = Fastify({ logger: true });
 
@@ -28,6 +31,9 @@ app.register(supabasePlugin);
 // --- Routes ---
 app.register(authRoutes, { prefix: "/auth" });
 app.register(usersRoutes, { prefix: "/users" });
+app.register(coursesRoutes, { prefix: "/courses" });
+app.register(subjectsRoutes, { prefix: "/subjects" });
+app.register(enrollmentRoutes, { prefix: "/enrollment" });
 
 // --- Health check ---
 app.get("/health", async () => ({ status: "ok" }));

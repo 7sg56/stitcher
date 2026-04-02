@@ -60,4 +60,108 @@ export async function toggleShadowBan(token: string, userId: string, isBanned: b
     });
 }
 
+// ============================================
+// Phase 2: Courses
+// ============================================
+
+export async function listCourses(token: string) {
+    return api.get("/courses", {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function getCourse(token: string, courseId: string) {
+    return api.get(`/courses/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function createCourse(token: string, data: {
+    name: string; code: string; semester_number: number; department?: string;
+}) {
+    return api.post("/courses", data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function updateCourse(token: string, courseId: string, data: Record<string, unknown>) {
+    return api.patch(`/courses/${courseId}`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function toggleCourseActive(token: string, courseId: string) {
+    return api.patch(`/courses/${courseId}/toggle`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+// ============================================
+// Phase 2: Subjects
+// ============================================
+
+export async function listSubjects(token: string, courseId: string) {
+    return api.get(`/subjects/course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function getSubject(token: string, subjectId: string) {
+    return api.get(`/subjects/${subjectId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function createSubject(token: string, data: {
+    course_id: string; name: string; code: string; unit_count?: number;
+}) {
+    return api.post("/subjects", data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function createUnit(token: string, subjectId: string, data: {
+    unit_number: number; title: string; description?: string;
+}) {
+    return api.post(`/subjects/${subjectId}/units`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function createExamSection(token: string, subjectId: string, data: {
+    type: string; year: number; exam_board?: string;
+}) {
+    return api.post(`/subjects/${subjectId}/exam-sections`, data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+// ============================================
+// Phase 2: Enrollment
+// ============================================
+
+export async function enrollInCourse(token: string, courseId: string) {
+    return api.post("/enrollment", { course_id: courseId }, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function dropEnrollment(token: string, enrollmentId: string) {
+    return api.delete(`/enrollment/${enrollmentId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function getMyEnrollments(token: string) {
+    return api.get("/enrollment/my", {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function getEnrollmentsByCourse(token: string, courseId: string) {
+    return api.get(`/enrollment/course/${courseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
 export default api;
