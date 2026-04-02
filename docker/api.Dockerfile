@@ -4,9 +4,10 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Copy package files
+# Copy ALL workspace package files (npm ci needs full workspace resolution)
 COPY package*.json ./
 COPY apps/api/package*.json ./apps/api/
+COPY apps/web/package*.json ./apps/web/
 COPY packages ./packages
 
 # Install dependencies
