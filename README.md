@@ -1,7 +1,9 @@
 # Stitcher
+
 A modular monorepo connecting students and teachers through attendance, feedback, and analytics.
 
 ## Stack
+
 - **Frontend**: Next.js 16 (React 19)
 - **Backend**: Fastify
 - **Auth**: Clerk
@@ -12,40 +14,52 @@ A modular monorepo connecting students and teachers through attendance, feedback
 ## Features
 
 ### 30-Second Feedback
+
 Lightweight, time-boxed feedback collection at the end of each session. Students submit quick ratings or comments within 30 seconds, giving teachers instant pulse checks without disrupting workflow.
 
 ### Smart Attendance
+
 Automated attendance marking with intelligent conflict detection. Reduces manual effort for teachers while maintaining accuracy across sessions and classes.
 
 ### Resource Bridge
+
 A centralized hub for sharing learning materials between teachers and students. Supports file uploads, links, and categorized resources tied to specific courses or sessions.
 
 ### Teacher Portfolio
+
 A structured profile for teachers showcasing their courses, session history, feedback scores, and achievements — enabling visibility and performance tracking over time.
 
 ### Doubt Clarification
+
 An async Q&A channel where students raise doubts linked to specific sessions or topics. Teachers can respond, and resolved doubts are archived for future reference by the class.
 
 ### Student Dashboard
+
 A personalized overview for each student displaying attendance status, pending tasks, recent feedback, quiz scores, and resource access — all in one place.
 
 ### Attendance Prediction
+
 ML-informed module that identifies students at risk of attendance shortfalls based on historical patterns. Enables early intervention by teachers and administrators.
 
 ### Teacher Insight Report
+
 Aggregated analytics for teachers covering class attendance trends, feedback summaries, quiz performance, and student engagement metrics — delivered as structured reports.
 
 ### Student Attendance
+
 Granular attendance records for individual students across all enrolled courses. Supports manual corrections, leave marking, and exportable history.
 
 ### Integration of LMS
+
 Seamless connection with external Learning Management Systems. Syncs course data, student rosters, and grades to eliminate duplicate data entry and keep records consistent.
 
 ### Quiz
+
 In-platform quiz creation and delivery tied to sessions or topics. Supports multiple question types, auto-grading, and result analytics visible to both students and teachers.
 
 ## Project Structure
-```
+
+```text
 stitcher/
 ├── apps/
 │   ├── web/        # Next.js frontend
@@ -61,32 +75,48 @@ stitcher/
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js 20+
 - Docker & Docker Compose (for infra)
 
-### 1. Install Dependencies
+### 1. Install & Setup
+
 ```bash
-npm install
+npm run setup
 ```
 
+This installs all dependencies across the entire monorepo (including `apps/api` and `apps/web`) using **npm workspaces**, and then builds internal shared packages (like `@stitcher/types`).
+
+Other useful commands:
+
+- `npm run clean`: Removes all `node_modules` and build artifacts.
+- `npm run reinstall`: Performs a clean re-installation.
+
 ### 2. Configure Environment
+
 Copy the example and fill in your values:
+
 ```bash
 cp .env.example .env
 ```
+
 Required variables:
+
 - Clerk keys for authentication
 - Database URL (PostgreSQL)
 - Redis URL
 
 ### 3. Start Infrastructure
+
 ```bash
 cd docker
 docker-compose up -d
 ```
+
 This starts PostgreSQL on port `5432` and Redis on `6379`.
 
 ### 4. Run Services
+
 ```bash
 # API (port 3001)
 npm run dev:api
@@ -96,25 +126,29 @@ npm run dev:web
 ```
 
 ### 5. Run Migrations
+
 ```bash
 cd apps/api
 npx prisma migrate dev
 ```
 
 ## Docker Deployment
+
 ```bash
 cd docker
 docker-compose up -d --build
 ```
-- Web: http://localhost:3000
-- API: http://localhost:3001
+
+- Web: <http://localhost:3000>
+- API: <http://localhost:3001>
 - DB: localhost:5432
 - Redis: localhost:6379
 
 ## Backend Architecture
+
 Pattern: **Route → Controller → Service → DB**
 
-```
+```text
 apps/api/src/
 ├── modules/         # Feature modules (auth, users, etc.)
 │   └── [module]/
@@ -128,6 +162,7 @@ apps/api/src/
 ```
 
 ## MVP Modules
+
 - `auth` — Clerk integration
 - `users` — User management
 - `attendance` — Smart attendance tracking & prediction

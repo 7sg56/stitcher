@@ -26,6 +26,12 @@ COPY package*.json ./
 COPY apps/web ./apps/web
 COPY packages ./packages
 
+# Define build arguments for Next.js NEXT_PUBLIC_ variables
+ARG NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+
 # Build Next.js
 RUN cd apps/web && npm run build > /tmp/build.log 2>&1 || (cat /tmp/build.log && exit 1)
 
