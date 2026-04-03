@@ -6,15 +6,13 @@ erDiagram
   USER ||--o{ PORTFOLIO : owns
   ENROLLMENT }o--|| COURSE : links
 
-  COURSE ||--o{ SEMESTER_SUBJECT : contains
   COURSE ||--o{ SESSION : holds
   COURSE ||--o{ LMS_SYNC : mapped_in
-
-  SEMESTER_SUBJECT ||--o{ UNIT : divided_into
-  SEMESTER_SUBJECT ||--o{ EXAM_SECTION : has
-  SEMESTER_SUBJECT ||--o{ QUIZ : scopes
-  SEMESTER_SUBJECT ||--o{ QUIZ_QUESTION : tagged_to
-  SEMESTER_SUBJECT ||--o{ WEAK_CONCEPT : tracked_in
+  COURSE ||--o{ UNIT : divided_into
+  COURSE ||--o{ EXAM_SECTION : has
+  COURSE ||--o{ QUIZ : scopes
+  COURSE ||--o{ QUIZ_QUESTION : tagged_to
+  COURSE ||--o{ WEAK_CONCEPT : tracked_in
 
   UNIT ||--o{ RESOURCE : stores_notes
   EXAM_SECTION ||--o{ RESOURCE : stores_pyq

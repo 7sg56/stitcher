@@ -1,6 +1,19 @@
 import dotenv from "dotenv";
 import path from "path";
-dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
+import fs from "fs";
+
+const envPaths = [
+    path.resolve(process.cwd(), "../../.env"), // Standard monorepo root
+    path.resolve(__dirname, "../../../.env"),  // Fallback via __dirname
+    path.resolve(process.cwd(), ".env"),       // Fallback local API
+];
+
+for (const p of envPaths) {
+    if (fs.existsSync(p)) {
+        dotenv.config({ path: p });
+        break;
+    }
+}
 
 // Alias for @clerk/fastify which expects CLERK_PUBLISHABLE_KEY
 if (!process.env.CLERK_PUBLISHABLE_KEY && process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY) {
