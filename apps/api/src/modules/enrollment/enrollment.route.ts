@@ -1,22 +1,26 @@
 import { FastifyInstance, FastifyPluginCallback } from "fastify";
 import {
-    enrollInCourse,
+    enrollByPasskey,
+    teacherAddStudent,
+    teacherRemoveStudent,
     dropEnrollment,
     getMyEnrollments,
     getEnrollmentsByCourse,
 } from "./enrollment.controller";
 
 const enrollmentRoutes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, done) => {
-    // POST /enrollment -- enroll in a course
-    fastify.post("/", enrollInCourse);
+    // Student passkey enrollment
+    fastify.post("/passkey", enrollByPasskey);
 
-    // GET /enrollment/my -- get my enrollments
+    // Teacher manages students
+    fastify.post("/manage", teacherAddStudent);
+    fastify.delete("/manage/:id", teacherRemoveStudent);
+
+    // Student's own enrollments
     fastify.get("/my", getMyEnrollments);
-
-    // DELETE /enrollment/:id -- drop an enrollment
     fastify.delete("/:id", dropEnrollment);
 
-    // GET /enrollment/course/:courseId -- list enrollments for a course
+    // Teacher/admin: enrolled students
     fastify.get("/course/:courseId", getEnrollmentsByCourse);
 
     done();

@@ -5,17 +5,8 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-interface Subject {
-    id: string;
-    course_id: string;
-    name: string;
-    code: string;
-    unit_count: number;
-}
-
 interface Unit {
     id: string;
-    subject_id: string;
     unit_number: number;
     title: string;
     description: string | null;
@@ -23,10 +14,17 @@ interface Unit {
 
 interface ExamSection {
     id: string;
-    subject_id: string;
     type: string;
     year: number;
     exam_board: string | null;
+}
+
+interface EnrolledStudent {
+    id: string;
+    user_id: string;
+    student_name: string | null;
+    student_alias: string | null;
+    enrolled_at: string;
 }
 
 interface Course {
@@ -36,7 +34,12 @@ interface Course {
     semester_number: number;
     department: string | null;
     is_active: boolean;
-    subjects: Subject[];
+    passkey?: string;
+    teacher_id: string | null;
+    teacher_name: string | null;
+    teacher_title: string | null;
+    units: Unit[];
+    exam_sections: ExamSection[];
 }
 
 export default function CourseDetailPage() {
@@ -46,17 +49,13 @@ export default function CourseDetailPage() {
     const [role, setRole] = useState<string>("student");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-
-    // Expanded subjects with their units/exam_sections
-    const [expandedSubject, setExpandedSubject] = useState<string | null>(null);
-    const [subjectDetails, setSubjectDetails] = useState<Record<string, { units: Unit[]; exam_sections: ExamSection[] }>>({});
+    const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
+    const [tab, setTab] = useState<"units" | "exams" | "students">("units");
 
     // Forms
-    const [showSubjectForm, setShowSubjectForm] = useState(false);
-    const [subjectForm, setSubjectForm] = useState({ name: "", code: "", unit_count: 0 });
-    const [showUnitForm, setShowUnitForm] = useState<string | null>(null);
+    const [showUnitForm, setShowUnitForm] = useState(false);
     const [unitForm, setUnitForm] = useState({ unit_number: 1, title: "", description: "" });
-    const [showExamForm, setShowExamForm] = useState<string | null>(null);
+    const [showExamForm, setShowExamForm] = useState(false);
     const [examForm, setExamForm] = useState({ type: "mid-sem", year: new Date().getFullYear(), exam_board: "" });
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
@@ -80,7 +79,18 @@ export default function CourseDetailPage() {
 
             if (meRes.ok) {
                 const meData = await meRes.json();
-                setRole(meData.user?.role?.name || "student");
+                const userRole = meData.user?.role?.name || "student";
+                setRole(userRole);
+
+                if (userRole !== "student") {
+                    const enrollRes = await fetch(`${apiUrl}/enrollment/course/${id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (enrollRes.ok) {
+                        const eData = await enrollRes.json();
+                        setEnrolledStudents(eData.enrollments || []);
+                    }
+                }
             }
         } catch {
             setError("Failed to fetch course");
@@ -89,138 +99,92 @@ export default function CourseDetailPage() {
         }
     }, [getToken, id, apiUrl]);
 
-    useEffect(() => {
-        fetchCourse();
-    }, [fetchCourse]);
+    useEffect(() => { fetchCourse(); }, [fetchCourse]);
 
-    async function fetchSubjectDetails(subjectId: string) {
+    async function handleRemoveStudent(enrollmentId: string) {
+        if (!confirm("Remove this student from the course?")) return;
         const token = await getToken();
         if (!token) return;
-
         try {
-            const res = await fetch(`${apiUrl}/subjects/${subjectId}`, {
+            const res = await fetch(`${apiUrl}/enrollment/manage/${enrollmentId}`, {
+                method: "DELETE",
                 headers: { Authorization: `Bearer ${token}` },
             });
-            if (res.ok) {
-                const data = await res.json();
-                setSubjectDetails((prev) => ({
-                    ...prev,
-                    [subjectId]: {
-                        units: data.subject.units || [],
-                        exam_sections: data.subject.exam_sections || [],
-                    },
-                }));
-            }
-        } catch {
-            console.error("Failed to fetch subject details");
-        }
+            if (!res.ok) { const data = await res.json(); setError(data.error); return; }
+            await fetchCourse();
+        } catch { setError("Failed to remove student"); }
     }
 
-    function toggleSubject(subjectId: string) {
-        if (expandedSubject === subjectId) {
-            setExpandedSubject(null);
-        } else {
-            setExpandedSubject(subjectId);
-            if (!subjectDetails[subjectId]) {
-                fetchSubjectDetails(subjectId);
-            }
-        }
-    }
-
-    async function handleCreateSubject(e: React.FormEvent) {
+    async function handleAddUnit(e: React.FormEvent) {
         e.preventDefault();
         const token = await getToken();
         if (!token || !id) return;
-
         try {
-            const res = await fetch(`${apiUrl}/subjects`, {
+            const res = await fetch(`${apiUrl}/courses/${id}/units`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({ ...subjectForm, course_id: id }),
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ ...unitForm, description: unitForm.description || undefined }),
             });
-
-            if (!res.ok) {
-                const data = await res.json();
-                setError(data.error || "Failed to create subject");
-                return;
-            }
-
-            setError(null);
-            setShowSubjectForm(false);
-            setSubjectForm({ name: "", code: "", unit_count: 0 });
-            await fetchCourse();
-        } catch {
-            setError("Failed to create subject");
-        }
-    }
-
-    async function handleCreateUnit(subjectId: string, e: React.FormEvent) {
-        e.preventDefault();
-        const token = await getToken();
-        if (!token) return;
-
-        try {
-            const res = await fetch(`${apiUrl}/subjects/${subjectId}/units`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    ...unitForm,
-                    description: unitForm.description || undefined,
-                }),
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                setError(data.error || "Failed to create unit");
-                return;
-            }
-
-            setError(null);
-            setShowUnitForm(null);
+            if (!res.ok) { const data = await res.json(); setError(data.error); return; }
+            setShowUnitForm(false);
             setUnitForm({ unit_number: 1, title: "", description: "" });
-            await fetchSubjectDetails(subjectId);
-        } catch {
-            setError("Failed to create unit");
-        }
+            await fetchCourse();
+        } catch { setError("Failed to add unit"); }
     }
 
-    async function handleCreateExamSection(subjectId: string, e: React.FormEvent) {
+    async function handleDeleteUnit(unitId: string) {
+        if (!confirm("Delete this unit?")) return;
+        const token = await getToken();
+        if (!token || !id) return;
+        try {
+            await fetch(`${apiUrl}/courses/${id}/units/${unitId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            await fetchCourse();
+        } catch { setError("Failed to delete unit"); }
+    }
+
+    async function handleAddExamSection(e: React.FormEvent) {
         e.preventDefault();
         const token = await getToken();
-        if (!token) return;
-
+        if (!token || !id) return;
         try {
-            const res = await fetch(`${apiUrl}/subjects/${subjectId}/exam-sections`, {
+            const res = await fetch(`${apiUrl}/courses/${id}/exam-sections`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    ...examForm,
-                    exam_board: examForm.exam_board || undefined,
-                }),
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ ...examForm, exam_board: examForm.exam_board || undefined }),
             });
-
-            if (!res.ok) {
-                const data = await res.json();
-                setError(data.error || "Failed to create exam section");
-                return;
-            }
-
-            setError(null);
-            setShowExamForm(null);
+            if (!res.ok) { const data = await res.json(); setError(data.error); return; }
+            setShowExamForm(false);
             setExamForm({ type: "mid-sem", year: new Date().getFullYear(), exam_board: "" });
-            await fetchSubjectDetails(subjectId);
-        } catch {
-            setError("Failed to create exam section");
-        }
+            await fetchCourse();
+        } catch { setError("Failed to add exam section"); }
+    }
+
+    async function handleDeleteExamSection(sectionId: string) {
+        if (!confirm("Delete this exam section?")) return;
+        const token = await getToken();
+        if (!token || !id) return;
+        try {
+            await fetch(`${apiUrl}/courses/${id}/exam-sections/${sectionId}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            await fetchCourse();
+        } catch { setError("Failed to delete exam section"); }
+    }
+
+    async function handleRegeneratePasskey() {
+        const token = await getToken();
+        if (!token || !id) return;
+        try {
+            const res = await fetch(`${apiUrl}/courses/${id}/passkey`, {
+                method: "PATCH",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) await fetchCourse();
+        } catch { setError("Failed to regenerate passkey"); }
     }
 
     if (loading) {
@@ -236,9 +200,7 @@ export default function CourseDetailPage() {
             <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
                 <div className="text-center">
                     <p className="text-zinc-400 text-lg">{error || "Course not found"}</p>
-                    <Link href="/dashboard/courses" className="text-indigo-400 text-sm mt-2 block hover:underline">
-                        &larr; Back to Courses
-                    </Link>
+                    <Link href="/dashboard/courses" className="text-indigo-400 text-sm mt-2 block hover:underline">&larr; Back to Courses</Link>
                 </div>
             </div>
         );
@@ -251,26 +213,18 @@ export default function CourseDetailPage() {
             <nav className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
                 <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href="/dashboard/courses" className="text-zinc-400 hover:text-white transition-colors text-sm">
-                            &larr; Courses
-                        </Link>
-                        <h1 className="text-lg font-semibold text-white tracking-tight">
-                            {course.name}
-                        </h1>
-                        <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                            {course.code}
-                        </span>
+                        <Link href="/dashboard/courses" className="text-zinc-400 hover:text-white transition-colors text-sm">&larr; Courses</Link>
+                        <h1 className="text-lg font-semibold text-white tracking-tight">{course.name}</h1>
+                        <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{course.code}</span>
                     </div>
-                    <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-800 px-2.5 py-1 rounded-full">
-                        {role}
-                    </span>
                 </div>
             </nav>
 
             <main className="max-w-5xl mx-auto px-4 py-8">
                 {error && (
-                    <div className="mb-6 bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg text-sm">
+                    <div className="mb-4 bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg text-sm">
                         {error}
+                        <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-200">&times;</button>
                     </div>
                 )}
 
@@ -292,217 +246,200 @@ export default function CourseDetailPage() {
                             </dd>
                         </div>
                         <div>
-                            <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Subjects</dt>
-                            <dd className="mt-1 text-sm text-zinc-300">{course.subjects?.length || 0}</dd>
+                            <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Teacher</dt>
+                            <dd className="mt-1 text-sm text-zinc-300">
+                                {course.teacher_name || "Not assigned"}
+                                {course.teacher_title && <span className="text-zinc-500 text-xs ml-1">({course.teacher_title})</span>}
+                            </dd>
                         </div>
                     </div>
+
+                    {canManage && course.passkey && (
+                        <div className="mt-4 pt-4 border-t border-zinc-800 flex items-center gap-3">
+                            <span className="text-xs text-zinc-500">Passkey:</span>
+                            <span className="font-mono text-lg text-indigo-400 bg-zinc-800 px-3 py-1 rounded select-all tracking-widest">{course.passkey}</span>
+                            <button onClick={handleRegeneratePasskey} className="text-xs text-zinc-500 hover:text-white transition-colors">Regenerate</button>
+                            <span className="text-xs text-zinc-600 ml-2">Share with students to let them join</span>
+                        </div>
+                    )}
                 </div>
 
-                {/* Subjects Section */}
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-white">Subjects</h2>
+                {/* Tabs */}
+                <div className="flex gap-1 mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-1 w-fit">
+                    <button onClick={() => setTab("units")}
+                        className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === "units" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}>
+                        Units ({course.units?.length || 0})
+                    </button>
+                    <button onClick={() => setTab("exams")}
+                        className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === "exams" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}>
+                        Exams ({course.exam_sections?.length || 0})
+                    </button>
                     {canManage && (
-                        <button
-                            onClick={() => setShowSubjectForm(!showSubjectForm)}
-                            className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors"
-                        >
-                            {showSubjectForm ? "Cancel" : "+ Add Subject"}
+                        <button onClick={() => setTab("students")}
+                            className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === "students" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}>
+                            Students ({enrolledStudents.length})
                         </button>
                     )}
                 </div>
 
-                {showSubjectForm && canManage && (
-                    <div className="mb-6 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                        <form onSubmit={handleCreateSubject} className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Name</label>
-                                <input
-                                    type="text"
-                                    value={subjectForm.name}
-                                    onChange={(e) => setSubjectForm({ ...subjectForm, name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
-                                    placeholder="e.g. Data Structures"
-                                    required
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Code</label>
-                                <input
-                                    type="text"
-                                    value={subjectForm.code}
-                                    onChange={(e) => setSubjectForm({ ...subjectForm, code: e.target.value })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
-                                    placeholder="e.g. CS401-DS"
-                                    required
-                                />
-                            </div>
-                            <div className="flex items-end gap-3">
-                                <div className="flex-1">
-                                    <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Units</label>
-                                    <input
-                                        type="number"
-                                        value={subjectForm.unit_count}
-                                        onChange={(e) => setSubjectForm({ ...subjectForm, unit_count: parseInt(e.target.value) || 0 })}
-                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
-                                        min={0}
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-500 transition-colors"
-                                >
-                                    Create
+                {/* Units Tab */}
+                {tab === "units" && (
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-white">Units</h2>
+                            {canManage && (
+                                <button onClick={() => setShowUnitForm(!showUnitForm)}
+                                    className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors">
+                                    {showUnitForm ? "Cancel" : "+ Add Unit"}
                                 </button>
+                            )}
+                        </div>
+
+                        {showUnitForm && canManage && (
+                            <div className="mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                                <form onSubmit={handleAddUnit} className="flex gap-3 items-end">
+                                    <div>
+                                        <label className="block text-xs text-zinc-500 mb-1">Unit #</label>
+                                        <input type="number" value={unitForm.unit_number} onChange={(e) => setUnitForm({ ...unitForm, unit_number: parseInt(e.target.value) || 1 })}
+                                            className="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" min={1} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs text-zinc-500 mb-1">Title</label>
+                                        <input type="text" value={unitForm.title} onChange={(e) => setUnitForm({ ...unitForm, title: e.target.value })}
+                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Introduction to Networking" required />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs text-zinc-500 mb-1">Description (optional)</label>
+                                        <input type="text" value={unitForm.description} onChange={(e) => setUnitForm({ ...unitForm, description: e.target.value })}
+                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="Brief description" />
+                                    </div>
+                                    <button type="submit" className="px-5 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500">Add</button>
+                                </form>
                             </div>
-                        </form>
+                        )}
+
+                        {(!course.units || course.units.length === 0) ? (
+                            <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                                <p>No units added yet.</p>
+                            </div>
+                        ) : (
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                                {course.units.map((unit, i) => (
+                                    <div key={unit.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-zinc-800" : ""} hover:bg-zinc-800/30`}>
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-indigo-400 font-mono text-sm font-semibold w-10">U{unit.unit_number}</span>
+                                            <div>
+                                                <p className="text-white font-medium">{unit.title}</p>
+                                                {unit.description && <p className="text-zinc-500 text-sm mt-0.5">{unit.description}</p>}
+                                            </div>
+                                        </div>
+                                        {canManage && (
+                                            <button onClick={() => handleDeleteUnit(unit.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 )}
 
-                {(!course.subjects || course.subjects.length === 0) ? (
-                    <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
-                        <p>No subjects added yet.</p>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {course.subjects.map((subject) => (
-                            <div key={subject.id} className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-                                <button
-                                    onClick={() => toggleSubject(subject.id)}
-                                    className="w-full px-5 py-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <span className={`text-zinc-500 transition-transform ${expandedSubject === subject.id ? "rotate-90" : ""}`}>
-                                            &#9654;
-                                        </span>
-                                        <h3 className="text-white font-medium">{subject.name}</h3>
-                                        <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">
-                                            {subject.code}
-                                        </span>
-                                    </div>
-                                    <span className="text-xs text-zinc-500">{subject.unit_count} units</span>
+                {/* Exams Tab */}
+                {tab === "exams" && (
+                    <div>
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-semibold text-white">Exam Sections</h2>
+                            {canManage && (
+                                <button onClick={() => setShowExamForm(!showExamForm)}
+                                    className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors">
+                                    {showExamForm ? "Cancel" : "+ Add Exam Section"}
                                 </button>
+                            )}
+                        </div>
 
-                                {expandedSubject === subject.id && (
-                                    <div className="border-t border-zinc-800 px-5 py-4 space-y-4">
-                                        {/* Units */}
-                                        <div>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h4 className="text-sm font-medium text-zinc-400">Units</h4>
-                                                {canManage && (
-                                                    <button
-                                                        onClick={() => setShowUnitForm(showUnitForm === subject.id ? null : subject.id)}
-                                                        className="text-xs text-indigo-400 hover:text-indigo-300"
-                                                    >
-                                                        + Add Unit
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {showUnitForm === subject.id && canManage && (
-                                                <form onSubmit={(e) => handleCreateUnit(subject.id, e)} className="mb-3 flex gap-2 items-end">
-                                                    <input
-                                                        type="number"
-                                                        value={unitForm.unit_number}
-                                                        onChange={(e) => setUnitForm({ ...unitForm, unit_number: parseInt(e.target.value) || 1 })}
-                                                        className="w-16 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-indigo-500"
-                                                        placeholder="#"
-                                                        min={1}
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        value={unitForm.title}
-                                                        onChange={(e) => setUnitForm({ ...unitForm, title: e.target.value })}
-                                                        className="flex-1 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-indigo-500"
-                                                        placeholder="Unit title"
-                                                        required
-                                                    />
-                                                    <button type="submit" className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-500">
-                                                        Add
-                                                    </button>
-                                                </form>
-                                            )}
-
-                                            {subjectDetails[subject.id]?.units.length === 0 ? (
-                                                <p className="text-xs text-zinc-600">No units yet.</p>
-                                            ) : (
-                                                <div className="space-y-1">
-                                                    {subjectDetails[subject.id]?.units.map((unit) => (
-                                                        <div key={unit.id} className="flex items-center gap-2 text-sm">
-                                                            <span className="text-zinc-600 font-mono text-xs w-8">U{unit.unit_number}</span>
-                                                            <span className="text-zinc-300">{unit.title}</span>
-                                                            {unit.description && (
-                                                                <span className="text-zinc-600 text-xs">-- {unit.description}</span>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* Exam Sections */}
-                                        <div>
-                                            <div className="flex items-center justify-between mb-2">
-                                                <h4 className="text-sm font-medium text-zinc-400">Exam Sections</h4>
-                                                {canManage && (
-                                                    <button
-                                                        onClick={() => setShowExamForm(showExamForm === subject.id ? null : subject.id)}
-                                                        className="text-xs text-indigo-400 hover:text-indigo-300"
-                                                    >
-                                                        + Add Exam Section
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {showExamForm === subject.id && canManage && (
-                                                <form onSubmit={(e) => handleCreateExamSection(subject.id, e)} className="mb-3 flex gap-2 items-end">
-                                                    <select
-                                                        value={examForm.type}
-                                                        onChange={(e) => setExamForm({ ...examForm, type: e.target.value })}
-                                                        className="px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-indigo-500"
-                                                    >
-                                                        <option value="mid-sem">Mid-Sem</option>
-                                                        <option value="end-sem">End-Sem</option>
-                                                    </select>
-                                                    <input
-                                                        type="number"
-                                                        value={examForm.year}
-                                                        onChange={(e) => setExamForm({ ...examForm, year: parseInt(e.target.value) || 2024 })}
-                                                        className="w-20 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-indigo-500"
-                                                        placeholder="Year"
-                                                    />
-                                                    <input
-                                                        type="text"
-                                                        value={examForm.exam_board}
-                                                        onChange={(e) => setExamForm({ ...examForm, exam_board: e.target.value })}
-                                                        className="flex-1 px-2 py-1.5 bg-zinc-800 border border-zinc-700 rounded text-white text-sm focus:outline-none focus:border-indigo-500"
-                                                        placeholder="Board (optional)"
-                                                    />
-                                                    <button type="submit" className="px-3 py-1.5 bg-indigo-600 text-white text-xs rounded hover:bg-indigo-500">
-                                                        Add
-                                                    </button>
-                                                </form>
-                                            )}
-
-                                            {subjectDetails[subject.id]?.exam_sections.length === 0 ? (
-                                                <p className="text-xs text-zinc-600">No exam sections yet.</p>
-                                            ) : (
-                                                <div className="space-y-1">
-                                                    {subjectDetails[subject.id]?.exam_sections.map((section) => (
-                                                        <div key={section.id} className="flex items-center gap-2 text-sm">
-                                                            <span className="text-zinc-300 capitalize">{section.type}</span>
-                                                            <span className="text-zinc-500">{section.year}</span>
-                                                            {section.exam_board && (
-                                                                <span className="text-zinc-600 text-xs">({section.exam_board})</span>
-                                                            )}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                        {showExamForm && canManage && (
+                            <div className="mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                                <form onSubmit={handleAddExamSection} className="flex gap-3 items-end">
+                                    <div>
+                                        <label className="block text-xs text-zinc-500 mb-1">Type</label>
+                                        <select value={examForm.type} onChange={(e) => setExamForm({ ...examForm, type: e.target.value })}
+                                            className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500">
+                                            <option value="mid-sem">Mid-Sem</option>
+                                            <option value="end-sem">End-Sem</option>
+                                        </select>
                                     </div>
-                                )}
+                                    <div>
+                                        <label className="block text-xs text-zinc-500 mb-1">Year</label>
+                                        <input type="number" value={examForm.year} onChange={(e) => setExamForm({ ...examForm, year: parseInt(e.target.value) || 2024 })}
+                                            className="w-24 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <label className="block text-xs text-zinc-500 mb-1">Board (optional)</label>
+                                        <input type="text" value={examForm.exam_board} onChange={(e) => setExamForm({ ...examForm, exam_board: e.target.value })}
+                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. University Board" />
+                                    </div>
+                                    <button type="submit" className="px-5 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500">Add</button>
+                                </form>
                             </div>
-                        ))}
+                        )}
+
+                        {(!course.exam_sections || course.exam_sections.length === 0) ? (
+                            <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                                <p>No exam sections added yet.</p>
+                            </div>
+                        ) : (
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                                {course.exam_sections.map((section, i) => (
+                                    <div key={section.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-zinc-800" : ""} hover:bg-zinc-800/30`}>
+                                        <div className="flex items-center gap-4">
+                                            <span className="text-emerald-400 font-medium capitalize">{section.type}</span>
+                                            <span className="text-zinc-400 text-sm">{section.year}</span>
+                                            {section.exam_board && <span className="text-zinc-500 text-sm">({section.exam_board})</span>}
+                                        </div>
+                                        {canManage && (
+                                            <button onClick={() => handleDeleteExamSection(section.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* Students Tab */}
+                {tab === "students" && canManage && (
+                    <div>
+                        <h2 className="text-lg font-semibold text-white mb-4">Enrolled Students</h2>
+                        {enrolledStudents.length === 0 ? (
+                            <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                                <p>No students enrolled yet.</p>
+                                <p className="text-sm mt-1">Share the passkey with your students.</p>
+                            </div>
+                        ) : (
+                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                                <table className="w-full">
+                                    <thead>
+                                        <tr className="border-b border-zinc-800">
+                                            <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Alias</th>
+                                            <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Name</th>
+                                            <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Enrolled</th>
+                                            <th className="text-right px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {enrolledStudents.map((student) => (
+                                            <tr key={student.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30">
+                                                <td className="px-5 py-3 text-sm text-indigo-400 font-medium">{student.student_alias || "--"}</td>
+                                                <td className="px-5 py-3 text-sm text-zinc-300">{student.student_name || "--"}</td>
+                                                <td className="px-5 py-3 text-sm text-zinc-500">{new Date(student.enrolled_at).toLocaleDateString()}</td>
+                                                <td className="px-5 py-3 text-right">
+                                                    <button onClick={() => handleRemoveStudent(student.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Remove</button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        )}
                     </div>
                 )}
             </main>

@@ -4,24 +4,32 @@ import {
     listCourses,
     getCourse,
     updateCourse,
+    deleteCourse,
     toggleCourseActive,
+    regeneratePasskey,
+    addUnit,
+    deleteUnit,
+    addExamSection,
+    deleteExamSection,
 } from "./courses.controller";
 
 const coursesRoutes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, done) => {
-    // POST /courses -- create a new course
+    // Course CRUD
     fastify.post("/", createCourse);
-
-    // GET /courses -- list all courses
     fastify.get("/", listCourses);
-
-    // GET /courses/:id -- get course detail
     fastify.get("/:id", getCourse);
-
-    // PATCH /courses/:id -- update a course
     fastify.patch("/:id", updateCourse);
-
-    // PATCH /courses/:id/toggle -- toggle active status
+    fastify.delete("/:id", deleteCourse);
     fastify.patch("/:id/toggle", toggleCourseActive);
+    fastify.patch("/:id/passkey", regeneratePasskey);
+
+    // Units (under courses)
+    fastify.post("/:id/units", addUnit);
+    fastify.delete("/:id/units/:unitId", deleteUnit);
+
+    // Exam Sections (under courses)
+    fastify.post("/:id/exam-sections", addExamSection);
+    fastify.delete("/:id/exam-sections/:sectionId", deleteExamSection);
 
     done();
 };

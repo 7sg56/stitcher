@@ -21,6 +21,7 @@ export interface User {
     is_shadow_banned: boolean;
     profanity_score: number;
     onboarding_status: OnboardingStatus;
+    teacher_title: string | null;
     created_at: string;
 }
 
@@ -75,6 +76,14 @@ export interface Course {
     semester_number: number;
     department: string | null;
     is_active: boolean;
+    passkey: string;
+    teacher_id: string | null;
+    created_at: string;
+}
+
+export interface CourseWithTeacher extends Course {
+    teacher_name: string | null;
+    teacher_title: string | null;
 }
 
 export type EnrollmentStatus = "active" | "dropped" | "completed";
@@ -91,17 +100,14 @@ export interface EnrollmentWithCourse extends Enrollment {
     course: Course;
 }
 
-export interface SemesterSubject {
-    id: string;
-    course_id: string;
-    name: string;
-    code: string;
-    unit_count: number;
+export interface EnrollmentWithStudent extends Enrollment {
+    student_name: string | null;
+    student_alias: string | null;
 }
 
 export interface Unit {
     id: string;
-    subject_id: string;
+    course_id: string;
     unit_number: number;
     title: string;
     description: string | null;
@@ -109,19 +115,17 @@ export interface Unit {
 
 export interface ExamSection {
     id: string;
-    subject_id: string;
+    course_id: string;
     type: string;
     year: number;
     exam_board: string | null;
 }
 
-export interface SubjectWithDetails extends SemesterSubject {
+export interface CourseWithDetails extends Course {
     units: Unit[];
     exam_sections: ExamSection[];
-}
-
-export interface CourseWithSubjects extends Course {
-    subjects: SemesterSubject[];
+    teacher_name: string | null;
+    teacher_title: string | null;
 }
 
 export interface Session {

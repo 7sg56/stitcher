@@ -113,4 +113,33 @@ export class UsersService {
 
         if (error) throw error;
     }
+
+    async updateTeacherTitle(userId: string, title: string): Promise<void> {
+        const { error } = await this.supabase
+            .from("users")
+            .update({ teacher_title: title })
+            .eq("id", userId);
+
+        if (error) throw error;
+    }
+
+    async listTeachers(): Promise<{ id: string; real_name: string | null; teacher_title: string | null }[]> {
+        // Get teacher role id
+        const { data: role } = await this.supabase
+            .from("roles")
+            .select("id")
+            .eq("name", "teacher")
+            .single();
+
+        if (!role) return [];
+
+        const { data, error } = await this.supabase
+            .from("users")
+            .select("id, real_name, teacher_title")
+            .eq("role_id", role.id)
+            .order("real_name");
+
+        if (error) throw error;
+        return (data ?? []) as { id: string; real_name: string | null; teacher_title: string | null }[];
+    }
 }
