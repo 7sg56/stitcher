@@ -82,14 +82,12 @@ export default function CourseDetailPage() {
                 const userRole = meData.user?.role?.name || "student";
                 setRole(userRole);
 
-                if (userRole !== "student") {
-                    const enrollRes = await fetch(`${apiUrl}/enrollment/course/${id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (enrollRes.ok) {
-                        const eData = await enrollRes.json();
-                        setEnrolledStudents(eData.enrollments || []);
-                    }
+                const enrollRes = await fetch(`${apiUrl}/enrollment/course/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (enrollRes.ok) {
+                    const eData = await enrollRes.json();
+                    setEnrolledStudents(eData.enrollments || []);
                 }
             }
         } catch {
@@ -274,12 +272,10 @@ export default function CourseDetailPage() {
                         className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === "exams" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}>
                         Exams ({course.exam_sections?.length || 0})
                     </button>
-                    {canManage && (
-                        <button onClick={() => setTab("students")}
-                            className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === "students" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}>
-                            Students ({enrolledStudents.length})
-                        </button>
-                    )}
+                    <button onClick={() => setTab("students")}
+                        className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === "students" ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}>
+                        Students ({enrolledStudents.length})
+                    </button>
                 </div>
 
                 {/* Units Tab */}
@@ -406,34 +402,36 @@ export default function CourseDetailPage() {
                 )}
 
                 {/* Students Tab */}
-                {tab === "students" && canManage && (
+                {tab === "students" && (
                     <div>
                         <h2 className="text-lg font-semibold text-white mb-4">Enrolled Students</h2>
                         {enrolledStudents.length === 0 ? (
                             <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
                                 <p>No students enrolled yet.</p>
-                                <p className="text-sm mt-1">Share the passkey with your students.</p>
+                                {canManage && <p className="text-sm mt-1">Share the passkey with your students.</p>}
                             </div>
                         ) : (
                             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
                                 <table className="w-full">
                                     <thead>
                                         <tr className="border-b border-zinc-800">
-                                            <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Alias</th>
+                                            {role === "admin" && <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Alias</th>}
                                             <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Name</th>
                                             <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Enrolled</th>
-                                            <th className="text-right px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>
+                                            {canManage && <th className="text-right px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>}
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {enrolledStudents.map((student) => (
                                             <tr key={student.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30">
-                                                <td className="px-5 py-3 text-sm text-indigo-400 font-medium">{student.student_alias || "--"}</td>
+                                                {role === "admin" && <td className="px-5 py-3 text-sm text-indigo-400 font-medium">{student.student_alias || "--"}</td>}
                                                 <td className="px-5 py-3 text-sm text-zinc-300">{student.student_name || "--"}</td>
                                                 <td className="px-5 py-3 text-sm text-zinc-500">{new Date(student.enrolled_at).toLocaleDateString()}</td>
-                                                <td className="px-5 py-3 text-right">
-                                                    <button onClick={() => handleRemoveStudent(student.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Remove</button>
-                                                </td>
+                                                {canManage && (
+                                                    <td className="px-5 py-3 text-right">
+                                                        <button onClick={() => handleRemoveStudent(student.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Remove</button>
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>

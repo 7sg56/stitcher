@@ -197,10 +197,15 @@ export default function CoursesPage() {
         const token = await getToken();
         if (!token) return;
         try {
-            await fetch(`${apiUrl}/courses/${courseId}/toggle`, {
+            const res = await fetch(`${apiUrl}/courses/${courseId}/toggle`, {
                 method: "PATCH",
                 headers: { Authorization: `Bearer ${token}` },
             });
+            if (!res.ok) {
+                const data = await res.json();
+                setError(data.error || "Failed to toggle course status");
+                return;
+            }
             await fetchData();
         } catch { setError("Failed to toggle course status"); }
     }
@@ -363,7 +368,7 @@ export default function CoursesPage() {
                                             <div className="flex items-center gap-3 mb-1">
                                                 <h3 className="text-white font-semibold group-hover:text-indigo-400 transition-colors">{course.name}</h3>
                                                 <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{course.code}</span>
-                                                {!course.is_active && <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">Inactive</span>}
+                                                {!course.is_active && <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">Enrollment Closed</span>}
                                                 {isEnrolled(course.id) && <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Enrolled</span>}
                                             </div>
                                             <div className="flex items-center gap-4 text-sm text-zinc-400">
@@ -382,12 +387,12 @@ export default function CoursesPage() {
                                         <div className="flex items-center gap-2 ml-4">
                                             {canManage && (
                                                 <>
-                                                    <button onClick={() => startEditing(course)} className="px-3 py-1.5 text-xs font-medium text-zinc-400 border border-zinc-700 rounded-lg hover:bg-zinc-800 transition-colors">Edit</button>
-                                                    <button onClick={() => handleToggleActive(course.id)}
+                                                    <button onClick={(e) => { e.preventDefault(); startEditing(course); }} className="px-3 py-1.5 text-xs font-medium text-zinc-400 border border-zinc-700 rounded-lg hover:bg-zinc-800 transition-colors">Edit</button>
+                                                    <button onClick={(e) => { e.preventDefault(); handleToggleActive(course.id); }}
                                                         className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${course.is_active ? "text-amber-400 border border-amber-800 hover:bg-amber-900/30" : "text-emerald-400 border border-emerald-800 hover:bg-emerald-900/30"}`}>
-                                                        {course.is_active ? "Deactivate" : "Activate"}
+                                                        {course.is_active ? "Close Enrollment" : "Open Enrollment"}
                                                     </button>
-                                                    <button onClick={() => handleDeleteCourse(course.id)} className="px-3 py-1.5 text-xs font-medium text-red-400 border border-red-800 rounded-lg hover:bg-red-900/30 transition-colors">Delete</button>
+                                                    <button onClick={(e) => { e.preventDefault(); handleDeleteCourse(course.id); }} className="px-3 py-1.5 text-xs font-medium text-red-400 border border-red-800 rounded-lg hover:bg-red-900/30 transition-colors">Delete</button>
                                                 </>
                                             )}
                                         </div>

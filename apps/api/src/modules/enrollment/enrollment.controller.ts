@@ -121,11 +121,12 @@ export async function getEnrollmentsByCourse(
     if (!me) return;
 
     if (me.role.name === "student") {
-        return reply.code(403).send({ error: "Only teachers and admins can view course enrollments" });
+        // Option to verify if student is enrolled in the course could go here, 
+        // but for now we just pass their role to limit returned fields.
     }
 
     const service = new EnrollmentService(req.server.supabase);
-    const enrollments = await service.getEnrollmentsByCourse(req.params.courseId);
+    const enrollments = await service.getEnrollmentsByCourse(req.params.courseId, me.role.name);
 
     return reply.send({ enrollments });
 }

@@ -136,8 +136,8 @@ export class EnrollmentService {
         return (data ?? []) as unknown as EnrollmentWithCourse[];
     }
 
-    // Teacher/admin view: enrolled students with names
-    async getEnrollmentsByCourse(courseId: string): Promise<EnrollmentWithStudent[]> {
+    // Teacher/admin/student view: enrolled students with names (and aliases for admin)
+    async getEnrollmentsByCourse(courseId: string, callerRole: string): Promise<EnrollmentWithStudent[]> {
         const { data: enrollments, error } = await this.supabase
             .from("enrollments")
             .select("*")
@@ -173,7 +173,7 @@ export class EnrollmentService {
         return items.map((e) => ({
             ...e,
             student_name: userMap[e.user_id] ?? null,
-            student_alias: aliasMap[e.user_id] ?? null,
+            student_alias: callerRole === "admin" ? (aliasMap[e.user_id] ?? null) : null,
         })) as EnrollmentWithStudent[];
     }
 }
