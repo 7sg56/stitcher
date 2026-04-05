@@ -6,6 +6,7 @@ export const createCourseSchema = z.object({
     semester_number: z.number().int().min(1),
     department: z.string().optional(),
     teacher_id: z.string().uuid("Invalid teacher ID").optional(),
+    class_name: z.string().optional(),
 });
 
 export type CreateCourseInput = z.infer<typeof createCourseSchema>;
@@ -17,6 +18,7 @@ export const updateCourseSchema = z.object({
     department: z.string().nullable().optional(),
     is_active: z.boolean().optional(),
     teacher_id: z.string().uuid().nullable().optional(),
+    class_name: z.string().nullable().optional(),
 });
 
 export type UpdateCourseInput = z.infer<typeof updateCourseSchema>;

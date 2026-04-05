@@ -23,6 +23,7 @@ export class CoursesService {
                 semester_number: data.semester_number,
                 department: data.department ?? null,
                 teacher_id: data.teacher_id ?? fallbackTeacherId ?? null,
+                class_name: data.class_name ?? null,
                 passkey: generatePasskey(),
             })
             .select("*")
@@ -40,6 +41,7 @@ export class CoursesService {
         if (data.department !== undefined) updateData.department = data.department;
         if (data.is_active !== undefined) updateData.is_active = data.is_active;
         if (data.teacher_id !== undefined) updateData.teacher_id = data.teacher_id;
+        if (data.class_name !== undefined) updateData.class_name = data.class_name;
 
         const { data: course, error } = await this.supabase
             .from("courses")

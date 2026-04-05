@@ -38,6 +38,7 @@ interface Course {
     teacher_id: string | null;
     teacher_name: string | null;
     teacher_title: string | null;
+    class_name: string | null;
     units: Unit[];
     exam_sections: ExamSection[];
 }
@@ -49,6 +50,7 @@ export default function CourseDetailPage() {
     const [role, setRole] = useState<string>("student");
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
     const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
     const [tab, setTab] = useState<"units" | "exams" | "students">("units");
 
@@ -185,6 +187,20 @@ export default function CourseDetailPage() {
         } catch { setError("Failed to regenerate passkey"); }
     }
 
+    function handleShareCourse() {
+        if (!course) return;
+        const classNameStr = course.class_name ? ` (${course.class_name})` : "";
+        const teacherStr = course.teacher_name || "your teacher";
+        const titleStr = course.teacher_title ? ` (${course.teacher_title})` : "";
+        const msg = `Join my class "${course.name}"${classNameStr} taught by ${teacherStr}${titleStr}. Access code: ${course.passkey}`;
+        navigator.clipboard.writeText(msg).then(() => {
+            setSuccess("Share message copied to clipboard!");
+            setTimeout(() => setSuccess(null), 3000);
+        }).catch(() => {
+            setError("Failed to copy to clipboard");
+        });
+    }
+
     if (loading) {
         return (
             <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
@@ -225,6 +241,12 @@ export default function CourseDetailPage() {
                         <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-200">&times;</button>
                     </div>
                 )}
+                {success && (
+                    <div className="mb-4 bg-emerald-900/30 border border-emerald-800 text-emerald-300 px-4 py-3 rounded-lg text-sm">
+                        {success}
+                        <button onClick={() => setSuccess(null)} className="ml-3 text-emerald-400 hover:text-emerald-200">&times;</button>
+                    </div>
+                )}
 
                 {/* Course Info */}
                 <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
@@ -257,7 +279,7 @@ export default function CourseDetailPage() {
                             <span className="text-xs text-zinc-500">Passkey:</span>
                             <span className="font-mono text-lg text-indigo-400 bg-zinc-800 px-3 py-1 rounded select-all tracking-widest">{course.passkey}</span>
                             <button onClick={handleRegeneratePasskey} className="text-xs text-zinc-500 hover:text-white transition-colors">Regenerate</button>
-                            <span className="text-xs text-zinc-600 ml-2">Share with students to let them join</span>
+                            <button onClick={handleShareCourse} className="ml-auto px-4 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors">Share via Message</button>
                         </div>
                     )}
                 </div>

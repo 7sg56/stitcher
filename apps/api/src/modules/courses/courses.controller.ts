@@ -31,6 +31,16 @@ export async function createCourse(req: FastifyRequest, reply: FastifyReply) {
     const body = createCourseSchema.parse(req.body);
     const service = new CoursesService(req.server.supabase);
 
+    if (me.role.name === "admin") {
+        if (!body.teacher_id) {
+            return reply.code(400).send({ error: "Admins must explicitly assign a teacher when creating a course" });
+        }
+        if (body.teacher_id === me.id) {
+            return reply.code(400).send({ error: "Admins cannot self-assign courses" });
+        }
+    }
+
+    // if teacher, auto-fallback to self if teacher_id not provided
     try {
         const course = await service.createCourse(
             body,

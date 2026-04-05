@@ -15,6 +15,7 @@ interface Course {
     teacher_id: string | null;
     teacher_name: string | null;
     teacher_title: string | null;
+    class_name: string | null;
 }
 
 interface Enrollment {
@@ -40,7 +41,7 @@ export default function CoursesPage() {
     const [passkey, setPasskey] = useState("");
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [formData, setFormData] = useState({
-        name: "", code: "", semester_number: 1, department: "", teacher_id: "",
+        name: "", code: "", semester_number: 1, department: "", teacher_id: "", class_name: "",
     });
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
@@ -131,6 +132,7 @@ export default function CoursesPage() {
                     ...formData,
                     department: formData.department || undefined,
                     teacher_id: formData.teacher_id || undefined,
+                    class_name: formData.class_name || undefined,
                 }),
             });
             if (!res.ok) {
@@ -140,7 +142,7 @@ export default function CoursesPage() {
             }
             setError(null);
             setShowCreateForm(false);
-            setFormData({ name: "", code: "", semester_number: 1, department: "", teacher_id: "" });
+            setFormData({ name: "", code: "", semester_number: 1, department: "", teacher_id: "", class_name: "" });
             await fetchData();
         } catch { setError("Failed to create course"); }
     }
@@ -160,6 +162,7 @@ export default function CoursesPage() {
                     semester_number: formData.semester_number,
                     department: formData.department || null,
                     teacher_id: formData.teacher_id || null,
+                    class_name: formData.class_name || null,
                 }),
             });
             if (!res.ok) {
@@ -218,6 +221,7 @@ export default function CoursesPage() {
             semester_number: course.semester_number,
             department: course.department || "",
             teacher_id: course.teacher_id || "",
+            class_name: course.class_name || "",
         });
     }
 
@@ -316,6 +320,11 @@ export default function CoursesPage() {
                                 <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                                     className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Computer Science" />
                             </div>
+                            <div>
+                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Class Name</label>
+                                <input type="text" value={formData.class_name} onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
+                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. 10th Grade" />
+                            </div>
                             {role === "admin" && teachers.length > 0 && (
                                 <div className="sm:col-span-2">
                                     <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Assign Teacher</label>
@@ -350,11 +359,13 @@ export default function CoursesPage() {
                                 {editingCourse === course.id ? (
                                     /* Edit Form */
                                     <form onSubmit={(e) => handleUpdateCourse(course.id, e)} className="space-y-3">
-                                        <div className="grid grid-cols-2 gap-3">
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                             <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                                 className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
                                             <input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })}
                                                 className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
+                                            <input type="text" value={formData.class_name} onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
+                                                className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="Class Name" />
                                         </div>
                                         <div className="flex gap-2">
                                             <button type="submit" className="px-4 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-500">Save</button>
@@ -372,6 +383,7 @@ export default function CoursesPage() {
                                                 {isEnrolled(course.id) && <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Enrolled</span>}
                                             </div>
                                             <div className="flex items-center gap-4 text-sm text-zinc-400">
+                                                {course.class_name && <><span className="text-zinc-200">{course.class_name}</span><span className="text-zinc-700">|</span></>}
                                                 <span>Semester {course.semester_number}</span>
                                                 {course.department && <><span className="text-zinc-700">|</span><span>{course.department}</span></>}
                                                 {course.teacher_name && (

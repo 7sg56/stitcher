@@ -78,6 +78,7 @@ export interface Course {
     is_active: boolean;
     passkey: string;
     teacher_id: string | null;
+    class_name: string | null;
     created_at: string;
 }
 

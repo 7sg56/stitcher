@@ -102,3 +102,11 @@ ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE units ENABLE ROW LEVEL SECURITY;
 ALTER TABLE exam_sections ENABLE ROW LEVEL SECURITY;
+
+-- ============================================
+-- Phase 2c: Course Classes
+-- Adds class_name to courses table
+-- ============================================
+
+ALTER TABLE courses ADD COLUMN IF NOT EXISTS class_name TEXT;
+
