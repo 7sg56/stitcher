@@ -330,7 +330,7 @@ export default function CoursesPage() {
                                     <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Assign Teacher</label>
                                     <select value={formData.teacher_id} onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })}
                                         className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500">
-                                        <option value="">-- Select Teacher --</option>
+                                        <option value="">-- Unassigned (Select Teacher) --</option>
                                         {teachers.map((t) => (
                                             <option key={t.id} value={t.id}>{t.real_name || "Unnamed"} {t.teacher_title ? `(${t.teacher_title})` : ""}</option>
                                         ))}
@@ -366,6 +366,17 @@ export default function CoursesPage() {
                                                 className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
                                             <input type="text" value={formData.class_name} onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
                                                 className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="Class Name" />
+                                            {role === "admin" && teachers.length > 0 && (
+                                                <div className="sm:col-span-3 mt-1">
+                                                    <select value={formData.teacher_id} onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })}
+                                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500">
+                                                        <option value="">-- Unassigned --</option>
+                                                        {teachers.map((t) => (
+                                                            <option key={t.id} value={t.id}>{t.real_name || "Unnamed"} {t.teacher_title ? `(${t.teacher_title})` : ""}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex gap-2">
                                             <button type="submit" className="px-4 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-500">Save</button>
@@ -386,8 +397,10 @@ export default function CoursesPage() {
                                                 {course.class_name && <><span className="text-zinc-200">{course.class_name}</span><span className="text-zinc-700">|</span></>}
                                                 <span>Semester {course.semester_number}</span>
                                                 {course.department && <><span className="text-zinc-700">|</span><span>{course.department}</span></>}
-                                                {course.teacher_name && (
+                                                {course.teacher_name ? (
                                                     <><span className="text-zinc-700">|</span><span>{course.teacher_name}{course.teacher_title ? ` (${course.teacher_title})` : ""}</span></>
+                                                ) : (
+                                                    <><span className="text-zinc-700">|</span><span className="italic text-zinc-500">Unassigned</span></>
                                                 )}
                                             </div>
                                             {canManage && course.passkey && (
