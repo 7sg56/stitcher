@@ -180,3 +180,130 @@ export interface DoubtVote {
     user_id: string;
     voted_at: string;
 }
+
+// ============================================
+// Phase 3: Sessions & Attendance (extended)
+// ============================================
+
+export interface AttendanceWithStudent extends Attendance {
+    student_name: string | null;
+    student_alias: string | null;
+}
+
+export interface SessionWithDetails extends Session {
+    attendance_count?: number;
+    feedback_count?: number;
+}
+
+// ============================================
+// Phase 4: Engagement & Content Features
+// ============================================
+
+export interface Resource {
+    id: string;
+    course_id: string;
+    unit_id: string | null;
+    exam_section_id: string | null;
+    uploaded_by: string;
+    title: string;
+    description: string | null;
+    file_url: string;
+    file_name: string;
+    file_size: number | null;
+    mime_type: string | null;
+    created_at: string;
+}
+
+export interface Quiz {
+    id: string;
+    course_id: string;
+    unit_id: string | null;
+    created_by: string;
+    title: string;
+    description: string | null;
+    duration_mins: number | null;
+    is_published: boolean;
+    created_at: string;
+}
+
+export interface QuizQuestion {
+    id: string;
+    quiz_id: string;
+    question_text: string;
+    question_type: string;
+    points: number;
+    order_index: number;
+}
+
+export interface QuizQuestionPool {
+    id: string;
+    question_id: string;
+    option_text: string;
+    is_correct: boolean;
+    order_index: number;
+}
+
+export interface QuizQuestionWithOptions extends QuizQuestion {
+    options: QuizQuestionPool[];
+}
+
+export interface QuizWithQuestions extends Quiz {
+    questions: QuizQuestionWithOptions[];
+}
+
+export interface QuizAttempt {
+    id: string;
+    quiz_id: string;
+    student_id: string;
+    started_at: string;
+    submitted_at: string | null;
+    score: number | null;
+    max_score: number | null;
+}
+
+export interface QuizResponse {
+    id: string;
+    attempt_id: string;
+    question_id: string;
+    selected_option_id: string | null;
+    text_answer: string | null;
+    is_correct: boolean | null;
+    points_awarded: number;
+}
+
+export interface FeedbackWindow {
+    id: string;
+    session_id: string;
+    unit_id: string | null;
+    opened_by: string;
+    opened_at: string;
+    closed_at: string | null;
+    is_open: boolean;
+}
+
+export interface DoubtThread {
+    id: string;
+    course_id: string;
+    created_by: string;
+    title: string;
+    is_resolved: boolean;
+    created_at: string;
+}
+
+export interface DoubtMessage {
+    id: string;
+    thread_id: string;
+    sender_id: string;
+    content: string;
+    sent_at: string;
+}
+
+export interface DoubtMessageWithSender extends DoubtMessage {
+    sender_alias: string;
+    sender_name: string | null;
+    sender_role: string;
+}
+
+export interface DoubtThreadWithMessages extends DoubtThread {
+    messages: DoubtMessageWithSender[];
+}
