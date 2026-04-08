@@ -35,6 +35,7 @@ const app = Fastify({ logger: true });
 app.register(cors, {
     origin: process.env.APP_URL || "http://localhost:3000",
     credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 });
 
 app.register(clerkPlugin);
