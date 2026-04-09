@@ -76,7 +76,7 @@ export default function SessionsPanel({
     const [topic, setTopic] = useState("");
     const [location, setLocation] = useState("");
     const [durationMins, setDurationMins] = useState("60");
-    const [questions, setQuestions] = useState<{ question_text: string; options: string[] }[]>([]);
+    const [questions, setQuestions] = useState<{ question_text: string; options: string[]; correct_index: number }[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -133,7 +133,11 @@ export default function SessionsPanel({
                     topic: topic.trim(),
                     location: location.trim() || undefined,
                     duration_minutes: parseInt(durationMins) || 60,
-                    questions: questions.filter(q => q.question_text.trim() && q.options.filter(o => o.trim()).length > 0),
+                    questions: questions.filter(q => q.question_text.trim() && q.options.filter(o => o.trim()).length > 0).map(q => ({
+                        question_text: q.question_text,
+                        options: q.options,
+                        correct_index: q.correct_index,
+                    })),
                 }),
             });
             if (!res.ok) {
@@ -356,7 +360,7 @@ export default function SessionsPanel({
                     <div className="mb-4">
                         <div className="flex justify-between items-center mb-2">
                             <label className="block text-xs text-zinc-500">Feedback Questions (Optional)</label>
-                            <button type="button" onClick={() => setQuestions([...questions, { question_text: "", options: ["", ""] }])} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">+ Add MCQ</button>
+                            <button type="button" onClick={() => setQuestions([...questions, { question_text: "", options: ["", "", "", ""], correct_index: 0 }])} className="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">+ Add MCQ</button>
                         </div>
                         {questions.length > 0 && (
                             <div className="space-y-4">
@@ -365,13 +369,45 @@ export default function SessionsPanel({
                                         <button type="button" onClick={() => setQuestions(questions.filter((_, idx) => idx !== i))} className="absolute top-3 right-3 text-red-400 font-bold hover:text-red-300">&times;</button>
                                         <input type="text" value={q.question_text} onChange={(e) => {
                                             const qt = [...questions]; qt[i]!.question_text = e.target.value; setQuestions(qt);
-                                        }} className="w-full pr-8 px-3 py-1.5 mb-2 bg-zinc-900 border border-zinc-700 rounded text-white text-sm focus:outline-none" placeholder="Question Text" />
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {q.options.map((opt, oi) => (
-                                                <input key={oi} type="text" value={opt} onChange={(e) => {
-                                                    const qt = [...questions]; qt[i]!.options[oi] = e.target.value; setQuestions(qt);
-                                                }} className="px-2 py-1 bg-zinc-900 border border-zinc-700 rounded text-white text-xs focus:outline-none" placeholder={`Option ${oi + 1}`} />
-                                            ))}
+                                        }} className="w-full pr-8 px-3 py-1.5 mb-3 bg-zinc-900 border border-zinc-700 rounded text-white text-sm focus:outline-none" placeholder="Question Text" />
+                                        <p className="text-xs text-zinc-500 mb-2">
+                                            Options — <span className="text-emerald-400">click to mark correct answer</span>
+                                        </p>
+                                        <div className="space-y-1.5">
+                                            {q.options.map((opt, oi) => {
+                                                const optLabels = ["A", "B", "C", "D"];
+                                                const isCorrect = q.correct_index === oi;
+                                                return (
+                                                    <div
+                                                        key={oi}
+                                                        className={`flex items-center gap-2 px-2 py-1.5 rounded-lg border cursor-pointer transition-colors ${isCorrect ? "border-emerald-600/60 bg-emerald-900/15" : "border-zinc-700 bg-zinc-900/50"}`}
+                                                        onClick={() => {
+                                                            const qt = [...questions];
+                                                            qt[i]!.correct_index = oi;
+                                                            setQuestions(qt);
+                                                        }}
+                                                    >
+                                                        <div className={`flex-shrink-0 w-4 h-4 rounded-full border-2 flex items-center justify-center transition-colors ${isCorrect ? "border-emerald-500 bg-emerald-500" : "border-zinc-600"}`}>
+                                                            {isCorrect && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                        </div>
+                                                        <span className={`flex-shrink-0 w-5 h-5 rounded text-[10px] font-semibold flex items-center justify-center ${isCorrect ? "bg-emerald-800/50 text-emerald-300" : "bg-zinc-700 text-zinc-400"}`}>
+                                                            {optLabels[oi] ?? oi + 1}
+                                                        </span>
+                                                        <input
+                                                            type="text"
+                                                            value={opt}
+                                                            onChange={(e) => {
+                                                                e.stopPropagation();
+                                                                const qt = [...questions]; qt[i]!.options[oi] = e.target.value; setQuestions(qt);
+                                                            }}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                            className="flex-1 bg-transparent text-white text-xs focus:outline-none placeholder:text-zinc-600"
+                                                            placeholder={`Option ${optLabels[oi] ?? oi + 1}`}
+                                                        />
+                                                        {isCorrect && <span className="flex-shrink-0 text-[10px] text-emerald-400 font-medium">✓ Correct</span>}
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 ))}
