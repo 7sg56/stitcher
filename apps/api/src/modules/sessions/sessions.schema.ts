@@ -8,8 +8,7 @@ export const createSessionSchema = z.object({
     quiz_id: z.string().uuid().optional().nullable(),
     questions: z.array(z.object({
         question_text: z.string(),
-        options: z.array(z.string()),
-        correct_index: z.number().int().min(0).default(0),
+        options: z.array(z.string())
     })).optional(),
 });
 
