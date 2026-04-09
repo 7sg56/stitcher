@@ -19,37 +19,53 @@ export class DoubtsService {
         return thread as DoubtThread;
     }
 
-    async listThreadsByCourse(courseId: string): Promise<DoubtThread[]> {
+    async listThreadsByCourse(courseId: string, callerId: string): Promise<DoubtThread[]> {
         const { data, error } = await this.supabase
             .from("doubt_threads")
-            .select("*")
+            .select("*, doubt_thread_upvotes(user_id)")
             .eq("course_id", courseId)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
-        return (data ?? []) as DoubtThread[];
+
+        return (data ?? []).map((t: any) => ({
+            ...t,
+            user_has_upvoted: t.doubt_thread_upvotes?.some((v: any) => v.user_id === callerId) ?? false,
+            doubt_thread_upvotes: undefined
+        })) as DoubtThread[];
     }
 
     async getThreadWithMessages(
         threadId: string,
-        callerRole: string
+        callerRole: string,
+        callerId: string
     ): Promise<DoubtThreadWithMessages | null> {
-        const { data: thread, error } = await this.supabase
+        const { data: threadData, error } = await this.supabase
             .from("doubt_threads")
-            .select("*")
+            .select("*, doubt_thread_upvotes(user_id)")
             .eq("id", threadId)
             .single();
 
         if (error && error.code === "PGRST116") return null;
         if (error) throw error;
 
-        const { data: messages } = await this.supabase
+        const thread = {
+            ...threadData,
+            user_has_upvoted: threadData.doubt_thread_upvotes?.some((v: any) => v.user_id === callerId) ?? false,
+            doubt_thread_upvotes: undefined
+        };
+
+        const { data: messagesData } = await this.supabase
             .from("doubt_messages")
-            .select("*")
+            .select("*, doubt_message_upvotes(user_id)")
             .eq("thread_id", threadId)
             .order("sent_at");
 
-        const msgs = (messages ?? []) as DoubtMessage[];
+        const msgs = (messagesData ?? []).map((m: any) => ({
+            ...m,
+            user_has_upvoted: m.doubt_message_upvotes?.some((v: any) => v.user_id === callerId) ?? false,
+            doubt_message_upvotes: undefined
+        })) as DoubtMessage[];
 
         // Fetch display info for message senders
         const senderIds = [...new Set(msgs.map((m) => m.sender_id))];
@@ -144,5 +160,60 @@ export class DoubtsService {
 
         if (error) throw error;
         return thread as DoubtThread;
+    }
+
+    async upvoteThread(threadId: string, userId: string): Promise<number> {
+        const { data: existing } = await this.supabase
+            .from("doubt_thread_upvotes")
+            .select("id")
+            .eq("thread_id", threadId)
+            .eq("user_id", userId)
+            .single();
+
+        let upvoteChange = 0;
+        if (existing) {
+            await this.supabase.from("doubt_thread_upvotes").delete().eq("id", existing.id);
+            upvoteChange = -1;
+        } else {
+            await this.supabase.from("doubt_thread_upvotes").insert({ thread_id: threadId, user_id: userId });
+            upvoteChange = 1;
+        }
+
+        const { data: thread, error: rpcError } = await this.supabase
+            .rpc('increment_doubt_thread_upvotes', { thread_row_id: threadId, change_val: upvoteChange });
+
+        // If the RPC isn't defined, fallback to manual update using typical subquery pattern
+        // But for simplicity, we can just fetch and update
+        if (rpcError) {
+            const { data: curr } = await this.supabase.from("doubt_threads").select("upvote_count").eq("id", threadId).single();
+            const newCount = (curr?.upvote_count ?? 0) + upvoteChange;
+            await this.supabase.from("doubt_threads").update({ upvote_count: newCount }).eq("id", threadId);
+            return newCount;
+        }
+
+        return typeof thread === "number" ? thread : 0;
+    }
+
+    async upvoteMessage(messageId: string, userId: string): Promise<number> {
+        const { data: existing } = await this.supabase
+            .from("doubt_message_upvotes")
+            .select("id")
+            .eq("message_id", messageId)
+            .eq("user_id", userId)
+            .single();
+
+        let upvoteChange = 0;
+        if (existing) {
+            await this.supabase.from("doubt_message_upvotes").delete().eq("id", existing.id);
+            upvoteChange = -1;
+        } else {
+            await this.supabase.from("doubt_message_upvotes").insert({ message_id: messageId, user_id: userId });
+            upvoteChange = 1;
+        }
+
+        const { data: curr } = await this.supabase.from("doubt_messages").select("upvote_count").eq("id", messageId).single();
+        const newCount = (curr?.upvote_count ?? 0) + upvoteChange;
+        await this.supabase.from("doubt_messages").update({ upvote_count: newCount }).eq("id", messageId);
+        return newCount;
     }
 }

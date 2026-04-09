@@ -98,7 +98,7 @@ export class CoursesService {
             .from("exam_sections")
             .select("*")
             .eq("course_id", courseId)
-            .order("year")
+            .order("date")
             .order("type");
 
         return {
@@ -110,13 +110,18 @@ export class CoursesService {
         } as CourseWithDetails;
     }
 
-    async listCourses(activeOnly: boolean): Promise<CourseWithTeacher[]> {
-        const { data: courses, error } = await this.supabase
+    async listCourses(activeOnly: boolean, teacherId?: string): Promise<CourseWithTeacher[]> {
+        let query = this.supabase
             .from("courses")
             .select("*")
             .order("semester_number")
             .order("name");
 
+        if (teacherId) {
+            query = query.eq("teacher_id", teacherId);
+        }
+
+        const { data: courses, error } = await query;
         if (error) throw error;
 
         let filtered = (courses ?? []) as Course[];
@@ -197,7 +202,7 @@ export class CoursesService {
     }
 
     // --- Exam Sections ---
-    async addExamSection(courseId: string, data: { type: string; year: number; exam_board?: string }): Promise<ExamSection> {
+    async addExamSection(courseId: string, data: { type: string; date?: string; description?: string; exam_board?: string }): Promise<ExamSection> {
         const { data: section, error } = await this.supabase
             .from("exam_sections")
             .insert({ course_id: courseId, ...data })

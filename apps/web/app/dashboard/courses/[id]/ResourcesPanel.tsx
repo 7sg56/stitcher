@@ -25,7 +25,8 @@ interface Unit {
 interface ExamSection {
     id: string;
     type: string;
-    year: number;
+    date: string | null;
+    description: string | null;
     exam_board: string | null;
 }
 
@@ -83,7 +84,7 @@ export default function ResourcesPanel({
             key = unit ? `Unit ${unit.unit_number}: ${unit.title}` : "Unknown Unit";
         } else if (r.exam_section_id) {
             const section = examSections.find((s) => s.id === r.exam_section_id);
-            key = section ? `Exam ${section.year} - ${section.type}` : "Unknown Section";
+            key = section ? `Exam: ${section.type} ${section.date ? `(${new Date(section.date).toLocaleDateString()})` : ""}` : "Unknown Section";
         } else {
             key = "General";
         }
@@ -232,7 +233,7 @@ export default function ResourcesPanel({
                             <option value="">Select {targetType === "unit" ? "unit" : "exam section"}</option>
                             {targetType === "unit"
                                 ? units.map((u) => <option key={u.id} value={u.id}>Unit {u.unit_number}: {u.title}</option>)
-                                : examSections.map((s) => <option key={s.id} value={s.id}>Exam {s.year} - {s.type}</option>)
+                                : examSections.map((s) => <option key={s.id} value={s.id}>Exam: {s.type} {s.date ? `(${new Date(s.date).toLocaleDateString()})` : ""}</option>)
                             }
                         </select>
                     </div>

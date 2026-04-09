@@ -298,4 +298,83 @@ export class QuizzesService {
         if (error) throw error;
         return data as QuizAttempt;
     }
+
+    // --- Teacher Review ---
+
+    async getAttemptsByQuiz(quizId: string): Promise<{
+        student_id: string;
+        student_name: string | null;
+        score: number | null;
+        max_score: number | null;
+        submitted_at: string | null;
+        attempt_id: string;
+    }[]> {
+        const { data, error } = await this.supabase
+            .from("quiz_attempts")
+            .select("id, student_id, score, max_score, submitted_at, users:student_id(real_name)")
+            .eq("quiz_id", quizId)
+            .not("submitted_at", "is", null)
+            .order("submitted_at");
+
+        if (error) throw error;
+
+        return (data ?? []).map((row: any) => ({
+            attempt_id: row.id,
+            student_id: row.student_id,
+            student_name: row.users?.real_name ?? null,
+            score: row.score,
+            max_score: row.max_score,
+            submitted_at: row.submitted_at,
+        }));
+    }
+
+    async getResponseDistribution(quizId: string): Promise<{
+        question_id: string;
+        question_text: string;
+        options: { option_id: string; option_text: string; count: number; percentage: number }[];
+        total_responses: number;
+    }[]> {
+        // Get all questions with options
+        const quiz = await this.getQuizWithQuestions(quizId);
+        if (!quiz) return [];
+
+        // Get all submitted responses for this quiz
+        const questionIds = quiz.questions.map(q => q.id);
+        const { data: responses, error } = await this.supabase
+            .from("quiz_responses")
+            .select("question_id, selected_option_id")
+            .in("question_id", questionIds);
+
+        if (error) throw error;
+
+        // Build counts per question per option
+        const responseCounts: Record<string, Record<string, number>> = {};
+        const questionTotals: Record<string, number> = {};
+
+        for (const r of (responses ?? []) as { question_id: string; selected_option_id: string | null }[]) {
+            if (!r.selected_option_id) continue;
+            const qId = r.question_id;
+            if (!responseCounts[qId]) responseCounts[qId] = {};
+            responseCounts[qId]![r.selected_option_id] = (responseCounts[qId]![r.selected_option_id] || 0) + 1;
+            questionTotals[qId] = (questionTotals[qId] || 0) + 1;
+        }
+
+        return quiz.questions.map(q => {
+            const total = questionTotals[q.id] || 0;
+            return {
+                question_id: q.id,
+                question_text: q.question_text,
+                total_responses: total,
+                options: q.options.map(opt => {
+                    const count = responseCounts[q.id]?.[opt.id] || 0;
+                    return {
+                        option_id: opt.id,
+                        option_text: opt.option_text,
+                        count,
+                        percentage: total > 0 ? Math.round((count / total) * 100) : 0,
+                    };
+                }),
+            };
+        });
+    }
 }

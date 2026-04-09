@@ -4,7 +4,20 @@ import { Attendance, AttendanceWithStudent } from "../../types/database";
 export class AttendanceService {
     constructor(private supabase: SupabaseClient) { }
 
-    async markAttendance(sessionId: string, studentId: string, status: string): Promise<Attendance> {
+    async markAttendance(sessionId: string, studentId: string, status: string, source: "manual" | "feedback" = "manual"): Promise<Attendance> {
+        // Block manual edits after 24 hours post-session
+        if (source === "manual") {
+            const { data: session } = await this.supabase.from("sessions").select("*").eq("id", sessionId).single();
+            if (session) {
+                const startedAt = new Date(session.started_at).getTime();
+                const durationMs = (session.duration_minutes ?? 60) * 60 * 1000;
+                const limitMs = startedAt + durationMs + 24 * 60 * 60 * 1000;
+                if (Date.now() > limitMs) {
+                    throw new Error("Attendance can only be manually edited within 24 hours of the session ending.");
+                }
+            }
+        }
+
         // Upsert: if record exists for this student+session, update it
         const { data: existing } = await this.supabase
             .from("attendance")
@@ -31,7 +44,7 @@ export class AttendanceService {
                 session_id: sessionId,
                 student_id: studentId,
                 status,
-                source: "manual",
+                source,
             })
             .select("*")
             .single();
@@ -42,11 +55,12 @@ export class AttendanceService {
 
     async bulkMarkAttendance(
         sessionId: string,
-        records: { student_id: string; status: string }[]
+        records: { student_id: string; status: string }[],
+        source: "manual" | "feedback" = "manual"
     ): Promise<Attendance[]> {
         const results: Attendance[] = [];
         for (const record of records) {
-            const result = await this.markAttendance(sessionId, record.student_id, record.status);
+            const result = await this.markAttendance(sessionId, record.student_id, record.status, source);
             results.push(result);
         }
         return results;

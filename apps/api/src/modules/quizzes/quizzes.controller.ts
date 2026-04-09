@@ -244,3 +244,47 @@ export async function getMyAttempt(
     const result = await service.getAttemptWithResponses(attempt.id);
     return reply.send(result);
 }
+
+// GET /quizzes/:id/attempts -- teacher views all student attempts
+export async function listAttempts(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    if (me.role.name === "student") {
+        return reply.code(403).send({ error: "Only teachers and admins can view attempts" });
+    }
+
+    const service = new QuizzesService(req.server.supabase);
+    try {
+        const attempts = await service.getAttemptsByQuiz(req.params.id);
+        return reply.send({ attempts });
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to fetch attempts";
+        return reply.code(400).send({ error: message });
+    }
+}
+
+// GET /quizzes/:id/distribution -- teacher views response distribution
+export async function getDistribution(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    if (me.role.name === "student") {
+        return reply.code(403).send({ error: "Only teachers and admins can view distributions" });
+    }
+
+    const service = new QuizzesService(req.server.supabase);
+    try {
+        const distribution = await service.getResponseDistribution(req.params.id);
+        return reply.send({ distribution });
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to fetch distribution";
+        return reply.code(400).send({ error: message });
+    }
+}

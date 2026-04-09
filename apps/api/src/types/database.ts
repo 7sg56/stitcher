@@ -118,7 +118,8 @@ export interface ExamSection {
     id: string;
     course_id: string;
     type: string;
-    year: number;
+    date: string | null;
+    description: string | null;
     exam_board: string | null;
 }
 
@@ -136,6 +137,8 @@ export interface Session {
     topic: string | null;
     started_at: string;
     ended_at: string | null;
+    duration_minutes: number;
+    quiz_id: string | null;
     location: string | null;
     is_cancelled: boolean;
 }
@@ -287,6 +290,8 @@ export interface DoubtThread {
     created_by: string;
     title: string;
     is_resolved: boolean;
+    upvote_count: number;
+    user_has_upvoted?: boolean;
     created_at: string;
 }
 
@@ -295,6 +300,8 @@ export interface DoubtMessage {
     thread_id: string;
     sender_id: string;
     content: string;
+    upvote_count: number;
+    user_has_upvoted?: boolean;
     sent_at: string;
 }
 

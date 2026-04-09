@@ -57,7 +57,8 @@ export async function listCourses(req: FastifyRequest, reply: FastifyReply) {
 
     const service = new CoursesService(req.server.supabase);
     const activeOnly = me.role.name === "student";
-    const courses = await service.listCourses(activeOnly);
+    const teacherId = me.role.name === "teacher" ? me.id : undefined;
+    const courses = await service.listCourses(activeOnly, teacherId);
 
     // Hide passkey from students
     const sanitized = courses.map((c) => {

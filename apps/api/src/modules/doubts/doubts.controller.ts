@@ -86,7 +86,7 @@ export async function listThreads(
     }
 
     const service = new DoubtsService(req.server.supabase);
-    const threads = await service.listThreadsByCourse(req.params.courseId);
+    const threads = await service.listThreadsByCourse(req.params.courseId, me.id);
     return reply.send({ threads });
 }
 
@@ -99,7 +99,7 @@ export async function getThread(
     if (!me) return;
 
     const service = new DoubtsService(req.server.supabase);
-    const thread = await service.getThreadWithMessages(req.params.id, me.role.name);
+    const thread = await service.getThreadWithMessages(req.params.id, me.role.name, me.id);
 
     if (!thread) {
         return reply.code(404).send({ error: "Thread not found" });
@@ -168,6 +168,42 @@ export async function resolveThread(
         return reply.send({ thread });
     } catch (err: unknown) {
         const message = err instanceof Error ? err.message : "Failed to resolve thread";
+        return reply.code(400).send({ error: message });
+    }
+}
+
+// POST /doubts/threads/:id/upvote
+export async function toggleThreadUpvote(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    const service = new DoubtsService(req.server.supabase);
+    try {
+        const newCount = await service.upvoteThread(req.params.id, me.id);
+        return reply.send({ upvote_count: newCount });
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to upvote thread";
+        return reply.code(400).send({ error: message });
+    }
+}
+
+// POST /doubts/messages/:id/upvote
+export async function toggleMessageUpvote(
+    req: FastifyRequest<{ Params: { id: string } }>,
+    reply: FastifyReply
+) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    const service = new DoubtsService(req.server.supabase);
+    try {
+        const newCount = await service.upvoteMessage(req.params.id, me.id);
+        return reply.send({ upvote_count: newCount });
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Failed to upvote message";
         return reply.code(400).send({ error: message });
     }
 }

@@ -5,6 +5,8 @@ import {
     getThread,
     addMessage,
     resolveThread,
+    toggleThreadUpvote,
+    toggleMessageUpvote,
 } from "./doubts.controller";
 
 const doubtsRoutes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, done) => {
@@ -13,6 +15,8 @@ const doubtsRoutes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, do
     fastify.get("/threads/:id", getThread);
     fastify.post("/threads/:id/messages", addMessage);
     fastify.patch("/threads/:id/resolve", resolveThread);
+    fastify.post("/threads/:id/upvote", toggleThreadUpvote);
+    fastify.post("/messages/:id/upvote", toggleMessageUpvote);
 
     done();
 };

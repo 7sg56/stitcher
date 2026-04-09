@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Feedback, FeedbackWindow } from "../../types/database";
 import { OpenFeedbackWindowInput } from "./feedback.schema";
+import { AttendanceService } from "../attendance/attendance.service";
 
 export class FeedbackService {
     constructor(private supabase: SupabaseClient) { }
@@ -8,65 +9,35 @@ export class FeedbackService {
     // --- Feedback Windows ---
 
     async openWindow(openedBy: string, data: OpenFeedbackWindowInput): Promise<FeedbackWindow> {
-        // Check if a window already exists for this session
-        const { data: existing } = await this.supabase
-            .from("feedback_windows")
-            .select("id, is_open")
-            .eq("session_id", data.session_id)
-            .single();
-
-        if (existing) {
-            if (existing.is_open) {
-                throw new Error("A feedback window is already open for this session");
-            }
-            // Reopen closed window
-            const { data: reopened, error } = await this.supabase
-                .from("feedback_windows")
-                .update({ is_open: true, opened_at: new Date().toISOString(), closed_at: null })
-                .eq("id", existing.id)
-                .select("*")
-                .single();
-
-            if (error) throw error;
-            return reopened as FeedbackWindow;
-        }
-
-        const { data: window, error } = await this.supabase
-            .from("feedback_windows")
-            .insert({
-                session_id: data.session_id,
-                unit_id: data.unit_id ?? null,
-                opened_by: openedBy,
-            })
-            .select("*")
-            .single();
-
-        if (error) throw error;
-        return window as FeedbackWindow;
+        throw new Error("Feedback windows are now automatically managed based on session duration.");
     }
 
     async closeWindow(windowId: string): Promise<FeedbackWindow> {
-        const { data: window, error } = await this.supabase
-            .from("feedback_windows")
-            .update({ is_open: false, closed_at: new Date().toISOString() })
-            .eq("id", windowId)
-            .select("*")
-            .single();
-
-        if (error) throw error;
-        return window as FeedbackWindow;
+        throw new Error("Feedback windows are now automatically managed based on session duration.");
     }
 
     async getWindowBySession(sessionId: string): Promise<FeedbackWindow | null> {
-        const { data, error } = await this.supabase
-            .from("feedback_windows")
+        const { data: session } = await this.supabase
+            .from("sessions")
             .select("*")
-            .eq("session_id", sessionId)
+            .eq("id", sessionId)
             .single();
 
-        if (error && error.code === "PGRST116") return null;
-        if (error) throw error;
-        return data as FeedbackWindow;
+        if (!session) return null;
+
+        const startedAt = new Date(session.started_at).getTime();
+        const durationMs = (session.duration_minutes ?? 60) * 60 * 1000;
+        const limitMs = startedAt + durationMs + 60 * 60 * 1000;
+        const isOpen = Date.now() <= limitMs && !session.is_cancelled;
+
+        return {
+            id: `window-${sessionId}`,
+            session_id: sessionId,
+            unit_id: null,
+            is_open: isOpen,
+            opened_at: session.started_at,
+            closed_at: isOpen ? null : new Date(limitMs).toISOString(),
+        } as FeedbackWindow;
     }
 
     // --- Feedback Submission ---
@@ -103,24 +74,34 @@ export class FeedbackService {
                 session_id: sessionId,
                 rating,
                 comment: comment ?? null,
-                is_anonymous: isAnonymous ?? false,
+                is_anonymous: true,
             })
             .select("*")
             .single();
 
         if (error) throw error;
+
+        const attendanceSvc = new AttendanceService(this.supabase);
+        await attendanceSvc.markAttendance(sessionId, studentId, "present", "feedback");
+
         return feedback as Feedback;
     }
 
-    async getFeedbackBySession(sessionId: string): Promise<Feedback[]> {
+    async getFeedbackBySession(sessionId: string): Promise<any[]> {
         const { data, error } = await this.supabase
             .from("feedback")
-            .select("*")
+            .select("*, users:student_id(real_name)")
             .eq("session_id", sessionId)
             .order("submitted_at");
 
         if (error) throw error;
-        return (data ?? []) as Feedback[];
+
+        return (data || []).map((fb: any) => {
+            return {
+                ...fb,
+                student_name: fb.is_anonymous ? "Anonymous Student" : (fb.users?.real_name || "Unknown"),
+            };
+        });
     }
 
     async getAverageRatingByCourse(courseId: string): Promise<{ average_rating: number; total_feedback: number }> {

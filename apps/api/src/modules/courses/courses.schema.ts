@@ -33,7 +33,8 @@ export type CreateUnitInput = z.infer<typeof createUnitSchema>;
 
 export const createExamSectionSchema = z.object({
     type: z.string().min(1, "Exam type is required"),
-    year: z.number().int().min(2000),
+    date: z.string().optional(),
+    description: z.string().optional(),
     exam_board: z.string().optional(),
 });
 

@@ -1,6 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { Session } from "../../types/database";
 import { CreateSessionInput } from "./sessions.schema";
+import { QuizzesService } from "../quizzes/quizzes.service";
 
 export class SessionsService {
     constructor(private supabase: SupabaseClient) { }
@@ -19,6 +20,35 @@ export class SessionsService {
             throw new Error("There is already an active session for this course. End it before starting a new one.");
         }
 
+        let quizId = data.quiz_id ?? null;
+
+        if (data.questions && data.questions.length > 0) {
+            const quizzesSvc = new QuizzesService(this.supabase);
+            const quiz = await quizzesSvc.createQuiz(teacherId, {
+                course_id: data.course_id,
+                title: `Feedback: ${(data.topic || 'Untitled Session')}`,
+                description: `Feedback questions for session`,
+            });
+            await quizzesSvc.publishQuiz(quiz.id);
+
+            for (let i = 0; i < data.questions.length; i++) {
+                const q = data.questions![i];
+                if (!q) continue;
+                await quizzesSvc.addQuestion(quiz.id, {
+                    question_text: q.question_text,
+                    question_type: "mcq",
+                    points: 0,
+                    order_index: i + 1,
+                    options: q.options.map((opt, o_i) => ({
+                        option_text: opt,
+                        is_correct: false,
+                        order_index: o_i + 1
+                    }))
+                });
+            }
+            quizId = quiz.id;
+        }
+
         const { data: session, error } = await this.supabase
             .from("sessions")
             .insert({
@@ -26,6 +56,8 @@ export class SessionsService {
                 teacher_id: teacherId,
                 topic: data.topic ?? null,
                 location: data.location ?? null,
+                duration_minutes: data.duration_minutes ?? 60,
+                quiz_id: quizId,
             })
             .select("*")
             .single();
@@ -79,7 +111,21 @@ export class SessionsService {
             .order("started_at", { ascending: false });
 
         if (error) throw error;
-        return (sessions ?? []) as Session[];
+
+        const validSessions = [];
+        for (const session of (sessions ?? []) as Session[]) {
+            if (!session.ended_at && !session.is_cancelled) {
+                const startedAt = new Date(session.started_at).getTime();
+                const durationMs = (session.duration_minutes ?? 60) * 60 * 1000;
+                if (Date.now() > startedAt + durationMs) {
+                    await this.endSession(session.id);
+                    session.ended_at = new Date(startedAt + durationMs).toISOString();
+                }
+            }
+            validSessions.push(session);
+        }
+
+        return validSessions;
     }
 
     async getActiveSession(courseId: string): Promise<Session | null> {
@@ -93,6 +139,16 @@ export class SessionsService {
 
         if (error) throw error;
         if (!sessions || sessions.length === 0) return null;
-        return sessions[0] as Session;
+
+        const session = sessions[0] as Session;
+        const startedAt = new Date(session.started_at).getTime();
+        const durationMs = (session.duration_minutes ?? 60) * 60 * 1000;
+
+        if (Date.now() > startedAt + durationMs) {
+            await this.endSession(session.id);
+            return null;
+        }
+
+        return session;
     }
 }

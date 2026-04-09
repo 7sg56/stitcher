@@ -5,10 +5,8 @@ import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import SessionsPanel from "./SessionsPanel";
-import QuizzesPanel from "./QuizzesPanel";
 import DoubtsPanel from "./DoubtsPanel";
 import ResourcesPanel from "./ResourcesPanel";
-import FeedbackPanel from "./FeedbackPanel";
 
 interface Unit {
     id: string;
@@ -20,7 +18,8 @@ interface Unit {
 interface ExamSection {
     id: string;
     type: string;
-    year: number;
+    date: string | null;
+    description: string | null;
     exam_board: string | null;
 }
 
@@ -57,15 +56,14 @@ export default function CourseDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
-    const [tab, setTab] = useState<"units" | "exams" | "students" | "sessions" | "quizzes" | "doubts" | "resources" | "feedback">("units");
+    const [tab, setTab] = useState<"units" | "exams" | "students" | "sessions" | "doubts" | "resources">("units");
 
     // Phase 3+4 data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [sessions, setSessions] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [activeSession, setActiveSession] = useState<any>(null);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [quizzes, setQuizzes] = useState<any[]>([]);
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [doubtThreads, setDoubtThreads] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,7 +73,7 @@ export default function CourseDetailPage() {
     const [showUnitForm, setShowUnitForm] = useState(false);
     const [unitForm, setUnitForm] = useState({ unit_number: 1, title: "", description: "" });
     const [showExamForm, setShowExamForm] = useState(false);
-    const [examForm, setExamForm] = useState({ type: "mid-sem", year: new Date().getFullYear(), exam_board: "" });
+    const [examForm, setExamForm] = useState({ type: "", date: "", description: "", exam_board: "" });
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -110,17 +108,15 @@ export default function CourseDetailPage() {
                 }
 
                 // Fetch Phase 3+4 data in parallel
-                const [sessionsRes, activeRes, quizzesRes, doubtsRes, resourcesRes] = await Promise.all([
+                const [sessionsRes, activeRes, doubtsRes, resourcesRes] = await Promise.all([
                     fetch(`${apiUrl}/sessions/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${apiUrl}/sessions/active/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch(`${apiUrl}/quizzes/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${apiUrl}/doubts/threads/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${apiUrl}/resources/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                 ]);
 
                 if (sessionsRes.ok) { const d = await sessionsRes.json(); setSessions(d.sessions || []); }
                 if (activeRes.ok) { const d = await activeRes.json(); setActiveSession(d.session || null); }
-                if (quizzesRes.ok) { const d = await quizzesRes.json(); setQuizzes(d.quizzes || []); }
                 if (doubtsRes.ok) { const d = await doubtsRes.json(); setDoubtThreads(d.threads || []); }
                 if (resourcesRes.ok) { const d = await resourcesRes.json(); setResources(d.resources || []); }
             }
@@ -128,6 +124,18 @@ export default function CourseDetailPage() {
             setError("Failed to fetch course");
         } finally {
             setLoading(false);
+        }
+    }, [getToken, id, apiUrl]);
+
+    const refreshDoubts = useCallback(async () => {
+        const token = await getToken();
+        if (!token || !id) return;
+        const res = await fetch(`${apiUrl}/doubts/threads/course/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+            const d = await res.json();
+            setDoubtThreads(d.threads || []);
         }
     }, [getToken, id, apiUrl]);
 
@@ -189,7 +197,7 @@ export default function CourseDetailPage() {
             });
             if (!res.ok) { const data = await res.json(); setError(data.error); return; }
             setShowExamForm(false);
-            setExamForm({ type: "mid-sem", year: new Date().getFullYear(), exam_board: "" });
+            setExamForm({ type: "", date: "", description: "", exam_board: "" });
             await fetchCourse();
         } catch { setError("Failed to add exam section"); }
     }
@@ -324,9 +332,7 @@ export default function CourseDetailPage() {
                         { key: "students", label: `Students (${enrolledStudents.length})` },
                         { key: "sessions", label: `Sessions (${sessions.length})` },
                         { key: "resources", label: "Resources" },
-                        { key: "quizzes", label: `Quizzes (${quizzes.length})` },
                         { key: "doubts", label: `Doubts (${doubtThreads.length})` },
-                        { key: "feedback", label: "Feedback" },
                     ] as const).map((t) => (
                         <button
                             key={t.key}
@@ -414,21 +420,23 @@ export default function CourseDetailPage() {
 
                         {showExamForm && canManage && (
                             <div className="mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
-                                <form onSubmit={handleAddExamSection} className="flex gap-3 items-end">
+                                <form onSubmit={handleAddExamSection} className="flex flex-wrap gap-3 items-end">
                                     <div>
                                         <label className="block text-xs text-zinc-500 mb-1">Type</label>
-                                        <select value={examForm.type} onChange={(e) => setExamForm({ ...examForm, type: e.target.value })}
-                                            className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500">
-                                            <option value="mid-sem">Mid-Sem</option>
-                                            <option value="end-sem">End-Sem</option>
-                                        </select>
+                                        <input type="text" value={examForm.type} onChange={(e) => setExamForm({ ...examForm, type: e.target.value })}
+                                            className="w-24 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. MCQ" required />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-zinc-500 mb-1">Year</label>
-                                        <input type="number" value={examForm.year} onChange={(e) => setExamForm({ ...examForm, year: parseInt(e.target.value) || 2024 })}
-                                            className="w-24 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" />
+                                        <label className="block text-xs text-zinc-500 mb-1">Date</label>
+                                        <input type="date" value={examForm.date} onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
+                                            className="w-36 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
                                     </div>
-                                    <div className="flex-1">
+                                    <div className="flex-1 min-w-[150px]">
+                                        <label className="block text-xs text-zinc-500 mb-1">Description (optional)</label>
+                                        <input type="text" value={examForm.description} onChange={(e) => setExamForm({ ...examForm, description: e.target.value })}
+                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Chapter 1-3" />
+                                    </div>
+                                    <div className="flex-1 min-w-[150px]">
                                         <label className="block text-xs text-zinc-500 mb-1">Board (optional)</label>
                                         <input type="text" value={examForm.exam_board} onChange={(e) => setExamForm({ ...examForm, exam_board: e.target.value })}
                                             className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. University Board" />
@@ -448,8 +456,9 @@ export default function CourseDetailPage() {
                                     <div key={section.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-zinc-800" : ""} hover:bg-zinc-800/30`}>
                                         <div className="flex items-center gap-4">
                                             <span className="text-emerald-400 font-medium capitalize">{section.type}</span>
-                                            <span className="text-zinc-400 text-sm">{section.year}</span>
-                                            {section.exam_board && <span className="text-zinc-500 text-sm">({section.exam_board})</span>}
+                                            {section.date && <span className="text-zinc-400 text-sm">{new Date(section.date).toLocaleDateString()}</span>}
+                                            {section.description && <span className="text-zinc-500 text-sm">{section.description}</span>}
+                                            {section.exam_board && <span className="text-zinc-500 text-sm italic">({section.exam_board})</span>}
                                         </div>
                                         {canManage && (
                                             <button onClick={() => handleDeleteExamSection(section.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
@@ -529,19 +538,6 @@ export default function CourseDetailPage() {
                     />
                 )}
 
-                {/* Quizzes Tab */}
-                {tab === "quizzes" && (
-                    <QuizzesPanel
-                        courseId={id as string}
-                        role={role}
-                        quizzes={quizzes}
-                        units={course.units}
-                        apiUrl={apiUrl}
-                        getToken={getToken}
-                        onRefresh={fetchCourse}
-                    />
-                )}
-
                 {/* Doubts Tab */}
                 {tab === "doubts" && (
                     <DoubtsPanel
@@ -550,18 +546,7 @@ export default function CourseDetailPage() {
                         threads={doubtThreads}
                         apiUrl={apiUrl}
                         getToken={getToken}
-                        onRefresh={fetchCourse}
-                    />
-                )}
-
-                {/* Feedback Tab */}
-                {tab === "feedback" && (
-                    <FeedbackPanel
-                        courseId={id as string}
-                        role={role}
-                        sessions={sessions}
-                        apiUrl={apiUrl}
-                        getToken={getToken}
+                        onRefresh={refreshDoubts}
                     />
                 )}
             </main>

@@ -10,6 +10,8 @@ import {
     startAttempt,
     submitAttempt,
     getMyAttempt,
+    listAttempts,
+    getDistribution,
 } from "./quizzes.controller";
 
 const quizzesRoutes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, done) => {
@@ -28,6 +30,10 @@ const quizzesRoutes: FastifyPluginCallback = (fastify: FastifyInstance, _opts, d
     fastify.post("/:id/attempt", startAttempt);
     fastify.post("/attempt/:attemptId/submit", submitAttempt);
     fastify.get("/:id/my-attempt", getMyAttempt);
+
+    // Teacher review
+    fastify.get("/:id/attempts", listAttempts);
+    fastify.get("/:id/distribution", getDistribution);
 
     done();
 };
