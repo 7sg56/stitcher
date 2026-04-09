@@ -41,7 +41,7 @@ export class SessionsService {
                     order_index: i + 1,
                     options: q.options.map((opt, o_i) => ({
                         option_text: opt,
-                        is_correct: false,
+                        is_correct: o_i === (q.correct_index ?? 0),
                         order_index: o_i + 1
                     }))
                 });
