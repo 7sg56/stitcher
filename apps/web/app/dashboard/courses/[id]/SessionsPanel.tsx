@@ -97,6 +97,18 @@ export default function SessionsPanel({
     const canManage = role === "teacher" || role === "admin";
     const isStudent = role === "student";
 
+    // Share feedback link
+    const [shareCopied, setShareCopied] = useState(false);
+    function shareFeedbackLink(session: Session) {
+        const origin = typeof window !== "undefined" ? window.location.origin : "";
+        const link = `${origin}/feedback/${session.id}`;
+        const msg = `Submit your feedback for today's session: "${session.topic || "Untitled Session"}"\n${link}`;
+        navigator.clipboard.writeText(msg).then(() => {
+            setShareCopied(true);
+            setTimeout(() => setShareCopied(false), 2000);
+        }).catch(() => setError("Failed to copy link"));
+    }
+
     useEffect(() => {
         loadCourseRating();
         // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -444,9 +456,17 @@ export default function SessionsPanel({
                                 </a>
                             )}
                             {canManage && (
-                                <p className="text-zinc-400 text-xs mt-1">
-                                    Feedback Link: <span className="text-indigo-300 font-mono select-all break-all">{typeof window !== "undefined" ? window.location.origin : ""}/feedback/{activeSession.id}</span>
-                                </p>
+                                <div className="flex items-center gap-2 mt-2">
+                                    <button
+                                        onClick={() => shareFeedbackLink(activeSession)}
+                                        className="px-3 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors"
+                                    >
+                                        {shareCopied ? "Copied!" : "Share Feedback Link"}
+                                    </button>
+                                    <span className="text-zinc-500 text-xs font-mono truncate max-w-[200px] select-all">
+                                        /feedback/{activeSession.id.slice(0, 8)}...
+                                    </span>
+                                </div>
                             )}
                         </div>
                         {canManage && (

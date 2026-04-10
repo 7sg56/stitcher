@@ -7,7 +7,7 @@ import { useParams } from "next/navigation";
 import SessionsPanel from "./SessionsPanel";
 import DoubtsPanel from "./DoubtsPanel";
 import ResourcesPanel from "./ResourcesPanel";
-import QuizzesPanel from "./QuizzesPanel";
+
 
 interface Unit {
     id: string;
@@ -57,7 +57,7 @@ export default function CourseDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
-    const [tab, setTab] = useState<"units" | "exams" | "students" | "sessions" | "quizzes" | "doubts" | "resources">("units");
+    const [tab, setTab] = useState<"units" | "exams" | "students" | "sessions" | "doubts" | "resources">("units");
 
     // Phase 3+4 data
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -69,8 +69,7 @@ export default function CourseDetailPage() {
     const [doubtThreads, setDoubtThreads] = useState<any[]>([]);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [resources, setResources] = useState<any[]>([]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [quizzes, setQuizzes] = useState<any[]>([]);
+
 
     // Forms
     const [showUnitForm, setShowUnitForm] = useState(false);
@@ -110,20 +109,18 @@ export default function CourseDetailPage() {
                     setEnrolledStudents(eData.enrollments || []);
                 }
 
-                // Fetch Phase 3+4 data in parallel
-                const [sessionsRes, activeRes, doubtsRes, resourcesRes, quizzesRes] = await Promise.all([
+                const [sessionsRes, activeRes, doubtsRes, resourcesRes] = await Promise.all([
                     fetch(`${apiUrl}/sessions/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${apiUrl}/sessions/active/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${apiUrl}/doubts/threads/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                     fetch(`${apiUrl}/resources/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
-                    fetch(`${apiUrl}/quizzes/course/${id}`, { headers: { Authorization: `Bearer ${token}` } }),
                 ]);
 
                 if (sessionsRes.ok) { const d = await sessionsRes.json(); setSessions(d.sessions || []); }
                 if (activeRes.ok) { const d = await activeRes.json(); setActiveSession(d.session || null); }
                 if (doubtsRes.ok) { const d = await doubtsRes.json(); setDoubtThreads(d.threads || []); }
                 if (resourcesRes.ok) { const d = await resourcesRes.json(); setResources(d.resources || []); }
-                if (quizzesRes.ok) { const d = await quizzesRes.json(); setQuizzes(d.quizzes || []); }
+
             }
         } catch {
             setError("Failed to fetch course");
@@ -336,7 +333,6 @@ export default function CourseDetailPage() {
                         { key: "exams", label: `Exams (${course.exam_sections?.length || 0})` },
                         { key: "students", label: `Students (${enrolledStudents.length})` },
                         { key: "sessions", label: `Sessions (${sessions.length})` },
-                        { key: "quizzes", label: `Quizzes (${quizzes.length})` },
                         { key: "resources", label: "Resources" },
                         { key: "doubts", label: `Doubts (${doubtThreads.length})` },
                     ] as const).map((t) => (
@@ -530,18 +526,7 @@ export default function CourseDetailPage() {
                     />
                 )}
 
-                {/* Quizzes Tab */}
-                {tab === "quizzes" && (
-                    <QuizzesPanel
-                        courseId={id as string}
-                        role={role}
-                        quizzes={quizzes}
-                        units={course.units}
-                        apiUrl={apiUrl}
-                        getToken={getToken}
-                        onRefresh={fetchCourse}
-                    />
-                )}
+
 
                 {/* Resources Tab */}
                 {tab === "resources" && (
