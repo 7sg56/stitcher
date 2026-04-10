@@ -6,19 +6,37 @@ import { ViolationsService } from "../violations/violations.service";
 export class DoubtsService {
     constructor(private supabase: SupabaseClient) { }
 
-    async createThread(courseId: string, createdBy: string, title: string): Promise<DoubtThread> {
+    async createThread(courseId: string, createdBy: string, title: string): Promise<DoubtThread & { was_filtered?: boolean }> {
+        // Run profanity filter
+        const profanityResult = checkProfanity(title);
+        const finalTitle = profanityResult.cleaned;
+        let wasFiltered = false;
+
+        if (profanityResult.isProfane) {
+            wasFiltered = true;
+
+            const violationsService = new ViolationsService(this.supabase);
+            await violationsService.logViolation(
+                createdBy,
+                courseId,
+                "profanity",
+                1,
+                profanityResult.original
+            );
+        }
+
         const { data: thread, error } = await this.supabase
             .from("doubt_threads")
             .insert({
                 course_id: courseId,
                 created_by: createdBy,
-                title,
+                title: finalTitle,
             })
             .select("*")
             .single();
 
         if (error) throw error;
-        return thread as DoubtThread;
+        return { ...(thread as DoubtThread), was_filtered: wasFiltered };
     }
 
     async listThreadsByCourse(courseId: string, callerId: string): Promise<DoubtThread[]> {
