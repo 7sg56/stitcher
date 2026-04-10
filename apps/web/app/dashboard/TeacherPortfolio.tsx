@@ -49,6 +49,7 @@ export default function TeacherPortfolio() {
     const { getToken } = useAuth();
     const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
     const [isEditingProfile, setIsEditingProfile] = useState(false);
     const [profileForm, setProfileForm] = useState({
@@ -85,9 +86,12 @@ export default function TeacherPortfolio() {
                             bio: data.portfolio.profile.bio || ""
                         });
                     }
+                } else {
+                    throw new Error(`API Error: ${res.status}`);
                 }
-            } catch {
-                /* ignore */
+            } catch (err) {
+                console.error("Failed to fetch teacher portfolio:", err);
+                setError("Failed to load your teaching portfolio. Please refresh the page.");
             } finally {
                 setLoading(false);
             }
@@ -135,6 +139,14 @@ export default function TeacherPortfolio() {
                 <div className="h-6 w-48 bg-zinc-800 rounded mb-4" />
                 <div className="h-4 w-full bg-zinc-800 rounded mb-2" />
                 <div className="h-4 w-3/4 bg-zinc-800 rounded" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="bg-zinc-900 border border-red-900/40 rounded-2xl p-6 text-center">
+                <p className="text-red-400 text-sm">{error}</p>
             </div>
         );
     }

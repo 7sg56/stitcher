@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Feedback, FeedbackWindow } from "../../types/database";
 import { OpenFeedbackWindowInput } from "./feedback.schema";
 import { AttendanceService } from "../attendance/attendance.service";
+import { enqueueSessionAggregation } from "../../core/queue/queue";
 
 export class FeedbackService {
     constructor(private supabase: SupabaseClient) { }
@@ -87,6 +88,13 @@ export class FeedbackService {
 
         const attendanceSvc = new AttendanceService(this.supabase);
         await attendanceSvc.markAttendance(sessionId, studentId, "present", "feedback");
+
+        // Re-enqueue aggregation so ratings submitted after session auto-end
+        // are included in teacher_ratings. BullMQ deduplication (jobId) prevents
+        // duplicate jobs if the session was just ended by the teacher.
+        enqueueSessionAggregation(sessionId).catch(err =>
+            console.error("Failed to enqueue aggregation after feedback submit:", sessionId, err)
+        );
 
         return feedback as Feedback;
     }

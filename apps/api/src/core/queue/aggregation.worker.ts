@@ -16,19 +16,13 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
     const { sessionId } = job.data;
     const supabase = createSupabaseClient();
 
-    // 1. Idempotency check
+    // Upsert job record (reset to processing on each run so late-feedback re-runs work)
     const { data: existingJob } = await supabase
         .from("aggregation_jobs")
-        .select("id, status")
+        .select("id")
         .eq("session_id", sessionId)
-        .single();
+        .maybeSingle();
 
-    if (existingJob?.status === "done") {
-        console.log(`Session ${sessionId} already aggregated, skipping`);
-        return;
-    }
-
-    // Upsert job record
     if (existingJob) {
         await supabase
             .from("aggregation_jobs")
