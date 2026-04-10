@@ -186,213 +186,226 @@ export default async function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-zinc-950">
-            <nav className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-                <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <h1 className="text-lg font-semibold text-white tracking-tight">Stitcher</h1>
-                    <div className="flex items-center gap-4">
-                        <span className="text-xs font-medium text-zinc-500 uppercase tracking-wider bg-zinc-800 px-2.5 py-1 rounded-full">
-                            {roleName}
-                        </span>
-                        <SignOutButton />
-                    </div>
+        <div className="space-y-8">
+            <header className="flex items-center justify-between pb-6 border-b border-border">
+                <h1 className="text-2xl font-medium tracking-tight text-foreground">Dashboard</h1>
+                <div className="flex items-center gap-4">
+                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1">
+                        {roleName}
+                    </span>
+                    <SignOutButton />
                 </div>
-            </nav>
+            </header>
 
-            <main className="max-w-5xl mx-auto px-4 py-12 space-y-8">
-                {/* Profile Card */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-                    <h2 className="text-xl font-semibold text-white mb-6">Your Profile</h2>
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-4">
-                                {user.imageUrl && (
-                                    <Image src={user.imageUrl} alt="Avatar" width={64} height={64}
-                                        className="w-16 h-16 rounded-full border-2 border-zinc-700" />
+            {/* Profile Card */}
+            <div className="bg-card border border-border p-8 shadow-sm">
+                <h2 className="text-lg font-medium text-card-foreground mb-6">Your Profile</h2>
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-5">
+                            {user.imageUrl && (
+                                <Image src={user.imageUrl} alt="Avatar" width={64} height={64}
+                                    className="w-16 h-16 border border-border object-cover" />
+                            )}
+                            <div>
+                                <p className="text-foreground font-medium text-lg">{displayName}</p>
+                                {aliasName && roleName === "student" && (
+                                    <p className="text-primary text-sm mt-0.5">Alias: {aliasName}</p>
                                 )}
-                                <div>
-                                    <p className="text-white font-medium text-lg">{displayName}</p>
-                                    {aliasName && roleName === "student" && (
-                                        <p className="text-indigo-400 text-sm">Alias: {aliasName}</p>
-                                    )}
-                                    {teacherTitle && roleName === "teacher" && (
-                                        <p className="text-indigo-400 text-sm">{teacherTitle}</p>
-                                    )}
-                                    <p className="text-zinc-400 text-sm">{user.emailAddresses[0]?.emailAddress}</p>
+                                {teacherTitle && roleName === "teacher" && (
+                                    <p className="text-primary text-sm mt-0.5">{teacherTitle}</p>
+                                )}
+                                <p className="text-muted-foreground text-sm mt-0.5">{user.emailAddresses[0]?.emailAddress}</p>
+                            </div>
+                        </div>
+
+                        {roleName === "student" && totalTotalSessions > 0 && (
+                            <div className="flex items-center gap-5 border-l border-border pl-5">
+                                <div className="text-right hidden sm:block">
+                                    <p className="text-sm font-medium text-foreground">Total Attendance</p>
+                                    <p className="text-xs text-muted-foreground mt-0.5">{totalPresentCount} / {totalTotalSessions} sessions</p>
+                                </div>
+                                <div className="relative w-16 h-16 flex items-center justify-center bg-secondary">
+                                    <svg className="w-full h-full transform -rotate-90 p-1" viewBox="0 0 100 100">
+                                        <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-border" />
+                                        <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="6" fill="transparent"
+                                            strokeDasharray={2 * Math.PI * 40}
+                                            strokeDashoffset={(2 * Math.PI * 40) * (1 - (totalPresentCount / totalTotalSessions))}
+                                            strokeLinecap="square"
+                                            className="text-primary transition-all duration-1000 ease-out"
+                                        />
+                                    </svg>
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <span className="text-xs font-semibold text-foreground">{Math.round((totalPresentCount / totalTotalSessions) * 100)}%</span>
+                                    </div>
                                 </div>
                             </div>
+                        )}
+                    </div>
 
-                            {roleName === "student" && totalTotalSessions > 0 && (
-                                <div className="flex items-center gap-4">
-                                    <div className="text-right hidden sm:block">
-                                        <p className="text-sm font-medium text-white">Total Attendance</p>
-                                        <p className="text-xs text-zinc-400">{totalPresentCount} / {totalTotalSessions} sessions</p>
-                                    </div>
-                                    <div className="relative w-16 h-16 flex items-center justify-center">
-                                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                                            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-zinc-800" />
-                                            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent"
-                                                strokeDasharray={2 * Math.PI * 40}
-                                                strokeDashoffset={(2 * Math.PI * 40) * (1 - (totalPresentCount / totalTotalSessions))}
-                                                strokeLinecap="round"
-                                                className="text-indigo-500 transition-all duration-1000 ease-out"
-                                            />
-                                        </svg>
-                                        <div className="absolute flex items-center justify-center">
-                                            <span className="text-sm font-bold text-white">{Math.round((totalPresentCount / totalTotalSessions) * 100)}%</span>
-                                        </div>
-                                    </div>
+                    <div className="pt-6 border-t border-border">
+                        <dl className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div>
+                                <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Role</dt>
+                                <dd className="mt-1.5 text-sm text-foreground capitalize font-medium">{roleName}</dd>
+                            </div>
+                            <div>
+                                <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Joined</dt>
+                                <dd className="mt-1.5 text-sm text-foreground font-medium">
+                                    {new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
+                                </dd>
+                            </div>
+                            {roleName === "teacher" && (
+                                <div>
+                                    <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Courses</dt>
+                                    <dd className="mt-1.5 text-sm text-foreground font-medium">{teacherCourses.length} course{teacherCourses.length !== 1 ? "s" : ""}</dd>
                                 </div>
                             )}
-                        </div>
-
-                        <div className="pt-4 border-t border-zinc-800">
-                            <dl className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            {roleName === "student" && (
                                 <div>
-                                    <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Role</dt>
-                                    <dd className="mt-1 text-sm text-zinc-300 capitalize">{roleName}</dd>
+                                    <dt className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Enrolled</dt>
+                                    <dd className="mt-1.5 text-sm text-foreground font-medium">{enrolledCourses.length} course{enrolledCourses.length !== 1 ? "s" : ""}</dd>
                                 </div>
-                                <div>
-                                    <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Joined</dt>
-                                    <dd className="mt-1 text-sm text-zinc-300">
-                                        {new Date(user.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })}
-                                    </dd>
-                                </div>
-                                {roleName === "teacher" && (
-                                    <div>
-                                        <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Courses</dt>
-                                        <dd className="mt-1 text-sm text-zinc-300">{teacherCourses.length} course{teacherCourses.length !== 1 ? "s" : ""}</dd>
-                                    </div>
-                                )}
-                                {roleName === "student" && (
-                                    <div>
-                                        <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Enrolled</dt>
-                                        <dd className="mt-1 text-sm text-zinc-300">{enrolledCourses.length} course{enrolledCourses.length !== 1 ? "s" : ""}</dd>
-                                    </div>
-                                )}
-                            </dl>
-                        </div>
+                            )}
+                        </dl>
                     </div>
                 </div>
+            </div>
 
-                {/* Student: Enrolled Courses */}
-                {roleName === "student" && (
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-white">My Courses</h2>
-                            <Link href="/dashboard/courses" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
-                                Browse Courses &rarr;
-                            </Link>
-                        </div>
-                        {enrolledCourses.length === 0 ? (
-                            <p className="text-zinc-400 text-sm">You haven&apos;t enrolled in any courses yet. Ask your teacher for a course passkey.</p>
-                        ) : (
-                            <div className="space-y-3">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {enrolledCourses.map((enrollment: any) => (
-                                    <div key={enrollment.id}
-                                        className="relative block bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 transition-colors group">
-
-                                        {/* Full card clickable link layer */}
-                                        <Link href={`/dashboard/courses/${enrollment.course?.id || enrollment.course_id}`} className="absolute inset-0 z-0" />
-
-                                        <div className="flex items-center justify-between relative z-10 pointer-events-none">
-                                            <div>
-                                                <h3 className="text-white font-medium group-hover:text-indigo-400 transition-colors">{enrollment.course?.name || "Course"}</h3>
-                                                <div className="flex items-center gap-3 mt-1 text-xs text-zinc-400">
-                                                    <span className="font-mono">{enrollment.course?.code}</span>
-                                                    {enrollment.className && <span>{enrollment.className}</span>}
-                                                    <span>Semester {enrollment.course?.semester_number}</span>
-                                                    {enrollment.course?.department && <span>{enrollment.course.department}</span>}
-                                                </div>
-                                                {enrollment.teacherName && (
-                                                    <div className="text-xs text-zinc-500 mt-1 pointer-events-auto">
-                                                        Faculty:{" "}
-                                                        {enrollment.teacher_id ? (
-                                                            <Link
-                                                                href={`/dashboard/teachers/${enrollment.teacher_id}`}
-                                                                className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors relative z-20"
-                                                            >
-                                                                {enrollment.teacherName}
-                                                            </Link>
-                                                        ) : (
-                                                            enrollment.teacherName
-                                                        )}
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-2 pointer-events-auto">
-                                                {enrollment.violationCount > 0 && (
-                                                    <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">
-                                                        {enrollment.violationCount} violation{enrollment.violationCount !== 1 ? "s" : ""}
-                                                    </span>
-                                                )}
-                                                {enrollment.attendanceStats?.totalSessions > 0 && (
-                                                    <span className="font-mono text-xs text-indigo-400 bg-zinc-800 px-2 py-1 rounded">
-                                                        {Math.round((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100)}%
-                                                    </span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+            {/* Student: Enrolled Courses */}
+            {roleName === "student" && (
+                <div className="bg-card border border-border p-8 shadow-sm">
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+                        <h2 className="text-lg font-medium text-foreground">My Courses</h2>
+                        <Link href="/dashboard/courses" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                            Browse Courses &rarr;
+                        </Link>
                     </div>
-                )}
+                    {enrolledCourses.length === 0 ? (
+                        <p className="text-muted-foreground text-sm">You haven&apos;t enrolled in any courses yet. Ask your teacher for a course passkey.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 gap-4">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {enrolledCourses.map((enrollment: any) => (
+                                <div key={enrollment.id}
+                                    className="relative flex flex-col sm:flex-row sm:items-center justify-between bg-secondary/50 border border-border p-5 hover:bg-secondary transition-colors group">
 
-                {/* Teacher: Course Portfolio */}
-                {(roleName === "teacher" || roleName === "admin") && (
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-                        <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-xl font-semibold text-white">
-                                {roleName === "teacher" ? "My Courses" : "Course Management"}
-                            </h2>
-                            <Link href="/dashboard/courses" className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">
-                                Manage Courses &rarr;
-                            </Link>
-                        </div>
-                        {teacherCourses.length === 0 ? (
-                            <p className="text-zinc-400 text-sm">
-                                {roleName === "teacher" ? "You haven't created any courses yet." : "No courses created yet."}
-                            </p>
-                        ) : (
-                            <div className="space-y-3">
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {teacherCourses.map((course: any) => (
-                                    <Link key={course.id} href={`/dashboard/courses/${course.id}`}
-                                        className="block bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 transition-colors">
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <div className="flex items-center gap-3">
-                                                    <h3 className="text-white font-medium">{course.name}</h3>
-                                                    <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{course.code}</span>
-                                                    {!course.is_active && <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">Inactive</span>}
-                                                </div>
-                                                <div className="flex items-center gap-3 mt-1 text-xs text-zinc-400">
-                                                    <span>Semester {course.semester_number}</span>
-                                                    {course.department && <span>{course.department}</span>}
-                                                    {course.teacher_name && roleName === "admin" && (
-                                                        <span>Teacher: {course.teacher_name}</span>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            {course.passkey && (
-                                                <span className="font-mono text-xs text-indigo-400 bg-zinc-800 px-2 py-1 rounded">{course.passkey}</span>
+                                    <Link href={`/dashboard/courses/${enrollment.course?.id || enrollment.course_id}`} className="absolute inset-0 z-0" />
+
+                                    <div className="relative z-10 pointer-events-none mb-4 sm:mb-0">
+                                        <h3 className="text-foreground font-medium text-base group-hover:text-primary transition-colors">{enrollment.course?.name || "Course"}</h3>
+                                        <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-muted-foreground">
+                                            <span className="font-mono bg-background px-2 py-0.5 border border-border">{enrollment.course?.code}</span>
+                                            {enrollment.className && <span className="font-medium text-foreground">{enrollment.className}</span>}
+                                            <span className="flex items-center">
+                                                <span className="w-1 h-1 rounded-full bg-border mr-2 inline-block"></span>
+                                                Semester {enrollment.course?.semester_number}
+                                            </span>
+                                            {enrollment.course?.department && (
+                                                <span className="flex items-center">
+                                                    <span className="w-1 h-1 rounded-full bg-border mr-2 inline-block"></span>
+                                                    {enrollment.course.department}
+                                                </span>
                                             )}
                                         </div>
-                                    </Link>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-                )}
+                                        {enrollment.teacherName && (
+                                            <div className="text-xs text-muted-foreground mt-3 pointer-events-auto flex items-center gap-2">
+                                                <span className="uppercase tracking-wider text-[10px] font-semibold text-foreground/50">Faculty</span>
+                                                {enrollment.teacher_id ? (
+                                                    <Link
+                                                        href={`/dashboard/teachers/${enrollment.teacher_id}`}
+                                                        className="text-primary hover:text-primary/80 font-medium hover:underline transition-colors relative z-20"
+                                                    >
+                                                        {enrollment.teacherName}
+                                                    </Link>
+                                                ) : (
+                                                    <span className="font-medium text-foreground">{enrollment.teacherName}</span>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-3 relative z-10 pointer-events-auto">
+                                        {enrollment.violationCount > 0 && (
+                                            <span className="text-xs font-medium text-destructive bg-destructive/10 border border-destructive/20 px-2 py-1">
+                                                {enrollment.violationCount} violation{enrollment.violationCount !== 1 ? "s" : ""}
+                                            </span>
+                                        )}
+                                        {enrollment.attendanceStats?.totalSessions > 0 && (
+                                            <span className="font-mono text-xs font-medium text-primary bg-primary/10 border border-primary/20 px-3 py-1">
+                                                {Math.round((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100)}% att.
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
-                {/* Teacher Portfolio -- ratings and insights */}
-                {(roleName === "teacher") && (
+            {/* Teacher: Course Management */}
+            {(roleName === "teacher" || roleName === "admin") && (
+                <div className="bg-card border border-border p-8 shadow-sm">
+                    <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+                        <h2 className="text-lg font-medium text-foreground">
+                            {roleName === "teacher" ? "My Courses" : "Course Management"}
+                        </h2>
+                        <Link href="/dashboard/courses" className="text-sm font-medium text-primary hover:text-primary/80 transition-colors">
+                            Manage Courses &rarr;
+                        </Link>
+                    </div>
+                    {teacherCourses.length === 0 ? (
+                        <p className="text-muted-foreground text-sm">
+                            {roleName === "teacher" ? "You haven't created any courses yet." : "No courses created yet."}
+                        </p>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {teacherCourses.map((course: any) => (
+                                <Link key={course.id} href={`/dashboard/courses/${course.id}`}
+                                    className="block bg-secondary/50 border border-border p-5 hover:bg-secondary transition-colors group">
+                                    <div className="flex flex-col h-full justify-between gap-4">
+                                        <div>
+                                            <div className="flex items-start justify-between gap-3 mb-2">
+                                                <h3 className="text-foreground font-medium group-hover:text-primary transition-colors leading-tight">{course.name}</h3>
+                                                {course.passkey && (
+                                                    <span className="font-mono text-[10px] text-muted-foreground bg-background border border-border px-1.5 py-0.5 whitespace-nowrap">Key: {course.passkey}</span>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <span className="text-[10px] font-mono text-muted-foreground bg-background border border-border px-1.5 py-0.5">{course.code}</span>
+                                                {!course.is_active && <span className="text-[10px] font-medium text-destructive bg-destructive/10 border border-destructive/20 px-1.5 py-0.5">Inactive</span>}
+                                            </div>
+                                            <div className="flex flex-wrap items-center gap-2 mt-auto text-xs text-muted-foreground">
+                                                <span>Sem {course.semester_number}</span>
+                                                {course.department && (
+                                                    <span className="flex items-center">
+                                                        <span className="w-1 h-1 rounded-full bg-border mx-2 inline-block"></span>
+                                                        {course.department}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        {course.teacher_name && roleName === "admin" && (
+                                            <div className="pt-3 mt-3 border-t border-border flex items-center justify-between text-xs">
+                                                <span className="uppercase tracking-wider text-[10px] font-semibold text-foreground/50">Instructor</span>
+                                                <span className="font-medium text-foreground">{course.teacher_name}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {/* Teacher Portfolio */}
+            {(roleName === "teacher") && (
+                <div className="mt-8">
                     <TeacherPortfolio />
-                )}
-            </main>
+                </div>
+            )}
         </div>
     );
 }

@@ -66,14 +66,14 @@ export default function SignInPage() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
+        <div className="min-h-screen flex items-center justify-center bg-background px-4">
             <div className="w-full max-w-md">
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
+                <div className="bg-card border border-border p-8 shadow-sm">
                     <div className="text-center mb-8">
-                        <h1 className="text-2xl font-bold text-white tracking-tight">
+                        <h1 className="text-2xl font-medium text-foreground tracking-tight">
                             Welcome back
                         </h1>
-                        <p className="text-zinc-400 mt-2 text-sm">
+                        <p className="text-muted-foreground mt-2 text-sm">
                             Sign in to your Stitcher account
                         </p>
                     </div>
@@ -81,7 +81,7 @@ export default function SignInPage() {
                     {/* Google sign-in */}
                     <button
                         onClick={handleGoogleSignIn}
-                        className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-zinc-500 focus:ring-offset-2 focus:ring-offset-zinc-900 mb-6"
+                        className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-secondary hover:bg-secondary/80 border border-border text-foreground font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-ring mb-6"
                     >
                         <svg className="w-5 h-5" viewBox="0 0 24 24">
                             <path
@@ -106,10 +106,10 @@ export default function SignInPage() {
 
                     <div className="relative mb-6">
                         <div className="absolute inset-0 flex items-center">
-                            <div className="w-full border-t border-zinc-700"></div>
+                            <div className="w-full border-t border-border"></div>
                         </div>
                         <div className="relative flex justify-center text-sm">
-                            <span className="px-3 bg-zinc-900 text-zinc-500">or</span>
+                            <span className="px-3 bg-card text-muted-foreground uppercase text-[10px] tracking-wider font-semibold">or</span>
                         </div>
                     </div>
 
@@ -117,7 +117,7 @@ export default function SignInPage() {
                         <div>
                             <label
                                 htmlFor="email"
-                                className="block text-sm font-medium text-zinc-300 mb-1.5"
+                                className="block text-sm font-medium text-foreground mb-1.5"
                             >
                                 Email address
                             </label>
@@ -126,11 +126,11 @@ export default function SignInPage() {
                                 name="email"
                                 type="email"
                                 required
-                                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-2.5 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
                                 placeholder="you@example.com"
                             />
                             {errors?.fields?.identifier && (
-                                <p className="mt-1.5 text-sm text-red-400">
+                                <p className="mt-1.5 text-sm text-destructive">
                                     {errors.fields.identifier.message}
                                 </p>
                             )}
@@ -139,7 +139,7 @@ export default function SignInPage() {
                         <div>
                             <label
                                 htmlFor="password"
-                                className="block text-sm font-medium text-zinc-300 mb-1.5"
+                                className="block text-sm font-medium text-foreground mb-1.5"
                             >
                                 Password
                             </label>
@@ -148,11 +148,11 @@ export default function SignInPage() {
                                 name="password"
                                 type="password"
                                 required
-                                className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                className="w-full px-4 py-2.5 bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring transition-all"
                                 placeholder="Enter your password"
                             />
                             {errors?.fields?.password && (
-                                <p className="mt-1.5 text-sm text-red-400">
+                                <p className="mt-1.5 text-sm text-destructive">
                                     {errors.fields.password.message}
                                 </p>
                             )}
@@ -161,26 +161,26 @@ export default function SignInPage() {
                         <button
                             type="submit"
                             disabled={fetchStatus === "fetching"}
-                            className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
+                            className="w-full py-2.5 px-4 bg-primary hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-ring"
                         >
                             {fetchStatus === "fetching" ? "Signing in..." : "Sign in"}
                         </button>
                     </form>
 
                     {errors && !errors.fields && (
-                        <div className="mt-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                            <p className="text-sm text-red-400">
+                        <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm font-medium">
+                            <p>
                                 {errors.global?.[0]?.message || "Something went wrong. Try again."}
                             </p>
                         </div>
                     )}
 
                     <div className="mt-6 text-center">
-                        <p className="text-sm text-zinc-400">
+                        <p className="text-sm text-muted-foreground">
                             Don&apos;t have an account?{" "}
                             <Link
                                 href="/sign-up"
-                                className="text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+                                className="text-primary hover:text-primary/80 font-medium transition-colors"
                             >
                                 Sign up
                             </Link>
