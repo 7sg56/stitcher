@@ -1,5 +1,6 @@
 import { Queue } from "bullmq";
 import IORedis from "ioredis";
+import { aggregateSession } from "./aggregation.worker";
 
 let sessionAggregationQueue: Queue | null = null;
 
@@ -38,17 +39,31 @@ export function getSessionAggregationQueue(): Queue | null {
     return sessionAggregationQueue;
 }
 
+/**
+ * Enqueue a session aggregation job. If Redis/BullMQ is unavailable or
+ * the enqueue fails, falls back to running aggregation synchronously
+ * so teacher ratings are always computed.
+ */
 export async function enqueueSessionAggregation(sessionId: string): Promise<boolean> {
     const queue = getSessionAggregationQueue();
+
     if (!queue) {
-        console.warn("Redis not configured -- skipping session aggregation for", sessionId);
-        return false;
+        // Redis not configured -- run aggregation synchronously
+        console.log(`Redis not configured -- running aggregation synchronously for session ${sessionId}`);
+        await aggregateSession(sessionId);
+        return true;
     }
 
-    await queue.add("AGGREGATE_SESSION", { sessionId }, {
-        jobId: `aggregate-${sessionId}-${Date.now()}`,
-        delay: 15_000, // 15s debounce so rapid feedback submissions batch naturally
-    });
-
-    return true;
+    try {
+        await queue.add("AGGREGATE_SESSION", { sessionId }, {
+            jobId: `aggregate-${sessionId}-${Date.now()}`,
+            delay: 15_000,
+        });
+        return true;
+    } catch (err) {
+        // BullMQ enqueue failed -- fall back to synchronous aggregation
+        console.error(`BullMQ enqueue failed for session ${sessionId}, running synchronously:`, err);
+        await aggregateSession(sessionId);
+        return true;
+    }
 }

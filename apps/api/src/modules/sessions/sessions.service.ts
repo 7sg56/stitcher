@@ -78,9 +78,9 @@ export class SessionsService {
 
         if (error) throw error;
 
-        // Enqueue async aggregation job
+        // Aggregate ratings (async via BullMQ, synchronous fallback if Redis down)
         enqueueSessionAggregation(sessionId).catch(err =>
-            console.error("Failed to enqueue aggregation for session", sessionId, err)
+            console.error("Aggregation failed for session (even fallback):", sessionId, err)
         );
 
         return session as Session;
@@ -132,9 +132,9 @@ export class SessionsService {
                         .is("ended_at", null);
                     session.ended_at = new Date(startedAt + durationMs).toISOString();
 
-                    // Enqueue aggregation for auto-ended session
+                    // Aggregate ratings for auto-ended session
                     enqueueSessionAggregation(session.id).catch(err =>
-                        console.error("Failed to enqueue aggregation for auto-ended session", session.id, err)
+                        console.error("Aggregation failed for auto-ended session (even fallback):", session.id, err)
                     );
                 }
             }

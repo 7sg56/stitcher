@@ -12,31 +12,34 @@ function createSupabaseClient(): SupabaseClient {
     return createClient(url, key);
 }
 
-async function processSessionAggregation(job: Job<AggregateSessionData>) {
-    const { sessionId } = job.data;
-    const supabase = createSupabaseClient();
+/**
+ * Core aggregation logic -- exported so it can be called directly as a
+ * synchronous fallback when BullMQ/Redis is unavailable.
+ */
+export async function aggregateSession(sessionId: string, supabase?: SupabaseClient): Promise<void> {
+    const db = supabase ?? createSupabaseClient();
 
     // Upsert job record (reset to processing on each run so late-feedback re-runs work)
-    const { data: existingJob } = await supabase
+    const { data: existingJob } = await db
         .from("aggregation_jobs")
         .select("id")
         .eq("session_id", sessionId)
         .maybeSingle();
 
     if (existingJob) {
-        await supabase
+        await db
             .from("aggregation_jobs")
             .update({ status: "processing" })
             .eq("id", existingJob.id);
     } else {
-        await supabase
+        await db
             .from("aggregation_jobs")
             .insert({ session_id: sessionId, status: "processing" });
     }
 
     try {
-        // 2. Get session details
-        const { data: session } = await supabase
+        // Get session details
+        const { data: session } = await db
             .from("sessions")
             .select("id, course_id, teacher_id")
             .eq("id", sessionId)
@@ -44,8 +47,8 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
 
         if (!session) throw new Error(`Session ${sessionId} not found`);
 
-        // 3. Collect all feedback for this session
-        const { data: feedbacks } = await supabase
+        // Collect all feedback for this session
+        const { data: feedbacks } = await db
             .from("feedback")
             .select("id, rating")
             .eq("session_id", sessionId);
@@ -54,12 +57,12 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
 
         if (feedbackItems.length === 0) {
             // No feedback -- still mark as done with empty insights
-            await supabase
+            await db
                 .from("aggregation_jobs")
                 .update({ status: "done", completed_at: new Date().toISOString() })
                 .eq("session_id", sessionId);
 
-            await supabase
+            await db
                 .from("session_insights")
                 .upsert({
                     session_id: sessionId,
@@ -73,12 +76,12 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
             return;
         }
 
-        // 4. Calculate plain average rating
+        // Calculate plain average rating
         const sumRatings = feedbackItems.reduce((sum, fb) => sum + fb.rating, 0);
         const avgRating = Math.round((sumRatings / feedbackItems.length) * 100) / 100;
 
-        // 5. Upsert teacher_ratings (rolling average across sessions)
-        const { data: existingRating } = await supabase
+        // Upsert teacher_ratings (rolling average across sessions)
+        const { data: existingRating } = await db
             .from("teacher_ratings")
             .select("id, weighted_avg_rating, total_reviews")
             .eq("teacher_id", session.teacher_id)
@@ -94,7 +97,7 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
 
             const isFlagged = roundedAvg < 2.5 && newTotal >= 5;
 
-            await supabase
+            await db
                 .from("teacher_ratings")
                 .update({
                     weighted_avg_rating: roundedAvg,
@@ -106,7 +109,7 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
         } else {
             const isFlagged = avgRating < 2.5 && feedbackItems.length >= 5;
 
-            await supabase
+            await db
                 .from("teacher_ratings")
                 .insert({
                     teacher_id: session.teacher_id,
@@ -118,8 +121,8 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
                 });
         }
 
-        // 6. Insert session_insights
-        await supabase
+        // Insert session_insights
+        await db
             .from("session_insights")
             .upsert({
                 session_id: sessionId,
@@ -130,8 +133,8 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
                 aggregated_at: new Date().toISOString(),
             }, { onConflict: "session_id" });
 
-        // 7. Mark job done
-        await supabase
+        // Mark job done
+        await db
             .from("aggregation_jobs")
             .update({ status: "done", completed_at: new Date().toISOString() })
             .eq("session_id", sessionId);
@@ -140,12 +143,16 @@ async function processSessionAggregation(job: Job<AggregateSessionData>) {
 
     } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
-        await supabase
+        await db
             .from("aggregation_jobs")
             .update({ status: "failed", error: errorMsg })
             .eq("session_id", sessionId);
         throw err;
     }
+}
+
+async function processSessionAggregation(job: Job<AggregateSessionData>) {
+    await aggregateSession(job.data.sessionId);
 }
 
 export function startAggregationWorker(): Worker | null {

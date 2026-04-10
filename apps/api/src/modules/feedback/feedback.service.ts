@@ -89,11 +89,10 @@ export class FeedbackService {
         const attendanceSvc = new AttendanceService(this.supabase);
         await attendanceSvc.markAttendance(sessionId, studentId, "present", "feedback");
 
-        // Re-enqueue aggregation so ratings submitted after session auto-end
-        // are included in teacher_ratings. Each enqueue creates a unique delayed
-        // job (15s debounce) so rapid submissions batch naturally.
+        // Trigger aggregation (async via BullMQ, or synchronous fallback if Redis
+        // is unavailable). Each call is self-contained and handles errors internally.
         enqueueSessionAggregation(sessionId).catch(err =>
-            console.error("Failed to enqueue aggregation after feedback submit:", sessionId, err)
+            console.error("Aggregation failed for session (even fallback):", sessionId, err)
         );
 
         return feedback as Feedback;
