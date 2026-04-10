@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface Course {
@@ -31,6 +32,7 @@ interface Teacher {
 }
 
 export default function CoursesPage() {
+    const router = useRouter();
     const { getToken } = useAuth();
     const [courses, setCourses] = useState<Course[]>([]);
     const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
@@ -386,7 +388,7 @@ export default function CoursesPage() {
                                 ) : (
                                     /* Display */
                                     <div className="flex items-start justify-between">
-                                        <Link href={`/dashboard/courses/${course.id}`} className="flex-1 group">
+                                        <div onClick={() => router.push(`/dashboard/courses/${course.id}`)} className="flex-1 group cursor-pointer relative block">
                                             <div className="flex items-center gap-3 mb-1">
                                                 <h3 className="text-white font-semibold group-hover:text-indigo-400 transition-colors">{course.name}</h3>
                                                 <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{course.code}</span>
@@ -398,7 +400,20 @@ export default function CoursesPage() {
                                                 <span>Semester {course.semester_number}</span>
                                                 {course.department && <><span className="text-zinc-700">|</span><span>{course.department}</span></>}
                                                 {course.teacher_name ? (
-                                                    <><span className="text-zinc-700">|</span><span>{course.teacher_name}{course.teacher_title ? ` (${course.teacher_title})` : ""}</span></>
+                                                    <div className="flex items-center gap-1 relative z-10 pointer-events-auto">
+                                                        <span className="text-zinc-700 mr-3">|</span>
+                                                        {course.teacher_id ? (
+                                                            <Link
+                                                                href={`/dashboard/teachers/${course.teacher_id}`}
+                                                                className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors"
+                                                                onClick={(e) => e.stopPropagation()}
+                                                            >
+                                                                {course.teacher_name}{course.teacher_title ? ` (${course.teacher_title})` : ""}
+                                                            </Link>
+                                                        ) : (
+                                                            <span>{course.teacher_name}{course.teacher_title ? ` (${course.teacher_title})` : ""}</span>
+                                                        )}
+                                                    </div>
                                                 ) : (
                                                     <><span className="text-zinc-700">|</span><span className="italic text-zinc-500">Unassigned</span></>
                                                 )}
@@ -408,7 +423,7 @@ export default function CoursesPage() {
                                                     Passkey: <span className="font-mono text-indigo-400 bg-zinc-800 px-2 py-0.5 rounded select-all">{course.passkey}</span>
                                                 </div>
                                             )}
-                                        </Link>
+                                        </div>
                                         <div className="flex items-center gap-2 ml-4">
                                             {canManage && (
                                                 <>

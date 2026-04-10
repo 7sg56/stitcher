@@ -310,8 +310,17 @@ export default function CourseDetailPage() {
                         <div>
                             <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Teacher</dt>
                             <dd className="mt-1 text-sm text-zinc-300">
-                                {course.teacher_name || "Not assigned"}
-                                {course.teacher_title && <span className="text-zinc-500 text-xs ml-1">({course.teacher_title})</span>}
+                                {course.teacher_id && course.teacher_name ? (
+                                    <Link href={`/dashboard/teachers/${course.teacher_id}`} className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors block w-fit">
+                                        {course.teacher_name}
+                                        {course.teacher_title && <span className="text-zinc-500 text-xs ml-1">({course.teacher_title})</span>}
+                                    </Link>
+                                ) : (
+                                    <>
+                                        {course.teacher_name || "Not assigned"}
+                                        {course.teacher_title && <span className="text-zinc-500 text-xs ml-1">({course.teacher_title})</span>}
+                                    </>
+                                )}
                             </dd>
                         </div>
                     </div>

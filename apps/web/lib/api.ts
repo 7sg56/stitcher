@@ -402,4 +402,20 @@ export async function getCourseRating(token: string, courseId: string) {
     });
 }
 
+// ============================================
+// Phase 6: Public Teacher Portfolio
+// ============================================
+
+export async function getPublicTeacherPortfolio(token: string, teacherId: string) {
+    return api.get(`/dashboard/teacher/${teacherId}/public-portfolio`, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
+export async function updateTeacherProfile(token: string, data: Record<string, unknown>) {
+    return api.put("/dashboard/teacher/profile", data, {
+        headers: { Authorization: `Bearer ${token}` },
+    });
+}
+
 export default api;

@@ -46,6 +46,42 @@ export async function getTeacherPortfolio(req: FastifyRequest, reply: FastifyRep
     return reply.send({ portfolio });
 }
 
+// PUT /dashboard/teacher/profile
+export async function updateTeacherProfile(req: FastifyRequest, reply: FastifyReply) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    if (me.role.name !== "teacher" && me.role.name !== "admin") {
+        return reply.code(403).send({ error: "Teacher access only" });
+    }
+
+    const service = new DashboardService(req.server.supabase);
+    try {
+        const profile = await service.updateTeacherProfile(me.id, req.body);
+        return reply.send({ profile });
+    } catch (err: any) {
+        return reply.code(400).send({ error: err.message });
+    }
+}
+
+// GET /dashboard/teacher/:teacherId/public-portfolio
+export async function getPublicTeacherPortfolio(
+    req: FastifyRequest<{ Params: { teacherId: string } }>,
+    reply: FastifyReply
+) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    const service = new DashboardService(req.server.supabase);
+    const portfolio = await service.getPublicTeacherPortfolio(req.params.teacherId);
+
+    if (!portfolio) {
+        return reply.code(404).send({ error: "Teacher not found" });
+    }
+
+    return reply.send({ portfolio });
+}
+
 // GET /dashboard/teacher/:teacherId/ratings (admin)
 export async function getTeacherRatings(
     req: FastifyRequest<{ Params: { teacherId: string } }>,

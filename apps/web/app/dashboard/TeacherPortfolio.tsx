@@ -35,6 +35,14 @@ interface PortfolioData {
     total_reviews: number;
     is_any_flagged: boolean;
     recent_insights: SessionInsight[];
+    profile?: {
+        designation: string | null;
+        contact_email: string | null;
+        orcid_id: string | null;
+        personal_website: string | null;
+        mastery_tags: string[];
+        bio: string | null;
+    } | null;
 }
 
 export default function TeacherPortfolio() {
@@ -42,6 +50,16 @@ export default function TeacherPortfolio() {
     const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
     const [loading, setLoading] = useState(true);
     const [expandedInsight, setExpandedInsight] = useState<string | null>(null);
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    const [profileForm, setProfileForm] = useState({
+        designation: "",
+        contact_email: "",
+        orcid_id: "",
+        personal_website: "",
+        mastery_tags: "",
+        bio: ""
+    });
+    const [savingProfile, setSavingProfile] = useState(false);
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -57,6 +75,16 @@ export default function TeacherPortfolio() {
                 if (res.ok) {
                     const data = await res.json();
                     setPortfolio(data.portfolio);
+                    if (data.portfolio.profile) {
+                        setProfileForm({
+                            designation: data.portfolio.profile.designation || "",
+                            contact_email: data.portfolio.profile.contact_email || "",
+                            orcid_id: data.portfolio.profile.orcid_id || "",
+                            personal_website: data.portfolio.profile.personal_website || "",
+                            mastery_tags: (data.portfolio.profile.mastery_tags || []).join(", "),
+                            bio: data.portfolio.profile.bio || ""
+                        });
+                    }
                 }
             } catch {
                 /* ignore */
@@ -68,6 +96,39 @@ export default function TeacherPortfolio() {
         fetchPortfolio();
     }, [getToken, apiUrl]);
 
+    async function handleSaveProfile(e: React.FormEvent) {
+        e.preventDefault();
+        setSavingProfile(true);
+        const token = await getToken();
+        if (!token) return;
+
+        try {
+            const tags = profileForm.mastery_tags.split(",").map(t => t.trim()).filter(Boolean);
+            const res = await fetch(`${apiUrl}/dashboard/teacher/profile`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ ...profileForm, mastery_tags: tags })
+            });
+
+            if (res.ok) {
+                const refreshed = await fetch(`${apiUrl}/dashboard/teacher/portfolio`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                if (refreshed.ok) {
+                    const data = await refreshed.json();
+                    setPortfolio(data.portfolio);
+                }
+                setIsEditingProfile(false);
+            } else {
+                alert("Failed to save profile");
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setSavingProfile(false);
+        }
+    }
+
     if (loading) {
         return (
             <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 animate-pulse">
@@ -78,15 +139,8 @@ export default function TeacherPortfolio() {
         );
     }
 
-    if (!portfolio || (portfolio.ratings.length === 0 && portfolio.recent_insights.length === 0)) {
-        return (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-                <h2 className="text-xl font-semibold text-white mb-2">Teaching Portfolio</h2>
-                <p className="text-zinc-500 text-sm">
-                    No rating data available yet. Ratings are generated after sessions end and students submit feedback.
-                </p>
-            </div>
-        );
+    if (!portfolio) {
+        return null;
     }
 
     function renderStars(rating: number) {
@@ -127,21 +181,27 @@ export default function TeacherPortfolio() {
                 </div>
 
                 {/* Summary Stats */}
-                <div className="grid grid-cols-3 gap-6 mb-6">
-                    <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-white">{portfolio.overall_avg.toFixed(1)}</div>
-                        <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Overall Rating</div>
-                        <div className="mt-2">{renderStars(portfolio.overall_avg)}</div>
+                {portfolio.ratings.length === 0 ? (
+                    <div className="bg-zinc-800/30 border border-zinc-800 rounded-xl p-6 text-center text-zinc-500 text-sm mb-6">
+                        No rating data available yet. Ratings are generated after sessions end and students submit feedback.
                     </div>
-                    <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-white">{portfolio.total_reviews}</div>
-                        <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Total Reviews</div>
+                ) : (
+                    <div className="grid grid-cols-3 gap-6 mb-6">
+                        <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
+                            <div className="text-2xl font-bold text-white">{portfolio.overall_avg.toFixed(1)}</div>
+                            <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Overall Rating</div>
+                            <div className="mt-2">{renderStars(portfolio.overall_avg)}</div>
+                        </div>
+                        <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
+                            <div className="text-2xl font-bold text-white">{portfolio.total_reviews}</div>
+                            <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Total Reviews</div>
+                        </div>
+                        <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
+                            <div className="text-2xl font-bold text-white">{portfolio.ratings.length}</div>
+                            <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Courses Rated</div>
+                        </div>
                     </div>
-                    <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-                        <div className="text-2xl font-bold text-white">{portfolio.ratings.length}</div>
-                        <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Courses Rated</div>
-                    </div>
-                </div>
+                )}
 
                 {/* Per-course ratings */}
                 {portfolio.ratings.length > 0 && (
@@ -152,8 +212,8 @@ export default function TeacherPortfolio() {
                                 <div
                                     key={r.course_id}
                                     className={`flex items-center justify-between p-4 rounded-xl border ${r.is_flagged
-                                            ? "border-amber-800/50 bg-amber-900/10"
-                                            : "border-zinc-800 bg-zinc-800/30"
+                                        ? "border-amber-800/50 bg-amber-900/10"
+                                        : "border-zinc-800 bg-zinc-800/30"
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
@@ -249,8 +309,8 @@ export default function TeacherPortfolio() {
                                                     >
                                                         <span
                                                             className={`text-xs font-mono px-1.5 py-0.5 rounded mt-0.5 shrink-0 ${wc.source === "quiz"
-                                                                    ? "bg-indigo-900/30 text-indigo-400"
-                                                                    : "bg-amber-900/30 text-amber-400"
+                                                                ? "bg-indigo-900/30 text-indigo-400"
+                                                                : "bg-amber-900/30 text-amber-400"
                                                                 }`}
                                                         >
                                                             {wc.source}
@@ -276,6 +336,89 @@ export default function TeacherPortfolio() {
                     </div>
                 </div>
             )}
+
+            {/* Public Profile Configuration */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 className="text-xl font-semibold text-white">Public Profile Settings</h2>
+                        <p className="text-sm text-zinc-500 mt-1">Enhance your public portfolio page for students.</p>
+                    </div>
+                    {!isEditingProfile && (
+                        <button onClick={() => setIsEditingProfile(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
+                            Edit Profile
+                        </button>
+                    )}
+                </div>
+
+                {isEditingProfile ? (
+                    <form onSubmit={handleSaveProfile} className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-xs text-zinc-500 mb-1">Designation</label>
+                                <input type="text" value={profileForm.designation} onChange={e => setProfileForm({ ...profileForm, designation: e.target.value })} placeholder="e.g. Associate Professor of CS" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-zinc-500 mb-1">Contact Email</label>
+                                <input type="email" value={profileForm.contact_email} onChange={e => setProfileForm({ ...profileForm, contact_email: e.target.value })} placeholder="Public email address" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-zinc-500 mb-1">ORCID ID</label>
+                                <input type="text" value={profileForm.orcid_id} onChange={e => setProfileForm({ ...profileForm, orcid_id: e.target.value })} placeholder="e.g. 0000-0002-1825-0097" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <div>
+                                <label className="block text-xs text-zinc-500 mb-1">Personal Website</label>
+                                <input type="url" value={profileForm.personal_website} onChange={e => setProfileForm({ ...profileForm, personal_website: e.target.value })} placeholder="https://..." className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-xs text-zinc-500 mb-1">Mastery Tags (comma separated)</label>
+                                <input type="text" value={profileForm.mastery_tags} onChange={e => setProfileForm({ ...profileForm, mastery_tags: e.target.value })} placeholder="e.g. Artificial Intelligence, Machine Learning, Graph Theory" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                            </div>
+                            <div className="md:col-span-2">
+                                <label className="block text-xs text-zinc-500 mb-1">Biography</label>
+                                <textarea value={profileForm.bio} onChange={e => setProfileForm({ ...profileForm, bio: e.target.value })} placeholder="A short bio about your academic background..." rows={4} className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 resize-none" />
+                            </div>
+                        </div>
+                        <div className="flex gap-3 justify-end pt-2">
+                            <button type="button" onClick={() => setIsEditingProfile(false)} className="px-4 py-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors">
+                                Cancel
+                            </button>
+                            <button type="submit" disabled={savingProfile} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
+                                {savingProfile ? "Saving..." : "Save Profile"}
+                            </button>
+                        </div>
+                    </form>
+                ) : (
+                    <div className="text-sm text-zinc-400">
+                        {portfolio.profile ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mt-4 bg-zinc-800/30 rounded-xl p-6 border border-zinc-700/50">
+                                <div>
+                                    <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Designation</span>
+                                    <span className="text-white">{portfolio.profile.designation || <span className="text-zinc-600 italic">Not set</span>}</span>
+                                </div>
+                                <div>
+                                    <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Contact Email</span>
+                                    <span className="text-white">{portfolio.profile.contact_email || <span className="text-zinc-600 italic">Not set</span>}</span>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Mastery Areas</span>
+                                    {portfolio.profile.mastery_tags && portfolio.profile.mastery_tags.length > 0 ? (
+                                        <div className="flex gap-2 flex-wrap mt-1">
+                                            {portfolio.profile.mastery_tags.map(tag => (
+                                                <span key={tag} className="px-2 py-0.5 bg-zinc-700/50 text-zinc-300 rounded text-xs">{tag}</span>
+                                            ))}
+                                        </div>
+                                    ) : <span className="text-zinc-600 italic">Not set</span>}
+                                </div>
+                            </div>
+                        ) : (
+                            <p className="py-4 text-center border border-zinc-800 rounded-lg bg-zinc-800/20 italic">
+                                Your public profile is currently empty. Click Edit Profile to add details.
+                            </p>
+                        )}
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

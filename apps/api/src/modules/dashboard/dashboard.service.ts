@@ -5,6 +5,7 @@ export interface StudentCourseData {
     course_name: string;
     course_code: string;
     class_name: string | null;
+    teacher_id: string | null;
     teacher_name: string | null;
     teacher_title: string | null;
     attendance_pct: number;
@@ -45,6 +46,32 @@ export interface TeacherPortfolioResult {
     total_reviews: number;
     is_any_flagged: boolean;
     recent_insights: SessionInsightData[];
+    profile: {
+        designation: string | null;
+        contact_email: string | null;
+        orcid_id: string | null;
+        personal_website: string | null;
+        mastery_tags: string[];
+        bio: string | null;
+    } | null;
+}
+
+export interface PublicTeacherPortfolioResult {
+    profile: {
+        id: string;
+        real_name: string | null;
+        real_email: string | null;
+        teacher_title: string | null;
+        designation: string | null;
+        contact_email: string | null;
+        orcid_id: string | null;
+        personal_website: string | null;
+        mastery_tags: string[];
+        bio: string | null;
+    };
+    ratings: TeacherCourseRating[];
+    overall_avg: number;
+    total_reviews: number;
 }
 
 export class DashboardService {
@@ -137,6 +164,7 @@ export class DashboardService {
                 course_name: course.name,
                 course_code: course.code,
                 class_name: course.class_name,
+                teacher_id: course.teacher_id,
                 teacher_name: teacher?.real_name ?? null,
                 teacher_title: teacher?.teacher_title ?? null,
                 attendance_pct: attendancePct,
@@ -194,6 +222,13 @@ export class DashboardService {
 
         const recentInsights: SessionInsightData[] = [];
 
+        // Fetch the teacher profile 
+        const { data: profile } = await this.supabase
+            .from("teacher_profiles")
+            .select("*")
+            .eq("teacher_id", teacherId)
+            .maybeSingle();
+
         if (teacherSessions && teacherSessions.length > 0) {
             const sessionIds = teacherSessions.map((s: { id: string }) => s.id);
 
@@ -222,6 +257,92 @@ export class DashboardService {
             total_reviews: totalReviews,
             is_any_flagged: courseRatings.some(r => r.is_flagged),
             recent_insights: recentInsights,
+            profile: profile ? {
+                designation: profile.designation,
+                contact_email: profile.contact_email,
+                orcid_id: profile.orcid_id,
+                personal_website: profile.personal_website,
+                mastery_tags: profile.mastery_tags || [],
+                bio: profile.bio
+            } : null
+        };
+    }
+
+    async updateTeacherProfile(teacherId: string, profileData: any) {
+        const { data, error } = await this.supabase
+            .from("teacher_profiles")
+            .upsert({
+                teacher_id: teacherId,
+                designation: profileData.designation,
+                contact_email: profileData.contact_email,
+                orcid_id: profileData.orcid_id,
+                personal_website: profileData.personal_website,
+                mastery_tags: profileData.mastery_tags,
+                bio: profileData.bio,
+                updated_at: new Date().toISOString()
+            }, { onConflict: "teacher_id" })
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return data;
+    }
+
+    // ---- Public Teacher Portfolio (for students) ----
+
+    async getPublicTeacherPortfolio(teacherId: string): Promise<PublicTeacherPortfolioResult | null> {
+        // 1. Get user and profile details
+        const { data: user } = await this.supabase
+            .from("users")
+            .select("id, real_name, real_email, teacher_title")
+            .eq("id", teacherId)
+            .single();
+
+        if (!user) return null;
+
+        const { data: profile } = await this.supabase
+            .from("teacher_profiles")
+            .select("*")
+            .eq("teacher_id", teacherId)
+            .maybeSingle();
+
+        // 2. Get ratings
+        const { data: ratings } = await this.supabase
+            .from("teacher_ratings")
+            .select("*, courses:course_id(name, code)")
+            .eq("teacher_id", teacherId);
+
+        const courseRatings: TeacherCourseRating[] = (ratings ?? []).map((r: any) => ({
+            course_id: r.course_id,
+            course_name: r.courses?.name ?? "Unknown",
+            course_code: r.courses?.code ?? "",
+            weighted_avg_rating: parseFloat(r.weighted_avg_rating),
+            total_reviews: r.total_reviews,
+            is_flagged: r.is_flagged, // This won't be exposed on the frontend anyway for public
+            last_aggregated_at: r.last_aggregated_at,
+        }));
+
+        const totalReviews = courseRatings.reduce((sum, r) => sum + r.total_reviews, 0);
+        const overallAvg = totalReviews > 0
+            ? courseRatings.reduce((sum, r) => sum + r.weighted_avg_rating * r.total_reviews, 0) / totalReviews
+            : 0;
+
+        return {
+            profile: {
+                id: user.id,
+                real_name: user.real_name,
+                real_email: user.real_email,
+                teacher_title: user.teacher_title,
+                designation: profile?.designation ?? null,
+                contact_email: profile?.contact_email ?? user.real_email ?? null,
+                orcid_id: profile?.orcid_id ?? null,
+                personal_website: profile?.personal_website ?? null,
+                mastery_tags: profile?.mastery_tags ?? [],
+                bio: profile?.bio ?? null,
+            },
+            ratings: courseRatings,
+            overall_avg: Math.round(overallAvg * 100) / 100,
+            total_reviews: totalReviews,
         };
     }
 

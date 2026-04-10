@@ -2,6 +2,8 @@ import { FastifyInstance } from "fastify";
 import {
     getStudentDashboard,
     getTeacherPortfolio,
+    updateTeacherProfile,
+    getPublicTeacherPortfolio,
     getTeacherRatings,
     getSessionInsights,
 } from "./dashboard.controller";
@@ -9,6 +11,8 @@ import {
 export default async function dashboardRoutes(fastify: FastifyInstance) {
     fastify.get("/student", getStudentDashboard);
     fastify.get("/teacher/portfolio", getTeacherPortfolio);
+    fastify.put("/teacher/profile", updateTeacherProfile);
+    fastify.get("/teacher/:teacherId/public-portfolio", getPublicTeacherPortfolio);
     fastify.get("/teacher/:teacherId/ratings", getTeacherRatings);
     fastify.get("/session/:sessionId/insights", getSessionInsights);
 }

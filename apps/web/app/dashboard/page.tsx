@@ -166,6 +166,7 @@ export default async function DashboardPage() {
                 const dashCourse = dashCourses.find((dc: any) => dc.course_id === courseId);
                 if (dashCourse) {
                     e.teacherName = dashCourse.teacher_name;
+                    e.teacher_id = dashCourse.teacher_id;
                     e.className = dashCourse.class_name;
                     e.violationCount = dashCourse.violation_count;
                 }
@@ -289,11 +290,15 @@ export default async function DashboardPage() {
                             <div className="space-y-3">
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {enrolledCourses.map((enrollment: any) => (
-                                    <Link key={enrollment.id} href={`/dashboard/courses/${enrollment.course?.id || enrollment.course_id}`}
-                                        className="block bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 transition-colors">
-                                        <div className="flex items-center justify-between">
+                                    <div key={enrollment.id}
+                                        className="relative block bg-zinc-800/50 border border-zinc-700/50 rounded-xl p-4 hover:border-zinc-600 transition-colors group">
+
+                                        {/* Full card clickable link layer */}
+                                        <Link href={`/dashboard/courses/${enrollment.course?.id || enrollment.course_id}`} className="absolute inset-0 z-0" />
+
+                                        <div className="flex items-center justify-between relative z-10 pointer-events-none">
                                             <div>
-                                                <h3 className="text-white font-medium">{enrollment.course?.name || "Course"}</h3>
+                                                <h3 className="text-white font-medium group-hover:text-indigo-400 transition-colors">{enrollment.course?.name || "Course"}</h3>
                                                 <div className="flex items-center gap-3 mt-1 text-xs text-zinc-400">
                                                     <span className="font-mono">{enrollment.course?.code}</span>
                                                     {enrollment.className && <span>{enrollment.className}</span>}
@@ -301,10 +306,22 @@ export default async function DashboardPage() {
                                                     {enrollment.course?.department && <span>{enrollment.course.department}</span>}
                                                 </div>
                                                 {enrollment.teacherName && (
-                                                    <p className="text-xs text-zinc-500 mt-1">Faculty: {enrollment.teacherName}</p>
+                                                    <div className="text-xs text-zinc-500 mt-1 pointer-events-auto">
+                                                        Faculty:{" "}
+                                                        {enrollment.teacher_id ? (
+                                                            <Link
+                                                                href={`/dashboard/teachers/${enrollment.teacher_id}`}
+                                                                className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors relative z-20"
+                                                            >
+                                                                {enrollment.teacherName}
+                                                            </Link>
+                                                        ) : (
+                                                            enrollment.teacherName
+                                                        )}
+                                                    </div>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-2">
+                                            <div className="flex items-center gap-2 pointer-events-auto">
                                                 {enrollment.violationCount > 0 && (
                                                     <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">
                                                         {enrollment.violationCount} violation{enrollment.violationCount !== 1 ? "s" : ""}
@@ -317,7 +334,7 @@ export default async function DashboardPage() {
                                                 )}
                                             </div>
                                         </div>
-                                    </Link>
+                                    </div>
                                 ))}
                             </div>
                         )}
