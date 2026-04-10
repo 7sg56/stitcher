@@ -80,10 +80,10 @@ export default function SignInPage() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/40 to-background" />
                 <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
-                    <h1 className="text-5xl font-serif text-white tracking-tight mb-4 drop-shadow-lg">
+                    <h1 className="text-5xl font-serif text-foreground tracking-tight mb-4 drop-shadow-lg">
                         Welcome back.
                     </h1>
-                    <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">
+                    <p className="text-xl text-foreground font-light tracking-wide max-w-md drop-shadow-md">
                         Log in to resume your management systems in Stitcher.
                     </p>
                 </div>
@@ -92,7 +92,7 @@ export default function SignInPage() {
             {/* Right Side: Form Content */}
             <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
                 {/* Subtle ambient light behind form */}
-                <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+                <div className="absolute top-1/4 -right-20 w-96 h-96 bg-success/20 blur-[120px] rounded-full pointer-events-none"></div>
 
                 <div className="w-full max-w-md z-10 relative">
                     <div className="bg-card rounded-[1.5rem] p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.06)] relative overflow-hidden">
@@ -108,7 +108,7 @@ export default function SignInPage() {
                         {/* Google sign-in */}
                         <button
                             onClick={handleGoogleSignIn}
-                            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50 mb-8 backdrop-blur-md"
+                            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-accent hover:bg-accent border border-border rounded-xl text-foreground font-medium transition-all focus:outline-none focus:ring-2 focus:ring-success/30 mb-8 backdrop-blur-md"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path
@@ -133,10 +133,10 @@ export default function SignInPage() {
 
                         <div className="relative mb-8">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-white/10"></div>
+                                <div className="w-full border-t border-border"></div>
                             </div>
                             <div className="relative flex justify-center text-sm">
-                                <span className="px-3 bg-transparent backdrop-blur-xl text-zinc-500 uppercase text-[10px] tracking-widest font-semibold">
+                                <span className="px-3 bg-transparent backdrop-blur-xl text-muted-foreground uppercase text-[10px] tracking-widest font-semibold">
                                     or
                                 </span>
                             </div>
@@ -146,7 +146,7 @@ export default function SignInPage() {
                             <div>
                                 <label
                                     htmlFor="email"
-                                    className="block text-sm font-medium text-zinc-300 mb-2"
+                                    className="block text-sm font-medium text-foreground mb-2"
                                 >
                                     Email address
                                 </label>
@@ -155,11 +155,11 @@ export default function SignInPage() {
                                     name="email"
                                     type="email"
                                     required
-                                    className="w-full px-4 py-3 bg-black/20 border border-white/5 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:bg-black/40 transition-all font-light"
+                                    className="w-full px-4 py-3 bg-background/80 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-success/30 focus:bg-background/80 transition-all font-light"
                                     placeholder="you@example.com"
                                 />
                                 {errors?.fields?.identifier && (
-                                    <p className="mt-2 text-sm text-red-400">
+                                    <p className="mt-2 text-sm text-danger">
                                         {errors.fields.identifier.message}
                                     </p>
                                 )}
@@ -168,7 +168,7 @@ export default function SignInPage() {
                             <div>
                                 <label
                                     htmlFor="password"
-                                    className="block text-sm font-medium text-zinc-300 mb-2"
+                                    className="block text-sm font-medium text-foreground mb-2"
                                 >
                                     Password
                                 </label>
@@ -177,11 +177,11 @@ export default function SignInPage() {
                                     name="password"
                                     type="password"
                                     required
-                                    className="w-full px-4 py-3 bg-black/20 border border-white/5 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:bg-black/40 transition-all font-light"
+                                    className="w-full px-4 py-3 bg-background/80 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-success/30 focus:bg-background/80 transition-all font-light"
                                     placeholder="Enter your password"
                                 />
                                 {errors?.fields?.password && (
-                                    <p className="mt-2 text-sm text-red-400">
+                                    <p className="mt-2 text-sm text-danger">
                                         {errors.fields.password.message}
                                     </p>
                                 )}
@@ -190,26 +190,26 @@ export default function SignInPage() {
                             <button
                                 type="submit"
                                 disabled={fetchStatus === "fetching"}
-                                className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-4"
+                                className="w-full py-3.5 px-4 bg-success hover:bg-success disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-foreground font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-success mt-4"
                             >
                                 {fetchStatus === "fetching" ? "Signing in..." : "Sign in"}
                             </button>
                         </form>
 
                         {errors && !errors.fields && (
-                            <div className="mt-6 p-4 bg-red-950/30 border border-red-900/30 rounded-xl text-red-400 text-sm font-medium">
+                            <div className="mt-6 p-4 bg-danger/20 border border-danger/50 rounded-xl text-danger text-sm font-medium">
                                 <p>
                                     {errors.global?.[0]?.message || "Something went wrong. Try again."}
                                 </p>
                             </div>
                         )}
 
-                        <div className="mt-8 text-center border-t border-white/5 pt-6">
-                            <p className="text-sm text-zinc-500">
+                        <div className="mt-8 text-center border-t border-border pt-6">
+                            <p className="text-sm text-muted-foreground">
                                 Don&apos;t have an account?{" "}
                                 <Link
                                     href="/sign-up"
-                                    className="text-emerald-400 hover:text-emerald-300 font-medium transition-colors"
+                                    className="text-success hover:text-success font-medium transition-colors"
                                 >
                                     Sign up
                                 </Link>

@@ -200,9 +200,9 @@ export default function SessionFeedbackPage() {
     // --- Loading ---
     if (!isLoaded || loading) {
         return (
-            <div className="min-h-dvh bg-black text-white flex flex-col items-center justify-center p-6">
-                <div className="w-10 h-10 rounded-full border-2 border-indigo-500 border-t-transparent animate-spin" />
-                <p className="text-zinc-500 text-sm mt-4">Loading session...</p>
+            <div className="min-h-dvh bg-background text-foreground flex flex-col items-center justify-center p-6">
+                <div className="w-10 h-10 rounded-full border-2 border-ring border-t-transparent animate-spin" />
+                <p className="text-muted-foreground text-sm mt-4">Loading session...</p>
             </div>
         );
     }
@@ -210,22 +210,22 @@ export default function SessionFeedbackPage() {
     // --- Error ---
     if (error && !sessionData) {
         return (
-            <div className="min-h-dvh bg-black text-white flex flex-col items-center justify-center p-6">
-                <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-sm w-full text-center">
-                    <div className="w-14 h-14 bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-red-400 text-2xl">!</span>
+            <div className="min-h-dvh bg-background text-foreground flex flex-col items-center justify-center p-6">
+                <div className="bg-card border border-border p-8 rounded-2xl max-w-sm w-full text-center">
+                    <div className="w-14 h-14 bg-danger/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-danger text-2xl">!</span>
                     </div>
-                    <p className="text-red-400 text-sm mb-6">{error}</p>
+                    <p className="text-danger text-sm mb-6">{error}</p>
                     <div className="flex flex-col gap-3">
                         <button
                             onClick={handleRetry}
-                            className="w-full py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-500 active:scale-[0.98] transition-all"
+                            className="w-full py-3 bg-primary text-foreground text-sm font-medium rounded-xl hover:bg-primary active:scale-[0.98] transition-all"
                         >
                             Try Again
                         </button>
                         <button
                             onClick={() => (window.location.href = "/dashboard")}
-                            className="w-full py-3 bg-zinc-800 text-zinc-300 text-sm rounded-xl hover:bg-zinc-700 active:scale-[0.98] transition-all"
+                            className="w-full py-3 bg-muted text-foreground text-sm rounded-xl hover:bg-accent active:scale-[0.98] transition-all"
                         >
                             Go to Dashboard
                         </button>
@@ -238,16 +238,16 @@ export default function SessionFeedbackPage() {
     // --- Success ---
     if (submitted) {
         return (
-            <div className="min-h-dvh bg-black text-white flex flex-col items-center justify-center p-6">
-                <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-sm w-full text-center">
-                    <div className="w-16 h-16 bg-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400">
+            <div className="min-h-dvh bg-background text-foreground flex flex-col items-center justify-center p-6">
+                <div className="bg-card border border-border p-8 rounded-2xl max-w-sm w-full text-center">
+                    <div className="w-16 h-16 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-success">
                             <path d="M20 6L9 17l-5-5" />
                         </svg>
                     </div>
                     <h2 className="text-xl font-semibold mb-1">Feedback Submitted</h2>
-                    <p className="text-emerald-400 text-sm mb-1">Your attendance has been marked.</p>
-                    <p className="text-zinc-500 text-xs mb-6">You can close this tab now.</p>
+                    <p className="text-success text-sm mb-1">Your attendance has been marked.</p>
+                    <p className="text-muted-foreground text-xs mb-6">You can close this tab now.</p>
                     <div className="flex flex-col gap-3">
                         <button
                             onClick={() => {
@@ -255,13 +255,13 @@ export default function SessionFeedbackPage() {
                                 // If window.close didn't work, redirect after a moment
                                 setTimeout(() => window.location.href = "/dashboard", 300);
                             }}
-                            className="w-full py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-500 active:scale-[0.98] transition-all"
+                            className="w-full py-3 bg-primary text-foreground text-sm font-medium rounded-xl hover:bg-primary active:scale-[0.98] transition-all"
                         >
                             Done
                         </button>
                         <a
                             href="/dashboard"
-                            className="w-full py-3 bg-zinc-800 text-zinc-300 text-sm rounded-xl hover:bg-zinc-700 active:scale-[0.98] transition-all text-center block"
+                            className="w-full py-3 bg-muted text-foreground text-sm rounded-xl hover:bg-accent active:scale-[0.98] transition-all text-center block"
                         >
                             Go to Dashboard
                         </a>
@@ -273,12 +273,12 @@ export default function SessionFeedbackPage() {
 
     // --- Main Form ---
     return (
-        <div className="min-h-dvh bg-black text-white">
+        <div className="min-h-dvh bg-background text-foreground">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-black/80 backdrop-blur-xl border-b border-zinc-800/50">
+            <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
                 <div className="max-w-lg mx-auto px-4 py-4">
-                    <p className="text-xs text-indigo-400 font-medium tracking-wide uppercase">Session Feedback</p>
-                    <h1 className="text-lg font-semibold text-white mt-0.5 leading-tight">
+                    <p className="text-xs text-primary font-medium tracking-wide uppercase">Session Feedback</p>
+                    <h1 className="text-lg font-semibold text-foreground mt-0.5 leading-tight">
                         {sessionData?.topic || "Untitled Session"}
                     </h1>
                 </div>
@@ -287,10 +287,10 @@ export default function SessionFeedbackPage() {
             <div className="max-w-lg mx-auto px-4 py-6 pb-32">
                 {/* Inline error */}
                 {error && (
-                    <div className="bg-red-900/20 border border-red-800/50 text-red-400 px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
+                    <div className="bg-danger/20 border border-danger/50/50 text-danger px-4 py-3 rounded-xl text-sm mb-6 flex items-start gap-2">
                         <span className="shrink-0 mt-0.5">!</span>
                         <span className="flex-1">{error}</span>
-                        <button onClick={() => setError(null)} className="shrink-0 text-red-500 hover:text-red-300">&times;</button>
+                        <button onClick={() => setError(null)} className="shrink-0 text-red-500 hover:text-danger">&times;</button>
                     </div>
                 )}
 
@@ -299,13 +299,13 @@ export default function SessionFeedbackPage() {
                     {activeQuiz && attemptId && activeQuiz.questions && activeQuiz.questions.length > 0 && (
                         <div className="space-y-5">
                             <div>
-                                <h2 className="text-base font-medium text-white">Questions</h2>
-                                <p className="text-xs text-zinc-500 mt-0.5">Answer the following before submitting your feedback</p>
+                                <h2 className="text-base font-medium text-foreground">Questions</h2>
+                                <p className="text-xs text-muted-foreground mt-0.5">Answer the following before submitting your feedback</p>
                             </div>
                             {activeQuiz.questions.map((q: QuizQuestion, i: number) => (
-                                <div key={q.id} className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
-                                    <p className="text-white font-medium text-sm mb-4">
-                                        <span className="text-indigo-400 mr-1.5">{i + 1}.</span>
+                                <div key={q.id} className="bg-card rounded-2xl border border-border p-5">
+                                    <p className="text-foreground font-medium text-sm mb-4">
+                                        <span className="text-primary mr-1.5">{i + 1}.</span>
                                         {q.question_text}
                                     </p>
                                     <div className="space-y-2.5">
@@ -315,13 +315,13 @@ export default function SessionFeedbackPage() {
                                                 <label
                                                     key={opt.id}
                                                     className={`flex items-center gap-3 p-3.5 rounded-xl border cursor-pointer transition-all active:scale-[0.99] ${selected
-                                                        ? "border-indigo-500/50 bg-indigo-500/10"
-                                                        : "border-zinc-800 bg-zinc-950 hover:border-zinc-700"
+                                                        ? "border-ring/50 bg-primary/20"
+                                                        : "border-border bg-background hover:border-border"
                                                         }`}
                                                 >
-                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${selected ? "border-indigo-500 bg-indigo-500" : "border-zinc-600"
+                                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${selected ? "border-ring bg-primary" : "border-border"
                                                         }`}>
-                                                        {selected && <div className="w-2 h-2 rounded-full bg-white" />}
+                                                        {selected && <div className="w-2 h-2 rounded-full bg-foreground" />}
                                                     </div>
                                                     <input
                                                         type="radio"
@@ -331,7 +331,7 @@ export default function SessionFeedbackPage() {
                                                         className="sr-only"
                                                         required
                                                     />
-                                                    <span className="text-sm text-zinc-200">{opt.option_text}</span>
+                                                    <span className="text-sm text-foreground">{opt.option_text}</span>
                                                 </label>
                                             );
                                         })}
@@ -342,9 +342,9 @@ export default function SessionFeedbackPage() {
                     )}
 
                     {/* Star Rating */}
-                    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
-                        <h2 className="text-base font-medium text-white mb-1">How was the session?</h2>
-                        <p className="text-xs text-zinc-500 mb-5">Rate your understanding of the material</p>
+                    <div className="bg-card rounded-2xl border border-border p-6">
+                        <h2 className="text-base font-medium text-foreground mb-1">How was the session?</h2>
+                        <p className="text-xs text-muted-foreground mb-5">Rate your understanding of the material</p>
 
                         <div className="flex items-center justify-center gap-3 mb-3">
                             {[1, 2, 3, 4, 5].map((star) => (
@@ -356,8 +356,8 @@ export default function SessionFeedbackPage() {
                                     onMouseLeave={() => setHoverRating(0)}
                                     onTouchStart={() => setRating(star)}
                                     className={`text-4xl transition-all duration-150 active:scale-110 select-none ${displayRating >= star
-                                        ? "text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]"
-                                        : "text-zinc-700"
+                                        ? "text-warning drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]"
+                                        : "text-muted-foreground"
                                         }`}
                                     style={{ WebkitTapHighlightColor: "transparent", minWidth: "48px", minHeight: "48px" }}
                                 >
@@ -366,48 +366,48 @@ export default function SessionFeedbackPage() {
                             ))}
                         </div>
                         {displayRating > 0 && (
-                            <p className="text-center text-sm text-zinc-400 transition-opacity">
+                            <p className="text-center text-sm text-muted-foreground transition-opacity">
                                 {ratingLabels[displayRating]}
                             </p>
                         )}
                     </div>
 
                     {/* Comment */}
-                    <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
-                        <label className="block text-sm font-medium text-white mb-1">
+                    <div className="bg-card rounded-2xl border border-border p-6">
+                        <label className="block text-sm font-medium text-foreground mb-1">
                             Comments
-                            <span className="text-zinc-600 font-normal ml-1">(optional)</span>
+                            <span className="text-muted-foreground font-normal ml-1">(optional)</span>
                         </label>
-                        <p className="text-xs text-zinc-500 mb-3">Any specific doubts or feedback?</p>
+                        <p className="text-xs text-muted-foreground mb-3">Any specific doubts or feedback?</p>
                         <textarea
                             value={comment}
                             onChange={(e) => setComment(e.target.value)}
                             placeholder="Share your thoughts..."
                             rows={4}
-                            className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-4 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/20 resize-none transition-colors"
+                            className="w-full bg-background border border-border rounded-xl p-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-ring/50 focus:ring-1 focus:ring-ring/30 resize-none transition-colors"
                         />
                     </div>
 
                     {/* Anonymous badge */}
-                    <div className="flex items-center justify-center gap-2 text-xs text-zinc-500">
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                    <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                        <span className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
                         All feedback is anonymous
                     </div>
                 </form>
             </div>
 
             {/* Fixed bottom submit */}
-            <div className="fixed bottom-0 left-0 right-0 bg-black/80 backdrop-blur-xl border-t border-zinc-800/50 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-xl border-t border-border p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
                 <div className="max-w-lg mx-auto">
                     <button
                         type="submit"
                         onClick={handleSubmit}
                         disabled={rating === 0 || submitting}
-                        className="w-full py-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all text-base"
+                        className="w-full py-4 bg-primary hover:bg-primary text-foreground font-semibold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all text-base"
                     >
                         {submitting ? (
                             <span className="flex items-center justify-center gap-2">
-                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                <span className="w-4 h-4 border-2 border-border border-t-white rounded-full animate-spin" />
                                 Submitting...
                             </span>
                         ) : (

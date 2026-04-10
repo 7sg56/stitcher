@@ -302,9 +302,9 @@ export default function DoubtsPanel({
         const name = isInstructor ? (msgName || "Instructor") : msgAlias;
         return (
             <div className="flex items-center gap-2">
-                <span className="text-[13px] font-semibold text-zinc-200">{name}</span>
+                <span className="text-[13px] font-semibold text-foreground">{name}</span>
                 {isInstructor && (
-                    <span className="text-[10px] font-semibold uppercase tracking-wider text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary text-primary-foreground/10 px-1.5 py-0.5 rounded">
                         {msgRole}
                     </span>
                 )}
@@ -318,9 +318,9 @@ export default function DoubtsPanel({
         <div className="space-y-5">
             {/* Error */}
             {error && (
-                <div className="flex items-center justify-between gap-3 bg-red-950/40 border border-red-900/50 text-red-300 px-4 py-2.5 rounded-lg text-sm">
+                <div className="flex items-center justify-between gap-3 bg-danger/20 border border-danger/50 text-danger px-4 py-2.5 rounded-lg text-sm">
                     <span>{error}</span>
-                    <button onClick={() => setError(null)} className="text-red-400 hover:text-red-200 shrink-0 p-0.5">&times;</button>
+                    <button onClick={() => setError(null)} className="text-danger hover:text-danger shrink-0 p-0.5">&times;</button>
                 </div>
             )}
 
@@ -330,13 +330,13 @@ export default function DoubtsPanel({
                     type="text"
                     value={newTitle}
                     onChange={(e) => setNewTitle(e.target.value)}
-                    className="w-full pl-4 pr-28 py-3.5 bg-zinc-900/80 border border-zinc-800 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500/60 transition-colors placeholder:text-zinc-600"
+                    className="w-full pl-4 pr-28 py-3.5 bg-card border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring/60 transition-colors placeholder:text-muted-foreground"
                     placeholder="Ask a question or start a discussion..."
                 />
                 <button
                     type="submit"
                     disabled={!newTitle.trim()}
-                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="absolute right-1.5 top-1.5 bottom-1.5 px-5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary text-primary-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                     Post
                 </button>
@@ -344,7 +344,7 @@ export default function DoubtsPanel({
 
             {/* Threads */}
             {threads.length === 0 ? (
-                <div className="text-center py-16 text-zinc-500 bg-zinc-900/40 border border-zinc-800/50 rounded-lg">
+                <div className="text-center py-16 text-muted-foreground bg-card border border-border/50 rounded-lg">
                     <IconMessage className="w-7 h-7 mx-auto mb-3 opacity-30" />
                     <p className="text-sm">No doubts posted yet. Be the first to start a discussion.</p>
                 </div>
@@ -359,7 +359,7 @@ export default function DoubtsPanel({
                         return (
                             <div
                                 key={thread.id}
-                                className={`bg-zinc-900/70 border rounded-lg transition-colors ${isExpanded ? "border-zinc-700" : "border-zinc-800/60 hover:border-zinc-700/60"}`}
+                                className={`bg-card border rounded-lg transition-colors ${isExpanded ? "border-border" : "border-border/60 hover:border-border"}`}
                             >
                                 {/* Thread row */}
                                 <div
@@ -371,12 +371,12 @@ export default function DoubtsPanel({
                                         <button
                                             onClick={(e) => toggleUpvoteThread(thread.id, e)}
                                             className={`p-1 rounded transition-colors ${thread.user_has_upvoted
-                                                ? "text-indigo-400"
-                                                : "text-zinc-600 hover:text-zinc-300"}`}
+                                                ? "text-primary"
+                                                : "text-muted-foreground hover:text-foreground"}`}
                                         >
                                             <IconArrowUp className="w-4 h-4" />
                                         </button>
-                                        <span className={`text-xs font-semibold tabular-nums mt-0.5 ${thread.user_has_upvoted ? "text-indigo-400" : "text-zinc-500"}`}>
+                                        <span className={`text-xs font-semibold tabular-nums mt-0.5 ${thread.user_has_upvoted ? "text-primary" : "text-muted-foreground"}`}>
                                             {thread.upvote_count || 0}
                                         </span>
                                     </div>
@@ -384,25 +384,25 @@ export default function DoubtsPanel({
                                     {/* Content */}
                                     <div className="flex-1 min-w-0 py-3.5 pr-4">
                                         <div className="flex items-center gap-2">
-                                            <h3 className={`text-sm font-medium truncate ${thread.is_resolved ? "text-zinc-400" : "text-zinc-100"}`}>
+                                            <h3 className={`text-sm font-medium truncate ${thread.is_resolved ? "text-muted-foreground" : "text-foreground"}`}>
                                                 {thread.title}
                                             </h3>
                                             {thread.is_resolved && (
-                                                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-medium text-emerald-400 bg-emerald-900/25 px-2 py-0.5 rounded-full">
+                                                <span className="shrink-0 inline-flex items-center gap-1 text-[11px] font-medium text-success bg-success/20 px-2 py-0.5 rounded-full">
                                                     <IconCheck className="w-3 h-3" />
                                                     Resolved
                                                 </span>
                                             )}
                                         </div>
-                                        <div className="flex items-center gap-2 mt-1.5 text-[11px] text-zinc-500">
+                                        <div className="flex items-center gap-2 mt-1.5 text-[11px] text-muted-foreground">
                                             <span>{new Date(thread.created_at).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span>
-                                            <span className="text-zinc-700">|</span>
+                                            <span className="text-muted-foreground">|</span>
                                             <span className="inline-flex items-center gap-1">
                                                 <IconMessage className="w-3 h-3" />
                                                 {isExpanded && detail ? `${messages.length} replies` : "Replies"}
                                             </span>
                                             <span className="ml-auto">
-                                                <IconChevron className="w-3.5 h-3.5 text-zinc-600" open={isExpanded} />
+                                                <IconChevron className="w-3.5 h-3.5 text-muted-foreground" open={isExpanded} />
                                             </span>
                                         </div>
                                     </div>
@@ -410,16 +410,16 @@ export default function DoubtsPanel({
 
                                 {/* Expanded replies */}
                                 <AnimatedExpand open={isExpanded}>
-                                    <div className="border-t border-zinc-800 px-4 pb-4 pt-3 ml-12">
+                                    <div className="border-t border-border px-4 pb-4 pt-3 ml-12">
                                         {isLoading ? (
                                             <div className="flex justify-center py-6">
-                                                <div className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+                                                <div className="w-5 h-5 border-2 border-ring border-t-transparent rounded-full animate-spin" />
                                             </div>
                                         ) : (
                                             <div className="space-y-4">
                                                 {/* Messages */}
                                                 {messages.length === 0 ? (
-                                                    <p className="text-xs text-zinc-600 py-2">No replies yet. Be the first to respond.</p>
+                                                    <p className="text-xs text-muted-foreground py-2">No replies yet. Be the first to respond.</p>
                                                 ) : (
                                                     <div className="space-y-3">
                                                         {messages.map((msg) => {
@@ -427,22 +427,22 @@ export default function DoubtsPanel({
                                                             return (
                                                                 <div key={msg.id} className="flex gap-3 group">
                                                                     <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold shrink-0 ${isInstructor
-                                                                        ? "bg-indigo-600/80 text-white"
-                                                                        : "bg-zinc-800 text-zinc-400"}`}>
+                                                                        ? "bg-primary text-primary-foreground/80 text-foreground"
+                                                                        : "bg-muted text-muted-foreground"}`}>
                                                                         {(msg.sender_name || msg.sender_alias).charAt(0).toUpperCase()}
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-2">
                                                                             {renderSender(msg.sender_role, msg.sender_name, msg.sender_alias)}
-                                                                            <span className="text-[11px] text-zinc-600">
+                                                                            <span className="text-[11px] text-muted-foreground">
                                                                                 {new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                                             </span>
                                                                         </div>
-                                                                        <p className="text-[13px] text-zinc-300 mt-1 leading-relaxed">{msg.content}</p>
+                                                                        <p className="text-[13px] text-foreground mt-1 leading-relaxed">{msg.content}</p>
                                                                         <div className="flex items-center gap-3 mt-1.5">
                                                                             <button
                                                                                 onClick={() => toggleUpvoteMessage(thread.id, msg.id)}
-                                                                                className={`inline-flex items-center gap-1 text-[11px] font-medium transition-colors ${msg.user_has_upvoted ? "text-indigo-400" : "text-zinc-600 hover:text-zinc-400"}`}
+                                                                                className={`inline-flex items-center gap-1 text-[11px] font-medium transition-colors ${msg.user_has_upvoted ? "text-primary" : "text-muted-foreground hover:text-muted-foreground"}`}
                                                                             >
                                                                                 <IconArrowUp className="w-3 h-3" />
                                                                                 {msg.upvote_count || 0}
@@ -450,7 +450,7 @@ export default function DoubtsPanel({
                                                                             {!thread.is_resolved && (
                                                                                 <button
                                                                                     onClick={() => setReplyingTo(thread.id)}
-                                                                                    className="text-[11px] font-medium text-zinc-600 hover:text-zinc-400 transition-colors"
+                                                                                    className="text-[11px] font-medium text-muted-foreground hover:text-muted-foreground transition-colors"
                                                                                 >
                                                                                     Reply
                                                                                 </button>
@@ -475,12 +475,12 @@ export default function DoubtsPanel({
                                                             onFocus={() => setReplyingTo(thread.id)}
                                                             onChange={(e) => { setReplyingTo(thread.id); setReplyContent(e.target.value); }}
                                                             placeholder="Write a reply..."
-                                                            className="flex-1 px-3 py-2 bg-zinc-950/80 border border-zinc-800 rounded-md text-[13px] text-white focus:outline-none focus:border-indigo-500/50 placeholder:text-zinc-600 transition-colors"
+                                                            className="flex-1 px-3 py-2 bg-background/80 border border-border rounded-md text-[13px] text-foreground focus:outline-none focus:border-ring/50 placeholder:text-muted-foreground transition-colors"
                                                         />
                                                         <button
                                                             type="submit"
                                                             disabled={replyingTo !== thread.id || !replyContent.trim()}
-                                                            className="px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                                                            className="px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary text-primary-foreground transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                                         >
                                                             <IconSend className="w-3.5 h-3.5" />
                                                         </button>
@@ -489,10 +489,10 @@ export default function DoubtsPanel({
 
                                                 {/* Resolve button */}
                                                 {canResolve && !thread.is_resolved && (
-                                                    <div className="flex justify-end pt-2 border-t border-zinc-800/50">
+                                                    <div className="flex justify-end pt-2 border-t border-border/50">
                                                         <button
                                                             onClick={() => handleResolve(thread.id)}
-                                                            className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-400 bg-emerald-500/8 hover:bg-emerald-500/15 px-3 py-1.5 rounded-md transition-colors"
+                                                            className="inline-flex items-center gap-1.5 text-[11px] font-medium text-success bg-success/20 hover:bg-success/20 px-3 py-1.5 rounded-md transition-colors"
                                                         >
                                                             <IconCheck className="w-3 h-3" />
                                                             Mark as Resolved

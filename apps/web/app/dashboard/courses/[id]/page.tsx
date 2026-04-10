@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { PageHeader } from "@/components/layout/page-header";
 import SessionsPanel from "./SessionsPanel";
 import DoubtsPanel from "./DoubtsPanel";
 import ResourcesPanel from "./ResourcesPanel";
@@ -245,18 +246,24 @@ export default function CourseDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="flex flex-col w-full min-h-screen bg-background">
+                <PageHeader title="Loading Course..." roleName={role} />
+                <main className="w-full max-w-6xl mx-auto p-4 sm:px-6 lg:px-8 py-8 space-y-4">
+                    <div className="bg-card border border-border rounded-xl p-8 animate-pulse">
+                        <div className="h-6 w-1/4 bg-muted rounded mb-4" />
+                        <div className="h-4 w-1/2 bg-muted rounded mb-2" />
+                    </div>
+                </main>
             </div>
         );
     }
 
     if (!course) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-zinc-400 text-lg">{error || "Course not found"}</p>
-                    <Link href="/dashboard/courses" className="text-indigo-400 text-sm mt-2 block hover:underline">&larr; Back to Courses</Link>
+                    <p className="text-muted-foreground text-lg">{error || "Course not found"}</p>
+                    <Link href="/dashboard/courses" className="text-primary text-sm mt-2 block hover:underline">&larr; Back to Courses</Link>
                 </div>
             </div>
         );
@@ -265,60 +272,59 @@ export default function CourseDetailPage() {
     const canManage = role === "admin" || role === "teacher";
 
     return (
-        <div className="min-h-screen bg-zinc-950">
-            <nav className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-                <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/dashboard/courses" className="text-zinc-400 hover:text-white transition-colors text-sm">&larr; Courses</Link>
-                        <h1 className="text-lg font-semibold text-white tracking-tight">{course.name}</h1>
-                        <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{course.code}</span>
-                    </div>
-                </div>
-            </nav>
+        <div className="flex flex-col w-full min-h-screen bg-background">
+            <PageHeader
+                title={course.name}
+                roleName={role}
+                breadcrumbs={[
+                    { label: "Dashboard", href: "/dashboard" },
+                    { label: "Courses", href: "/dashboard/courses" }
+                ]}
+            />
 
-            <main className="max-w-5xl mx-auto px-4 py-8">
+            <main className="w-full max-w-6xl mx-auto p-4 sm:px-6 lg:px-8 py-8">
                 {error && (
-                    <div className="mb-4 bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg text-sm">
+                    <div className="mb-4 bg-danger/20 border border-danger/50 text-danger px-4 py-3 rounded-lg text-sm">
                         {error}
-                        <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-200">&times;</button>
+                        <button onClick={() => setError(null)} className="ml-3 text-danger hover:text-danger">&times;</button>
                     </div>
                 )}
                 {success && (
-                    <div className="mb-4 bg-emerald-900/30 border border-emerald-800 text-emerald-300 px-4 py-3 rounded-lg text-sm">
+                    <div className="mb-4 bg-success/20 border border-success/50 text-success px-4 py-3 rounded-lg text-sm">
                         {success}
-                        <button onClick={() => setSuccess(null)} className="ml-3 text-emerald-400 hover:text-emerald-200">&times;</button>
+                        <button onClick={() => setSuccess(null)} className="ml-3 text-success hover:text-success/80">&times;</button>
                     </div>
                 )}
 
                 {/* Course Info */}
-                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-6">
+                <div className="bg-card border border-border rounded-xl p-6 mb-6">
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                         <div>
-                            <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Semester</dt>
-                            <dd className="mt-1 text-sm text-zinc-300">{course.semester_number}</dd>
+                            <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Semester</dt>
+                            <dd className="mt-1 text-sm text-foreground">{course.semester_number}</dd>
                         </div>
                         <div>
-                            <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Department</dt>
-                            <dd className="mt-1 text-sm text-zinc-300">{course.department || "N/A"}</dd>
+                            <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Department</dt>
+                            <dd className="mt-1 text-sm text-foreground">{course.department || "N/A"}</dd>
                         </div>
                         <div>
-                            <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Status</dt>
-                            <dd className={`mt-1 text-sm font-medium ${course.is_active ? "text-emerald-400" : "text-amber-400"}`}>
+                            <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Status</dt>
+                            <dd className={`mt-1 text-sm font-medium ${course.is_active ? "text-success" : "text-warning"}`}>
                                 {course.is_active ? "Active" : "Inactive"}
                             </dd>
                         </div>
                         <div>
-                            <dt className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Teacher</dt>
-                            <dd className="mt-1 text-sm text-zinc-300">
+                            <dt className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Teacher</dt>
+                            <dd className="mt-1 text-sm text-foreground">
                                 {course.teacher_id && course.teacher_name ? (
-                                    <Link href={`/dashboard/teachers/${course.teacher_id}`} className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors block w-fit">
+                                    <Link href={`/dashboard/teachers/${course.teacher_id}`} className="text-primary hover:text-primary hover:underline transition-colors block w-fit">
                                         {course.teacher_name}
-                                        {course.teacher_title && <span className="text-zinc-500 text-xs ml-1">({course.teacher_title})</span>}
+                                        {course.teacher_title && <span className="text-muted-foreground text-xs ml-1">({course.teacher_title})</span>}
                                     </Link>
                                 ) : (
                                     <>
                                         {course.teacher_name || "Not assigned"}
-                                        {course.teacher_title && <span className="text-zinc-500 text-xs ml-1">({course.teacher_title})</span>}
+                                        {course.teacher_title && <span className="text-muted-foreground text-xs ml-1">({course.teacher_title})</span>}
                                     </>
                                 )}
                             </dd>
@@ -326,17 +332,17 @@ export default function CourseDetailPage() {
                     </div>
 
                     {canManage && course.passkey && (
-                        <div className="mt-4 pt-4 border-t border-zinc-800 flex items-center gap-3">
-                            <span className="text-xs text-zinc-500">Passkey:</span>
-                            <span className="font-mono text-lg text-indigo-400 bg-zinc-800 px-3 py-1 rounded select-all tracking-widest">{course.passkey}</span>
-                            <button onClick={handleRegeneratePasskey} className="text-xs text-zinc-500 hover:text-white transition-colors">Regenerate</button>
-                            <button onClick={handleShareCourse} className="ml-auto px-4 py-1.5 text-xs font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors">Share via Message</button>
+                        <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
+                            <span className="text-xs text-muted-foreground">Passkey:</span>
+                            <span className="font-mono text-lg text-primary bg-muted px-3 py-1 rounded select-all tracking-widest">{course.passkey}</span>
+                            <button onClick={handleRegeneratePasskey} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Regenerate</button>
+                            <button onClick={handleShareCourse} className="ml-auto px-4 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary text-primary-foreground transition-colors">Share via Message</button>
                         </div>
                     )}
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-1 mb-6 bg-zinc-900 border border-zinc-800 rounded-lg p-1 w-fit flex-wrap">
+                <div className="flex gap-1 mb-6 bg-card border border-border rounded-lg p-1 w-fit flex-wrap">
                     {([
                         { key: "units", label: `Units (${course.units?.length || 0})` },
                         { key: "exams", label: `Exams (${course.exam_sections?.length || 0})` },
@@ -348,7 +354,7 @@ export default function CourseDetailPage() {
                         <button
                             key={t.key}
                             onClick={() => setTab(t.key)}
-                            className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === t.key ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}`}
+                            className={`px-4 py-2 text-sm rounded-md transition-colors ${tab === t.key ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground"}`}
                         >
                             {t.label}
                         </button>
@@ -359,55 +365,55 @@ export default function CourseDetailPage() {
                 {tab === "units" && (
                     <div>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-white">Units</h2>
+                            <h2 className="text-lg font-semibold text-foreground">Units</h2>
                             {canManage && (
                                 <button onClick={() => setShowUnitForm(!showUnitForm)}
-                                    className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors">
+                                    className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary text-primary-foreground transition-colors">
                                     {showUnitForm ? "Cancel" : "+ Add Unit"}
                                 </button>
                             )}
                         </div>
 
                         {showUnitForm && canManage && (
-                            <div className="mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                            <div className="mb-4 bg-card border border-border rounded-xl p-5">
                                 <form onSubmit={handleAddUnit} className="flex gap-3 items-end">
                                     <div>
-                                        <label className="block text-xs text-zinc-500 mb-1">Unit #</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Unit #</label>
                                         <input type="number" value={unitForm.unit_number} onChange={(e) => setUnitForm({ ...unitForm, unit_number: parseInt(e.target.value) || 1 })}
-                                            className="w-20 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" min={1} />
+                                            className="w-20 px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" min={1} />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-xs text-zinc-500 mb-1">Title</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Title</label>
                                         <input type="text" value={unitForm.title} onChange={(e) => setUnitForm({ ...unitForm, title: e.target.value })}
-                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Introduction to Networking" required />
+                                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. Introduction to Networking" required />
                                     </div>
                                     <div className="flex-1">
-                                        <label className="block text-xs text-zinc-500 mb-1">Description (optional)</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Description (optional)</label>
                                         <input type="text" value={unitForm.description} onChange={(e) => setUnitForm({ ...unitForm, description: e.target.value })}
-                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="Brief description" />
+                                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="Brief description" />
                                     </div>
-                                    <button type="submit" className="px-5 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500">Add</button>
+                                    <button type="submit" className="px-5 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary text-primary-foreground">Add</button>
                                 </form>
                             </div>
                         )}
 
                         {(!course.units || course.units.length === 0) ? (
-                            <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                            <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-xl">
                                 <p>No units added yet.</p>
                             </div>
                         ) : (
-                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                            <div className="bg-card border border-border rounded-xl overflow-hidden">
                                 {course.units.map((unit, i) => (
-                                    <div key={unit.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-zinc-800" : ""} hover:bg-zinc-800/30`}>
+                                    <div key={unit.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-border" : ""} hover:bg-muted`}>
                                         <div className="flex items-center gap-4">
-                                            <span className="text-indigo-400 font-mono text-sm font-semibold w-10">U{unit.unit_number}</span>
+                                            <span className="text-primary font-mono text-sm font-semibold w-10">U{unit.unit_number}</span>
                                             <div>
-                                                <p className="text-white font-medium">{unit.title}</p>
-                                                {unit.description && <p className="text-zinc-500 text-sm mt-0.5">{unit.description}</p>}
+                                                <p className="text-foreground font-medium">{unit.title}</p>
+                                                {unit.description && <p className="text-muted-foreground text-sm mt-0.5">{unit.description}</p>}
                                             </div>
                                         </div>
                                         {canManage && (
-                                            <button onClick={() => handleDeleteUnit(unit.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                                            <button onClick={() => handleDeleteUnit(unit.id)} className="text-xs text-danger hover:text-danger">Delete</button>
                                         )}
                                     </div>
                                 ))}
@@ -420,59 +426,59 @@ export default function CourseDetailPage() {
                 {tab === "exams" && (
                     <div>
                         <div className="flex items-center justify-between mb-4">
-                            <h2 className="text-lg font-semibold text-white">Exam Sections</h2>
+                            <h2 className="text-lg font-semibold text-foreground">Exam Sections</h2>
                             {canManage && (
                                 <button onClick={() => setShowExamForm(!showExamForm)}
-                                    className="px-3 py-1.5 text-sm bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 transition-colors">
+                                    className="px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary text-primary-foreground transition-colors">
                                     {showExamForm ? "Cancel" : "+ Add Exam Section"}
                                 </button>
                             )}
                         </div>
 
                         {showExamForm && canManage && (
-                            <div className="mb-4 bg-zinc-900 border border-zinc-800 rounded-xl p-5">
+                            <div className="mb-4 bg-card border border-border rounded-xl p-5">
                                 <form onSubmit={handleAddExamSection} className="flex flex-wrap gap-3 items-end">
                                     <div>
-                                        <label className="block text-xs text-zinc-500 mb-1">Type</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Type</label>
                                         <input type="text" value={examForm.type} onChange={(e) => setExamForm({ ...examForm, type: e.target.value })}
-                                            className="w-24 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. MCQ" required />
+                                            className="w-24 px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. MCQ" required />
                                     </div>
                                     <div>
-                                        <label className="block text-xs text-zinc-500 mb-1">Date</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Date</label>
                                         <input type="date" value={examForm.date} onChange={(e) => setExamForm({ ...examForm, date: e.target.value })}
-                                            className="w-36 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
+                                            className="w-36 px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" required />
                                     </div>
                                     <div className="flex-1 min-w-[150px]">
-                                        <label className="block text-xs text-zinc-500 mb-1">Description (optional)</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Description (optional)</label>
                                         <input type="text" value={examForm.description} onChange={(e) => setExamForm({ ...examForm, description: e.target.value })}
-                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Chapter 1-3" />
+                                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. Chapter 1-3" />
                                     </div>
                                     <div className="flex-1 min-w-[150px]">
-                                        <label className="block text-xs text-zinc-500 mb-1">Board (optional)</label>
+                                        <label className="block text-xs text-muted-foreground mb-1">Board (optional)</label>
                                         <input type="text" value={examForm.exam_board} onChange={(e) => setExamForm({ ...examForm, exam_board: e.target.value })}
-                                            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. University Board" />
+                                            className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. University Board" />
                                     </div>
-                                    <button type="submit" className="px-5 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500">Add</button>
+                                    <button type="submit" className="px-5 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary text-primary-foreground">Add</button>
                                 </form>
                             </div>
                         )}
 
                         {(!course.exam_sections || course.exam_sections.length === 0) ? (
-                            <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                            <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-xl">
                                 <p>No exam sections added yet.</p>
                             </div>
                         ) : (
-                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                            <div className="bg-card border border-border rounded-xl overflow-hidden">
                                 {course.exam_sections.map((section, i) => (
-                                    <div key={section.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-zinc-800" : ""} hover:bg-zinc-800/30`}>
+                                    <div key={section.id} className={`px-5 py-4 flex items-center justify-between ${i > 0 ? "border-t border-border" : ""} hover:bg-muted`}>
                                         <div className="flex items-center gap-4">
-                                            <span className="text-emerald-400 font-medium capitalize">{section.type}</span>
-                                            {section.date && <span className="text-zinc-400 text-sm">{new Date(section.date).toLocaleDateString()}</span>}
-                                            {section.description && <span className="text-zinc-500 text-sm">{section.description}</span>}
-                                            {section.exam_board && <span className="text-zinc-500 text-sm italic">({section.exam_board})</span>}
+                                            <span className="text-success font-medium capitalize">{section.type}</span>
+                                            {section.date && <span className="text-muted-foreground text-sm">{new Date(section.date).toLocaleDateString()}</span>}
+                                            {section.description && <span className="text-muted-foreground text-sm">{section.description}</span>}
+                                            {section.exam_board && <span className="text-muted-foreground text-sm italic">({section.exam_board})</span>}
                                         </div>
                                         {canManage && (
-                                            <button onClick={() => handleDeleteExamSection(section.id)} className="text-xs text-red-400 hover:text-red-300">Delete</button>
+                                            <button onClick={() => handleDeleteExamSection(section.id)} className="text-xs text-danger hover:text-danger">Delete</button>
                                         )}
                                     </div>
                                 ))}
@@ -484,32 +490,32 @@ export default function CourseDetailPage() {
                 {/* Students Tab */}
                 {tab === "students" && (
                     <div>
-                        <h2 className="text-lg font-semibold text-white mb-4">Enrolled Students</h2>
+                        <h2 className="text-lg font-semibold text-foreground mb-4">Enrolled Students</h2>
                         {enrolledStudents.length === 0 ? (
-                            <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                            <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-xl">
                                 <p>No students enrolled yet.</p>
                                 {canManage && <p className="text-sm mt-1">Share the passkey with your students.</p>}
                             </div>
                         ) : (
-                            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                            <div className="bg-card border border-border rounded-xl overflow-hidden">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-zinc-800">
-                                            {role === "admin" && <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Alias</th>}
-                                            <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Name</th>
-                                            <th className="text-left px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Enrolled</th>
-                                            {canManage && <th className="text-right px-5 py-3 text-xs font-medium text-zinc-500 uppercase tracking-wider">Actions</th>}
+                                        <tr className="border-b border-border">
+                                            {role === "admin" && <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Alias</th>}
+                                            <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Name</th>
+                                            <th className="text-left px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Enrolled</th>
+                                            {canManage && <th className="text-right px-5 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">Actions</th>}
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {enrolledStudents.map((student) => (
-                                            <tr key={student.id} className="border-b border-zinc-800/50 last:border-0 hover:bg-zinc-800/30">
-                                                {role === "admin" && <td className="px-5 py-3 text-sm text-indigo-400 font-medium">{student.student_alias || "--"}</td>}
-                                                <td className="px-5 py-3 text-sm text-zinc-300">{student.student_name || "--"}</td>
-                                                <td className="px-5 py-3 text-sm text-zinc-500">{new Date(student.enrolled_at).toLocaleDateString()}</td>
+                                            <tr key={student.id} className="border-b border-border/50 last:border-0 hover:bg-muted">
+                                                {role === "admin" && <td className="px-5 py-3 text-sm text-primary font-medium">{student.student_alias || "--"}</td>}
+                                                <td className="px-5 py-3 text-sm text-foreground">{student.student_name || "--"}</td>
+                                                <td className="px-5 py-3 text-sm text-muted-foreground">{new Date(student.enrolled_at).toLocaleDateString()}</td>
                                                 {canManage && (
                                                     <td className="px-5 py-3 text-right">
-                                                        <button onClick={() => handleRemoveStudent(student.id)} className="text-xs text-red-400 hover:text-red-300 transition-colors">Remove</button>
+                                                        <button onClick={() => handleRemoveStudent(student.id)} className="text-xs text-danger hover:text-danger transition-colors">Remove</button>
                                                     </td>
                                                 )}
                                             </tr>

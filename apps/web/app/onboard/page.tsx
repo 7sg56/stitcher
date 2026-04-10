@@ -66,25 +66,25 @@ export default function OnboardPage() {
                         <Image src="/auth-bg.png" alt="Onboarding Auth" fill priority className="object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0d0d0d]/40 to-[#0d0d0d]" />
                         <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
-                            <h1 className="text-5xl font-medium text-white tracking-tight mb-4 drop-shadow-lg">
+                            <h1 className="text-5xl font-medium text-foreground tracking-tight mb-4 drop-shadow-lg">
                                 Ready to deploy.
                             </h1>
-                            <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">
+                            <p className="text-xl text-foreground font-light tracking-wide max-w-md drop-shadow-md">
                                 Your anonymous management identity is initialized.
                             </p>
                         </div>
                     </div>
 
                     <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
-                        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+                        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-success/20 blur-[120px] rounded-full pointer-events-none"></div>
 
                         <div className="w-full max-w-md z-10 relative">
                             <div className="bg-card rounded-[1.5rem] p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.06)] text-center relative overflow-hidden">
 
 
-                                <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)] relative">
-                                    <div className="absolute inset-0 rounded-full border border-emerald-400/30 animate-ping opacity-20"></div>
-                                    <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                <div className="w-20 h-20 bg-success/20 border border-success/30 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)] relative">
+                                    <div className="absolute inset-0 rounded-full border border-success/30 animate-ping opacity-20"></div>
+                                    <svg className="w-10 h-10 text-success" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                     </svg>
                                 </div>
@@ -97,10 +97,10 @@ export default function OnboardPage() {
                                 </p>
 
                                 <div className="bg-muted rounded-xl p-6 mb-8 relative">
-                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2">
+                                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mb-2">
                                         Your Alias
                                     </p>
-                                    <p className="text-3xl font-medium text-emerald-400 tracking-tight drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                    <p className="text-3xl font-medium text-success tracking-tight drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                                         {aliasName}
                                     </p>
                                     <p className="text-xs text-muted-foreground mt-4 leading-relaxed font-light">
@@ -130,33 +130,33 @@ export default function OnboardPage() {
                     <Image src="/auth-bg.png" alt="Onboarding Details" fill priority className="object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/40 to-background" />
                     <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
-                        <h1 className="text-5xl font-serif text-white tracking-tight mb-4 drop-shadow-lg">
+                        <h1 className="text-5xl font-serif text-foreground tracking-tight mb-4 drop-shadow-lg">
                             Identity Core.
                         </h1>
-                        <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">
+                        <p className="text-xl text-foreground font-light tracking-wide max-w-md drop-shadow-md">
                             Provide your secure credentials to generate your encrypted alias.
                         </p>
                     </div>
                 </div>
 
                 <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
-                    <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+                    <div className="absolute top-1/4 -right-20 w-96 h-96 bg-success/20 blur-[120px] rounded-full pointer-events-none"></div>
 
                     <div className="w-full max-w-md z-10 relative">
-                        <div className="bg-zinc-950/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-10 shadow-2xl relative overflow-hidden">
-                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+                        <div className="bg-background/80 backdrop-blur-2xl border border-border rounded-3xl p-10 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-success/30 to-transparent"></div>
 
                             <div className="text-center mb-8">
-                                <h1 className="text-2xl font-semibold text-white tracking-tight">
+                                <h1 className="text-2xl font-semibold text-foreground tracking-tight">
                                     Secure Verification
                                 </h1>
-                                <p className="text-zinc-400 mt-2 text-sm">
+                                <p className="text-muted-foreground mt-2 text-sm">
                                     Final details required for your secure profile
                                 </p>
                             </div>
 
-                            <div className="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4 mb-8">
-                                <p className="text-xs text-emerald-400/90 font-light leading-relaxed">
+                            <div className="bg-success/20 border border-success/30 rounded-xl p-4 mb-8">
+                                <p className="text-xs text-success/90 font-light leading-relaxed">
                                     Your real name and phone number are encrypted. You will be assigned a random anonymous alias for public interactions.
                                 </p>
                             </div>
@@ -165,7 +165,7 @@ export default function OnboardPage() {
                                 <div>
                                     <label
                                         htmlFor="realName"
-                                        className="block text-sm font-medium text-zinc-300 mb-2"
+                                        className="block text-sm font-medium text-foreground mb-2"
                                     >
                                         Full Name
                                     </label>
@@ -175,7 +175,7 @@ export default function OnboardPage() {
                                         type="text"
                                         required
                                         minLength={1}
-                                        className="w-full px-4 py-3 bg-black/20 border border-white/5 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:bg-black/40 transition-all font-light"
+                                        className="w-full px-4 py-3 bg-background/80 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-success/30 focus:bg-background/80 transition-all font-light"
                                         placeholder="Your full name"
                                     />
                                 </div>
@@ -183,7 +183,7 @@ export default function OnboardPage() {
                                 <div>
                                     <label
                                         htmlFor="realPhone"
-                                        className="block text-sm font-medium text-zinc-300 mb-2"
+                                        className="block text-sm font-medium text-foreground mb-2"
                                     >
                                         Phone Number
                                     </label>
@@ -193,13 +193,13 @@ export default function OnboardPage() {
                                         type="tel"
                                         required
                                         minLength={10}
-                                        className="w-full px-4 py-3 bg-black/20 border border-white/5 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:bg-black/40 transition-all font-light"
+                                        className="w-full px-4 py-3 bg-background/80 border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-success/30 focus:bg-background/80 transition-all font-light"
                                         placeholder="+91 9876543210"
                                     />
                                 </div>
 
                                 {error && (
-                                    <div className="p-4 bg-red-950/30 border border-red-900/30 rounded-xl text-red-400 text-sm font-medium">
+                                    <div className="p-4 bg-danger/20 border border-danger/50 rounded-xl text-danger text-sm font-medium">
                                         <p>{error}</p>
                                     </div>
                                 )}
@@ -207,7 +207,7 @@ export default function OnboardPage() {
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-4"
+                                    className="w-full py-3.5 px-4 bg-success hover:bg-success disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-foreground font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-success mt-4"
                                 >
                                     {loading ? "Initializing..." : "Generate Alias"}
                                 </button>

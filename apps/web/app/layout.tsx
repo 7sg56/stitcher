@@ -28,9 +28,9 @@ export default function RootLayout({
     <ClerkProvider>
       <html
         lang="en"
-        className={`${newsreader.variable} ${manrope.variable} h-full antialiased`}
+        className={`${newsreader.variable} ${manrope.variable} h-full antialiased overscroll-none`}
       >
-        <body className="min-h-full flex flex-col font-sans">{children}</body>
+        <body className="min-h-full flex flex-col font-sans overscroll-none">{children}</body>
       </html>
     </ClerkProvider>
   );

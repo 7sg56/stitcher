@@ -135,18 +135,18 @@ export default function TeacherPortfolio() {
 
     if (loading) {
         return (
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 animate-pulse">
-                <div className="h-6 w-48 bg-zinc-800 rounded mb-4" />
-                <div className="h-4 w-full bg-zinc-800 rounded mb-2" />
-                <div className="h-4 w-3/4 bg-zinc-800 rounded" />
+            <div className="bg-card border border-border rounded-2xl p-8 animate-pulse">
+                <div className="h-6 w-48 bg-muted rounded mb-4" />
+                <div className="h-4 w-full bg-muted rounded mb-2" />
+                <div className="h-4 w-3/4 bg-muted rounded" />
             </div>
         );
     }
 
     if (error) {
         return (
-            <div className="bg-zinc-900 border border-red-900/40 rounded-2xl p-6 text-center">
-                <p className="text-red-400 text-sm">{error}</p>
+            <div className="bg-card border border-danger/50 rounded-2xl p-6 text-center">
+                <p className="text-danger text-sm">{error}</p>
             </div>
         );
     }
@@ -163,15 +163,15 @@ export default function TeacherPortfolio() {
         for (let i = 0; i < 5; i++) {
             if (i < fullStars) {
                 stars.push(
-                    <span key={i} className="text-amber-400">&#9733;</span>
+                    <span key={i} className="text-warning">&#9733;</span>
                 );
             } else if (i === fullStars && hasHalf) {
                 stars.push(
-                    <span key={i} className="text-amber-400/50">&#9733;</span>
+                    <span key={i} className="text-warning/50">&#9733;</span>
                 );
             } else {
                 stars.push(
-                    <span key={i} className="text-zinc-700">&#9733;</span>
+                    <span key={i} className="text-muted-foreground">&#9733;</span>
                 );
             }
         }
@@ -182,11 +182,11 @@ export default function TeacherPortfolio() {
     return (
         <div className="space-y-6">
             {/* Overview Card */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+            <div className="bg-card border border-border rounded-2xl p-8">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-white">Teaching Portfolio</h2>
+                    <h2 className="text-xl font-semibold text-foreground">Teaching Portfolio</h2>
                     {portfolio.is_any_flagged && (
-                        <span className="text-xs font-medium text-amber-400 bg-amber-900/30 px-3 py-1.5 rounded-full">
+                        <span className="text-xs font-medium text-warning bg-warning/20 px-3 py-1.5 rounded-full">
                             Review Needed
                         </span>
                     )}
@@ -194,23 +194,23 @@ export default function TeacherPortfolio() {
 
                 {/* Summary Stats */}
                 {portfolio.ratings.length === 0 ? (
-                    <div className="bg-zinc-800/30 border border-zinc-800 rounded-xl p-6 text-center text-zinc-500 text-sm mb-6">
+                    <div className="bg-muted border border-border rounded-xl p-6 text-center text-muted-foreground text-sm mb-6">
                         No rating data available yet. Ratings are generated after sessions end and students submit feedback.
                     </div>
                 ) : (
                     <div className="grid grid-cols-3 gap-6 mb-6">
-                        <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-                            <div className="text-2xl font-bold text-white">{portfolio.overall_avg.toFixed(1)}</div>
-                            <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Overall Rating</div>
+                        <div className="bg-muted rounded-xl p-4 text-center">
+                            <div className="text-2xl font-bold text-foreground">{portfolio.overall_avg.toFixed(1)}</div>
+                            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Overall Rating</div>
                             <div className="mt-2">{renderStars(portfolio.overall_avg)}</div>
                         </div>
-                        <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-                            <div className="text-2xl font-bold text-white">{portfolio.total_reviews}</div>
-                            <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Total Reviews</div>
+                        <div className="bg-muted rounded-xl p-4 text-center">
+                            <div className="text-2xl font-bold text-foreground">{portfolio.total_reviews}</div>
+                            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Total Reviews</div>
                         </div>
-                        <div className="bg-zinc-800/50 rounded-xl p-4 text-center">
-                            <div className="text-2xl font-bold text-white">{portfolio.ratings.length}</div>
-                            <div className="text-xs text-zinc-500 mt-1 uppercase tracking-wider">Courses Rated</div>
+                        <div className="bg-muted rounded-xl p-4 text-center">
+                            <div className="text-2xl font-bold text-foreground">{portfolio.ratings.length}</div>
+                            <div className="text-xs text-muted-foreground mt-1 uppercase tracking-wider">Courses Rated</div>
                         </div>
                     </div>
                 )}
@@ -218,33 +218,33 @@ export default function TeacherPortfolio() {
                 {/* Per-course ratings */}
                 {portfolio.ratings.length > 0 && (
                     <div>
-                        <h3 className="text-sm font-medium text-zinc-400 mb-3 uppercase tracking-wider">Ratings by Course</h3>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wider">Ratings by Course</h3>
                         <div className="space-y-2">
                             {portfolio.ratings.map((r) => (
                                 <div
                                     key={r.course_id}
                                     className={`flex items-center justify-between p-4 rounded-xl border ${r.is_flagged
-                                        ? "border-amber-800/50 bg-amber-900/10"
-                                        : "border-zinc-800 bg-zinc-800/30"
+                                        ? "border-warning/50 bg-warning/20"
+                                        : "border-border bg-muted"
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div>
-                                            <span className="text-white font-medium text-sm">{r.course_name}</span>
-                                            <span className="text-zinc-600 font-mono text-xs ml-2">{r.course_code}</span>
+                                            <span className="text-foreground font-medium text-sm">{r.course_name}</span>
+                                            <span className="text-muted-foreground font-mono text-xs ml-2">{r.course_code}</span>
                                         </div>
                                         {r.is_flagged && (
-                                            <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">
+                                            <span className="text-xs text-warning bg-warning/20 px-2 py-0.5 rounded">
                                                 Flagged
                                             </span>
                                         )}
                                     </div>
                                     <div className="flex items-center gap-3">
                                         {renderStars(r.weighted_avg_rating)}
-                                        <span className="text-sm text-white font-medium w-8 text-right">
+                                        <span className="text-sm text-foreground font-medium w-8 text-right">
                                             {r.weighted_avg_rating.toFixed(1)}
                                         </span>
-                                        <span className="text-xs text-zinc-500">
+                                        <span className="text-xs text-muted-foreground">
                                             ({r.total_reviews} review{r.total_reviews !== 1 ? "s" : ""})
                                         </span>
                                     </div>
@@ -257,46 +257,46 @@ export default function TeacherPortfolio() {
 
             {/* Session Insights */}
             {portfolio.recent_insights.length > 0 && (
-                <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
-                    <h2 className="text-xl font-semibold text-white mb-1">Session Insights</h2>
-                    <p className="text-zinc-500 text-sm mb-6">
+                <div className="bg-card border border-border rounded-2xl p-8">
+                    <h2 className="text-xl font-semibold text-foreground mb-1">Session Insights</h2>
+                    <p className="text-muted-foreground text-sm mb-6">
                         Weak concepts and feedback from recent sessions to help prepare for the next class.
                     </p>
 
                     <div className="space-y-3">
                         {portfolio.recent_insights.map((insight) => (
-                            <div key={insight.session_id} className="border border-zinc-800 rounded-xl overflow-hidden">
+                            <div key={insight.session_id} className="border border-border rounded-xl overflow-hidden">
                                 <button
                                     onClick={() =>
                                         setExpandedInsight(
                                             expandedInsight === insight.session_id ? null : insight.session_id
                                         )
                                     }
-                                    className="w-full flex items-center justify-between p-4 hover:bg-zinc-800/30 transition-colors text-left"
+                                    className="w-full flex items-center justify-between p-4 hover:bg-muted transition-colors text-left"
                                 >
                                     <div>
-                                        <span className="text-white font-medium text-sm">
+                                        <span className="text-foreground font-medium text-sm">
                                             {insight.topic || "Untitled Session"}
                                         </span>
-                                        <span className="text-zinc-600 text-xs ml-3">
+                                        <span className="text-muted-foreground text-xs ml-3">
                                             {new Date(insight.started_at).toLocaleDateString()}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-4">
                                         {insight.avg_rating !== null && (
-                                            <span className="text-xs text-zinc-400">
+                                            <span className="text-xs text-muted-foreground">
                                                 {insight.avg_rating.toFixed(1)} avg
                                             </span>
                                         )}
                                         {insight.quiz_accuracy_pct !== null && (
-                                            <span className="text-xs text-zinc-400">
+                                            <span className="text-xs text-muted-foreground">
                                                 {insight.quiz_accuracy_pct.toFixed(0)}% quiz acc
                                             </span>
                                         )}
-                                        <span className="text-xs text-zinc-500">
+                                        <span className="text-xs text-muted-foreground">
                                             {insight.total_feedback} feedback
                                         </span>
-                                        <span className={`text-zinc-500 transition-transform ${expandedInsight === insight.session_id ? "rotate-180" : ""
+                                        <span className={`text-muted-foreground transition-transform ${expandedInsight === insight.session_id ? "rotate-180" : ""
                                             }`}>
                                             &#9660;
                                         </span>
@@ -304,35 +304,35 @@ export default function TeacherPortfolio() {
                                 </button>
 
                                 {expandedInsight === insight.session_id && (
-                                    <div className="px-4 pb-4 border-t border-zinc-800">
+                                    <div className="px-4 pb-4 border-t border-border">
                                         {insight.weak_concepts.length === 0 ? (
-                                            <p className="text-zinc-500 text-sm py-3">
+                                            <p className="text-muted-foreground text-sm py-3">
                                                 No weak concepts identified for this session.
                                             </p>
                                         ) : (
                                             <div className="space-y-2 pt-3">
-                                                <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">
+                                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
                                                     Weak Concepts ({insight.weak_concepts.length})
                                                 </p>
                                                 {insight.weak_concepts.map((wc, i) => (
                                                     <div
                                                         key={i}
-                                                        className="flex items-start gap-3 p-3 bg-zinc-800/30 rounded-lg"
+                                                        className="flex items-start gap-3 p-3 bg-muted rounded-lg"
                                                     >
                                                         <span
                                                             className={`text-xs font-mono px-1.5 py-0.5 rounded mt-0.5 shrink-0 ${wc.source === "quiz"
-                                                                ? "bg-indigo-900/30 text-indigo-400"
-                                                                : "bg-amber-900/30 text-amber-400"
+                                                                ? "bg-primary/20 text-primary"
+                                                                : "bg-warning/20 text-warning"
                                                                 }`}
                                                         >
                                                             {wc.source}
                                                         </span>
                                                         <div className="min-w-0">
-                                                            <p className="text-sm text-zinc-300 break-words">
+                                                            <p className="text-sm text-foreground break-words">
                                                                 {wc.concept}
                                                             </p>
                                                             {wc.detail && (
-                                                                <p className="text-xs text-zinc-500 mt-0.5">
+                                                                <p className="text-xs text-muted-foreground mt-0.5">
                                                                     {wc.detail}
                                                                 </p>
                                                             )}
@@ -350,14 +350,14 @@ export default function TeacherPortfolio() {
             )}
 
             {/* Public Profile Configuration */}
-            <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
+            <div className="bg-card border border-border rounded-2xl p-8">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-xl font-semibold text-white">Public Profile Settings</h2>
-                        <p className="text-sm text-zinc-500 mt-1">Enhance your public portfolio page for students.</p>
+                        <h2 className="text-xl font-semibold text-foreground">Public Profile Settings</h2>
+                        <p className="text-sm text-muted-foreground mt-1">Enhance your public portfolio page for students.</p>
                     </div>
                     {!isEditingProfile && (
-                        <button onClick={() => setIsEditingProfile(true)} className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors">
+                        <button onClick={() => setIsEditingProfile(true)} className="px-4 py-2 bg-primary text-primary-foreground hover:bg-primary text-primary-foreground text-sm font-medium rounded-lg transition-colors">
                             Edit Profile
                         </button>
                     )}
@@ -367,64 +367,64 @@ export default function TeacherPortfolio() {
                     <form onSubmit={handleSaveProfile} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs text-zinc-500 mb-1">Designation</label>
-                                <input type="text" value={profileForm.designation} onChange={e => setProfileForm({ ...profileForm, designation: e.target.value })} placeholder="e.g. Associate Professor of CS" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                                <label className="block text-xs text-muted-foreground mb-1">Designation</label>
+                                <input type="text" value={profileForm.designation} onChange={e => setProfileForm({ ...profileForm, designation: e.target.value })} placeholder="e.g. Associate Professor of CS" className="w-full bg-muted border border-border text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ring" />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-500 mb-1">Contact Email</label>
-                                <input type="email" value={profileForm.contact_email} onChange={e => setProfileForm({ ...profileForm, contact_email: e.target.value })} placeholder="Public email address" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                                <label className="block text-xs text-muted-foreground mb-1">Contact Email</label>
+                                <input type="email" value={profileForm.contact_email} onChange={e => setProfileForm({ ...profileForm, contact_email: e.target.value })} placeholder="Public email address" className="w-full bg-muted border border-border text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ring" />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-500 mb-1">ORCID ID</label>
-                                <input type="text" value={profileForm.orcid_id} onChange={e => setProfileForm({ ...profileForm, orcid_id: e.target.value })} placeholder="e.g. 0000-0002-1825-0097" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                                <label className="block text-xs text-muted-foreground mb-1">ORCID ID</label>
+                                <input type="text" value={profileForm.orcid_id} onChange={e => setProfileForm({ ...profileForm, orcid_id: e.target.value })} placeholder="e.g. 0000-0002-1825-0097" className="w-full bg-muted border border-border text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ring" />
                             </div>
                             <div>
-                                <label className="block text-xs text-zinc-500 mb-1">Personal Website</label>
-                                <input type="url" value={profileForm.personal_website} onChange={e => setProfileForm({ ...profileForm, personal_website: e.target.value })} placeholder="https://..." className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                                <label className="block text-xs text-muted-foreground mb-1">Personal Website</label>
+                                <input type="url" value={profileForm.personal_website} onChange={e => setProfileForm({ ...profileForm, personal_website: e.target.value })} placeholder="https://..." className="w-full bg-muted border border-border text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ring" />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-xs text-zinc-500 mb-1">Mastery Tags (comma separated)</label>
-                                <input type="text" value={profileForm.mastery_tags} onChange={e => setProfileForm({ ...profileForm, mastery_tags: e.target.value })} placeholder="e.g. Artificial Intelligence, Machine Learning, Graph Theory" className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500" />
+                                <label className="block text-xs text-muted-foreground mb-1">Mastery Tags (comma separated)</label>
+                                <input type="text" value={profileForm.mastery_tags} onChange={e => setProfileForm({ ...profileForm, mastery_tags: e.target.value })} placeholder="e.g. Artificial Intelligence, Machine Learning, Graph Theory" className="w-full bg-muted border border-border text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ring" />
                             </div>
                             <div className="md:col-span-2">
-                                <label className="block text-xs text-zinc-500 mb-1">Biography</label>
-                                <textarea value={profileForm.bio} onChange={e => setProfileForm({ ...profileForm, bio: e.target.value })} placeholder="A short bio about your academic background..." rows={4} className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-indigo-500 resize-none" />
+                                <label className="block text-xs text-muted-foreground mb-1">Biography</label>
+                                <textarea value={profileForm.bio} onChange={e => setProfileForm({ ...profileForm, bio: e.target.value })} placeholder="A short bio about your academic background..." rows={4} className="w-full bg-muted border border-border text-foreground rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-ring resize-none" />
                             </div>
                         </div>
                         <div className="flex gap-3 justify-end pt-2">
-                            <button type="button" onClick={() => setIsEditingProfile(false)} className="px-4 py-2 text-zinc-400 hover:text-white text-sm font-medium transition-colors">
+                            <button type="button" onClick={() => setIsEditingProfile(false)} className="px-4 py-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
                                 Cancel
                             </button>
-                            <button type="submit" disabled={savingProfile} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
+                            <button type="submit" disabled={savingProfile} className="px-4 py-2 bg-success hover:bg-success text-foreground text-sm font-medium rounded-lg transition-colors disabled:opacity-50">
                                 {savingProfile ? "Saving..." : "Save Profile"}
                             </button>
                         </div>
                     </form>
                 ) : (
-                    <div className="text-sm text-zinc-400">
+                    <div className="text-sm text-muted-foreground">
                         {portfolio.profile ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mt-4 bg-zinc-800/30 rounded-xl p-6 border border-zinc-700/50">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 mt-4 bg-muted rounded-xl p-6 border border-border">
                                 <div>
-                                    <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Designation</span>
-                                    <span className="text-white">{portfolio.profile.designation || <span className="text-zinc-600 italic">Not set</span>}</span>
+                                    <span className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Designation</span>
+                                    <span className="text-foreground">{portfolio.profile.designation || <span className="text-muted-foreground italic">Not set</span>}</span>
                                 </div>
                                 <div>
-                                    <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Contact Email</span>
-                                    <span className="text-white">{portfolio.profile.contact_email || <span className="text-zinc-600 italic">Not set</span>}</span>
+                                    <span className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Contact Email</span>
+                                    <span className="text-foreground">{portfolio.profile.contact_email || <span className="text-muted-foreground italic">Not set</span>}</span>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <span className="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-1">Mastery Areas</span>
+                                    <span className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">Mastery Areas</span>
                                     {portfolio.profile.mastery_tags && portfolio.profile.mastery_tags.length > 0 ? (
                                         <div className="flex gap-2 flex-wrap mt-1">
                                             {portfolio.profile.mastery_tags.map(tag => (
-                                                <span key={tag} className="px-2 py-0.5 bg-zinc-700/50 text-zinc-300 rounded text-xs">{tag}</span>
+                                                <span key={tag} className="px-2 py-0.5 bg-accent text-foreground rounded text-xs">{tag}</span>
                                             ))}
                                         </div>
-                                    ) : <span className="text-zinc-600 italic">Not set</span>}
+                                    ) : <span className="text-muted-foreground italic">Not set</span>}
                                 </div>
                             </div>
                         ) : (
-                            <p className="py-4 text-center border border-zinc-800 rounded-lg bg-zinc-800/20 italic">
+                            <p className="py-4 text-center border border-border rounded-lg bg-muted italic">
                                 Your public profile is currently empty. Click Edit Profile to add details.
                             </p>
                         )}

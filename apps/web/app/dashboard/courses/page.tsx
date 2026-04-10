@@ -230,8 +230,18 @@ export default function CoursesPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-zinc-950 flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+            <div className="flex flex-col w-full min-h-screen bg-background">
+                <PageHeader title="Courses" roleName={role} />
+                <main className="w-full max-w-6xl mx-auto p-4 sm:px-6 lg:px-8 py-8 space-y-4">
+                    <div className="bg-card border border-border rounded-xl p-8 animate-pulse">
+                        <div className="h-6 w-1/4 bg-muted rounded mb-4" />
+                        <div className="h-4 w-1/2 bg-muted rounded mb-2" />
+                    </div>
+                    <div className="bg-card border border-border rounded-xl p-8 animate-pulse">
+                        <div className="h-6 w-1/4 bg-muted rounded mb-4" />
+                        <div className="h-4 w-1/2 bg-muted rounded mb-2" />
+                    </div>
+                </main>
             </div>
         );
     }
@@ -256,36 +266,36 @@ export default function CoursesPage() {
 
             <main className="w-full max-w-6xl mx-auto p-4 sm:px-6 lg:px-8 py-8">
                 {error && (
-                    <div className="mb-4 bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg text-sm">
+                    <div className="mb-4 bg-danger/20 border border-danger/50 text-danger px-4 py-3 rounded-lg text-sm">
                         {error}
-                        <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-200">&times;</button>
+                        <button onClick={() => setError(null)} className="ml-3 text-danger hover:text-danger">&times;</button>
                     </div>
                 )}
                 {success && (
-                    <div className="mb-4 bg-emerald-900/30 border border-emerald-800 text-emerald-300 px-4 py-3 rounded-lg text-sm">
+                    <div className="mb-4 bg-success/20 border border-success/50 text-success px-4 py-3 rounded-lg text-sm">
                         {success}
-                        <button onClick={() => setSuccess(null)} className="ml-3 text-emerald-400 hover:text-emerald-200">&times;</button>
+                        <button onClick={() => setSuccess(null)} className="ml-3 text-success hover:text-success/80">&times;</button>
                     </div>
                 )}
 
                 {/* Student: Join by Passkey */}
                 {role === "student" && (
-                    <div className="mb-8 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                        <h2 className="text-lg font-semibold text-white mb-3">Join a Course</h2>
-                        <p className="text-zinc-400 text-sm mb-4">Enter the 6-character passkey shared by your teacher.</p>
+                    <div className="mb-8 bg-card border border-border rounded-xl p-6">
+                        <h2 className="text-lg font-semibold text-foreground mb-3">Join a Course</h2>
+                        <p className="text-muted-foreground text-sm mb-4">Enter the 6-character passkey shared by your teacher.</p>
                         <form onSubmit={handlePasskeyEnroll} className="flex gap-3">
                             <input
                                 type="text"
                                 value={passkey}
                                 onChange={(e) => setPasskey(e.target.value.toUpperCase())}
                                 maxLength={6}
-                                className="w-40 px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-center font-mono text-lg tracking-widest focus:outline-none focus:border-indigo-500 uppercase"
+                                className="w-40 px-4 py-2.5 bg-muted border border-border rounded-lg text-foreground text-center font-mono text-lg tracking-widest focus:outline-none focus:border-ring uppercase"
                                 placeholder="ABCD12"
                                 required
                             />
                             <button
                                 type="submit"
-                                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-500 transition-colors"
+                                className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary text-primary-foreground transition-colors"
                             >
                                 Join
                             </button>
@@ -295,39 +305,39 @@ export default function CoursesPage() {
 
                 {/* Create Course Form */}
                 {showCreateForm && canManage && (
-                    <div className="mb-8 bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-                        <h2 className="text-lg font-semibold text-white mb-4">Create New Course</h2>
+                    <div className="mb-8 bg-card border border-border rounded-xl p-6">
+                        <h2 className="text-lg font-semibold text-foreground mb-4">Create New Course</h2>
                         <form onSubmit={handleCreateCourse} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Course Name</label>
+                                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Course Name</label>
                                 <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Computer Networks" required />
+                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. Computer Networks" required />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Course Code</label>
+                                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Course Code</label>
                                 <input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. CS401" required />
+                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. CS401" required />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Semester</label>
+                                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Semester</label>
                                 <input type="number" value={formData.semester_number} onChange={(e) => setFormData({ ...formData, semester_number: parseInt(e.target.value) || 1 })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" min={1} required />
+                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" min={1} required />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Department</label>
+                                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Department</label>
                                 <input type="text" value={formData.department} onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. Computer Science" />
+                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. Computer Science" />
                             </div>
                             <div>
-                                <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Class Name</label>
+                                <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Class Name</label>
                                 <input type="text" value={formData.class_name} onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
-                                    className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="e.g. 10th Grade" />
+                                    className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="e.g. 10th Grade" />
                             </div>
                             {role === "admin" && teachers.length > 0 && (
                                 <div className="sm:col-span-2">
-                                    <label className="block text-xs font-medium text-zinc-400 uppercase tracking-wider mb-1.5">Assign Teacher</label>
+                                    <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1.5">Assign Teacher</label>
                                     <select value={formData.teacher_id} onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })}
-                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500">
+                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring">
                                         <option value="">-- Unassigned (Select Teacher) --</option>
                                         {teachers.map((t) => (
                                             <option key={t.id} value={t.id}>{t.real_name || "Unnamed"} {t.teacher_title ? `(${t.teacher_title})` : ""}</option>
@@ -336,7 +346,7 @@ export default function CoursesPage() {
                                 </div>
                             )}
                             <div className="sm:col-span-2">
-                                <button type="submit" className="px-6 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-500 transition-colors">
+                                <button type="submit" className="px-6 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-lg hover:bg-primary text-primary-foreground transition-colors">
                                     Create Course
                                 </button>
                             </div>
@@ -346,28 +356,28 @@ export default function CoursesPage() {
 
                 {/* Course List */}
                 {courses.length === 0 ? (
-                    <div className="text-center py-16 text-zinc-500">
+                    <div className="text-center py-16 text-muted-foreground">
                         <p className="text-lg">No courses available yet.</p>
                         {role === "student" && <p className="text-sm mt-2">Ask your teacher for a course passkey to join.</p>}
                     </div>
                 ) : (
                     <div className="grid gap-4">
                         {courses.map((course) => (
-                            <div key={course.id} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 hover:border-zinc-700 transition-colors">
+                            <div key={course.id} className="bg-card border border-border rounded-xl p-5 hover:border-border transition-colors">
                                 {editingCourse === course.id ? (
                                     /* Edit Form */
                                     <form onSubmit={(e) => handleUpdateCourse(course.id, e)} className="space-y-3">
                                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                                             <input type="text" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
+                                                className="px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" required />
                                             <input type="text" value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value })}
-                                                className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" required />
+                                                className="px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" required />
                                             <input type="text" value={formData.class_name} onChange={(e) => setFormData({ ...formData, class_name: e.target.value })}
-                                                className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500" placeholder="Class Name" />
+                                                className="px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring" placeholder="Class Name" />
                                             {role === "admin" && teachers.length > 0 && (
                                                 <div className="sm:col-span-3 mt-1">
                                                     <select value={formData.teacher_id} onChange={(e) => setFormData({ ...formData, teacher_id: e.target.value })}
-                                                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500">
+                                                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring">
                                                         <option value="">-- Unassigned --</option>
                                                         {teachers.map((t) => (
                                                             <option key={t.id} value={t.id}>{t.real_name || "Unnamed"} {t.teacher_title ? `(${t.teacher_title})` : ""}</option>
@@ -377,8 +387,8 @@ export default function CoursesPage() {
                                             )}
                                         </div>
                                         <div className="flex gap-2">
-                                            <button type="submit" className="px-4 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-500">Save</button>
-                                            <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-1.5 text-zinc-400 border border-zinc-700 text-xs rounded-lg hover:bg-zinc-800">Cancel</button>
+                                            <button type="submit" className="px-4 py-1.5 bg-primary text-primary-foreground text-xs rounded-lg hover:bg-primary text-primary-foreground">Save</button>
+                                            <button type="button" onClick={() => setEditingCourse(null)} className="px-4 py-1.5 text-muted-foreground border border-border text-xs rounded-lg hover:bg-muted">Cancel</button>
                                         </div>
                                     </form>
                                 ) : (
@@ -386,22 +396,22 @@ export default function CoursesPage() {
                                     <div className="flex items-start justify-between">
                                         <div onClick={() => router.push(`/dashboard/courses/${course.id}`)} className="flex-1 group cursor-pointer relative block">
                                             <div className="flex items-center gap-3 mb-1">
-                                                <h3 className="text-white font-semibold group-hover:text-indigo-400 transition-colors">{course.name}</h3>
-                                                <span className="text-xs font-mono text-zinc-500 bg-zinc-800 px-2 py-0.5 rounded">{course.code}</span>
-                                                {!course.is_active && <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">Enrollment Closed</span>}
-                                                {isEnrolled(course.id) && <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Enrolled</span>}
+                                                <h3 className="text-foreground font-semibold group-hover:text-primary transition-colors">{course.name}</h3>
+                                                <span className="text-xs font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">{course.code}</span>
+                                                {!course.is_active && <span className="text-xs text-warning bg-warning/20 px-2 py-0.5 rounded">Enrollment Closed</span>}
+                                                {isEnrolled(course.id) && <span className="text-xs text-success bg-success/20 px-2 py-0.5 rounded">Enrolled</span>}
                                             </div>
-                                            <div className="flex items-center gap-4 text-sm text-zinc-400">
-                                                {course.class_name && <><span className="text-zinc-200">{course.class_name}</span><span className="text-zinc-700">|</span></>}
+                                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                {course.class_name && <><span className="text-foreground">{course.class_name}</span><span className="text-muted-foreground">|</span></>}
                                                 <span>Semester {course.semester_number}</span>
-                                                {course.department && <><span className="text-zinc-700">|</span><span>{course.department}</span></>}
+                                                {course.department && <><span className="text-muted-foreground">|</span><span>{course.department}</span></>}
                                                 {course.teacher_name ? (
                                                     <div className="flex items-center gap-1 relative z-10 pointer-events-auto">
-                                                        <span className="text-zinc-700 mr-3">|</span>
+                                                        <span className="text-muted-foreground mr-3">|</span>
                                                         {course.teacher_id ? (
                                                             <Link
                                                                 href={`/dashboard/teachers/${course.teacher_id}`}
-                                                                className="text-indigo-400 hover:text-indigo-300 hover:underline transition-colors"
+                                                                className="text-primary hover:text-primary hover:underline transition-colors"
                                                                 onClick={(e) => e.stopPropagation()}
                                                             >
                                                                 {course.teacher_name}{course.teacher_title ? ` (${course.teacher_title})` : ""}
@@ -411,24 +421,24 @@ export default function CoursesPage() {
                                                         )}
                                                     </div>
                                                 ) : (
-                                                    <><span className="text-zinc-700">|</span><span className="italic text-zinc-500">Unassigned</span></>
+                                                    <><span className="text-muted-foreground">|</span><span className="italic text-muted-foreground">Unassigned</span></>
                                                 )}
                                             </div>
                                             {canManage && course.passkey && (
-                                                <div className="mt-2 text-xs text-zinc-500">
-                                                    Passkey: <span className="font-mono text-indigo-400 bg-zinc-800 px-2 py-0.5 rounded select-all">{course.passkey}</span>
+                                                <div className="mt-2 text-xs text-muted-foreground">
+                                                    Passkey: <span className="font-mono text-primary bg-muted px-2 py-0.5 rounded select-all">{course.passkey}</span>
                                                 </div>
                                             )}
                                         </div>
                                         <div className="flex items-center gap-2 ml-4">
                                             {canManage && (
                                                 <>
-                                                    <button onClick={(e) => { e.preventDefault(); startEditing(course); }} className="px-3 py-1.5 text-xs font-medium text-zinc-400 border border-zinc-700 rounded-lg hover:bg-zinc-800 transition-colors">Edit</button>
+                                                    <button onClick={(e) => { e.preventDefault(); startEditing(course); }} className="px-3 py-1.5 text-xs font-medium text-muted-foreground border border-border rounded-lg hover:bg-muted transition-colors">Edit</button>
                                                     <button onClick={(e) => { e.preventDefault(); handleToggleActive(course.id); }}
-                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${course.is_active ? "text-amber-400 border border-amber-800 hover:bg-amber-900/30" : "text-emerald-400 border border-emerald-800 hover:bg-emerald-900/30"}`}>
+                                                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${course.is_active ? "text-warning border border-warning/50 hover:bg-warning/20" : "text-success border border-success/50 hover:bg-success/20"}`}>
                                                         {course.is_active ? "Close Enrollment" : "Open Enrollment"}
                                                     </button>
-                                                    <button onClick={(e) => { e.preventDefault(); handleDeleteCourse(course.id); }} className="px-3 py-1.5 text-xs font-medium text-red-400 border border-red-800 rounded-lg hover:bg-red-900/30 transition-colors">Delete</button>
+                                                    <button onClick={(e) => { e.preventDefault(); handleDeleteCourse(course.id); }} className="px-3 py-1.5 text-xs font-medium text-danger border border-danger/50 rounded-lg hover:bg-danger/20 transition-colors">Delete</button>
                                                 </>
                                             )}
                                         </div>

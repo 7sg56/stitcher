@@ -155,9 +155,9 @@ export default function ResourcesPanel({
     return (
         <div className="space-y-4">
             {error && (
-                <div className="bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg text-sm">
+                <div className="bg-danger/20 border border-danger/50 text-danger px-4 py-3 rounded-lg text-sm">
                     {error}
-                    <button onClick={() => setError(null)} className="ml-3 text-red-400 hover:text-red-200">&times;</button>
+                    <button onClick={() => setError(null)} className="ml-3 text-danger hover:text-danger">&times;</button>
                 </div>
             )}
 
@@ -168,8 +168,8 @@ export default function ResourcesPanel({
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${filter === f
-                                ? "bg-indigo-600 text-white"
-                                : "bg-zinc-800 text-zinc-400 hover:text-white"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground hover:text-foreground"
                                 }`}
                         >
                             {f === "all" ? "All" : f === "unit" ? "Units" : "Exam Sections"}
@@ -179,7 +179,7 @@ export default function ResourcesPanel({
                 {canManage && (
                     <button
                         onClick={() => setShowUpload(!showUpload)}
-                        className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition-colors"
+                        className="px-4 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary text-primary-foreground transition-colors"
                     >
                         + Add Resource
                     </button>
@@ -187,40 +187,40 @@ export default function ResourcesPanel({
             </div>
 
             {showUpload && canManage && (
-                <form onSubmit={handleUpload} className="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-3">
+                <form onSubmit={handleUpload} className="bg-card border border-border rounded-xl p-5 space-y-3">
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring"
                         placeholder="Resource title"
                     />
                     <input
                         type="text"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring"
                         placeholder="Description (optional)"
                     />
                     <input
                         type="text"
                         value={fileUrl}
                         onChange={(e) => setFileUrl(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring"
                         placeholder="File URL (paste link)"
                     />
                     <input
                         type="text"
                         value={fileName}
                         onChange={(e) => setFileName(e.target.value)}
-                        className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                        className="w-full px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring"
                         placeholder="File name (e.g. notes.pdf)"
                     />
                     <div className="flex gap-3">
                         <select
                             value={targetType}
                             onChange={(e) => { setTargetType(e.target.value as "unit" | "exam_section"); setTargetId(""); }}
-                            className="px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                            className="px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring"
                         >
                             <option value="unit">Unit</option>
                             <option value="exam_section">Exam Section</option>
@@ -228,7 +228,7 @@ export default function ResourcesPanel({
                         <select
                             value={targetId}
                             onChange={(e) => setTargetId(e.target.value)}
-                            className="flex-1 px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-white text-sm focus:outline-none focus:border-indigo-500"
+                            className="flex-1 px-3 py-2 bg-muted border border-border rounded-lg text-foreground text-sm focus:outline-none focus:border-ring"
                         >
                             <option value="">Select {targetType === "unit" ? "unit" : "exam section"}</option>
                             {targetType === "unit"
@@ -238,10 +238,10 @@ export default function ResourcesPanel({
                         </select>
                     </div>
                     <div className="flex gap-2">
-                        <button type="submit" className="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-500 transition-colors">
+                        <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground text-sm rounded-lg hover:bg-primary text-primary-foreground transition-colors">
                             Add Resource
                         </button>
-                        <button type="button" onClick={() => setShowUpload(false)} className="px-4 py-2 text-sm text-zinc-400 hover:text-white">
+                        <button type="button" onClick={() => setShowUpload(false)} className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground">
                             Cancel
                         </button>
                     </div>
@@ -249,21 +249,21 @@ export default function ResourcesPanel({
             )}
 
             {Object.keys(grouped).length === 0 ? (
-                <div className="text-center py-12 text-zinc-500 bg-zinc-900 border border-zinc-800 rounded-xl">
+                <div className="text-center py-12 text-muted-foreground bg-card border border-border rounded-xl">
                     <p>No resources uploaded yet.</p>
                 </div>
             ) : (
                 Object.entries(grouped).map(([group, items]) => (
                     <div key={group}>
-                        <h4 className="text-xs font-medium text-zinc-500 uppercase tracking-wide mb-2">{group}</h4>
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+                        <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">{group}</h4>
+                        <div className="bg-card border border-border rounded-xl overflow-hidden">
                             {items.map((resource, i) => (
                                 <div
                                     key={resource.id}
-                                    className={`px-5 py-3.5 flex items-center justify-between ${i > 0 ? "border-t border-zinc-800" : ""} hover:bg-zinc-800/30`}
+                                    className={`px-5 py-3.5 flex items-center justify-between ${i > 0 ? "border-t border-border" : ""} hover:bg-muted`}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 bg-zinc-800 rounded-lg flex items-center justify-center text-xs text-zinc-400">
+                                        <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center text-xs text-muted-foreground">
                                             {resource.mime_type?.includes("pdf") ? "PDF" : resource.mime_type?.includes("image") ? "IMG" : "DOC"}
                                         </div>
                                         <div>
@@ -271,11 +271,11 @@ export default function ResourcesPanel({
                                                 href={resource.file_url}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="text-sm text-white hover:text-indigo-400 transition-colors"
+                                                className="text-sm text-foreground hover:text-primary transition-colors"
                                             >
                                                 {resource.title}
                                             </a>
-                                            <div className="flex items-center gap-2 text-xs text-zinc-500 mt-0.5">
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                                 <span>{resource.file_name}</span>
                                                 {resource.file_size && <span>{formatFileSize(resource.file_size)}</span>}
                                             </div>
@@ -284,7 +284,7 @@ export default function ResourcesPanel({
                                     {canManage && (
                                         <button
                                             onClick={() => handleDelete(resource.id)}
-                                            className="text-xs text-red-400 hover:text-red-300 transition-colors"
+                                            className="text-xs text-danger hover:text-danger transition-colors"
                                         >
                                             Delete
                                         </button>

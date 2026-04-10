@@ -17,7 +17,7 @@ export function PageHeader({ title, breadcrumbs, roleName, action }: PageHeaderP
     const displayName = isLoaded && user ? (user.firstName || user.username || "User") : "Loading...";
 
     return (
-        <header className="flex h-20 items-center justify-between border-b border-border bg-background px-4 sm:px-6 lg:px-8 shrink-0">
+        <header className="sticky top-0 z-50 flex h-20 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4 sm:px-6 lg:px-8 shrink-0">
             {/* Left Box: Breadcrumb & Title */}
             <div className="flex items-center gap-4">
                 {breadcrumbs && breadcrumbs.length > 0 && (
@@ -31,10 +31,9 @@ export function PageHeader({ title, breadcrumbs, roleName, action }: PageHeaderP
                                 ) : (
                                     <span className="text-foreground">{bc.label}</span>
                                 )}
-                                {idx < breadcrumbs.length - 1 && <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
                             </div>
                         ))}
-                        <span className="text-muted-foreground mx-2">|</span>
                     </div>
                 )}
                 <h1 className="text-2xl font-serif text-foreground tracking-tight">{title}</h1>
