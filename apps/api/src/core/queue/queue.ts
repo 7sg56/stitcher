@@ -46,7 +46,8 @@ export async function enqueueSessionAggregation(sessionId: string): Promise<bool
     }
 
     await queue.add("AGGREGATE_SESSION", { sessionId }, {
-        jobId: `aggregate-${sessionId}`, // Prevents duplicate jobs for same session
+        jobId: `aggregate-${sessionId}-${Date.now()}`,
+        delay: 15_000, // 15s debounce so rapid feedback submissions batch naturally
     });
 
     return true;

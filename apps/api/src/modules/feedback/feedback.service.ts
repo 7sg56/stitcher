@@ -90,8 +90,8 @@ export class FeedbackService {
         await attendanceSvc.markAttendance(sessionId, studentId, "present", "feedback");
 
         // Re-enqueue aggregation so ratings submitted after session auto-end
-        // are included in teacher_ratings. BullMQ deduplication (jobId) prevents
-        // duplicate jobs if the session was just ended by the teacher.
+        // are included in teacher_ratings. Each enqueue creates a unique delayed
+        // job (15s debounce) so rapid submissions batch naturally.
         enqueueSessionAggregation(sessionId).catch(err =>
             console.error("Failed to enqueue aggregation after feedback submit:", sessionId, err)
         );
