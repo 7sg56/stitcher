@@ -97,6 +97,8 @@ export default function QuizzesPanel({
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [attemptResult, setAttemptResult] = useState<{ score: number; max_score: number } | null>(null);
     const [attemptId, setAttemptId] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const [attemptResponses, setAttemptResponses] = useState<any[]>([]);
 
     // Student quiz-taking view
     const [studentQuizMode, setStudentQuizMode] = useState(false);
@@ -175,6 +177,7 @@ export default function QuizzesPanel({
                 setAnswers({});
                 setAttemptResult(null);
                 setAttemptId(null);
+                setAttemptResponses([]);
                 setStudentQuizMode(false);
                 setTeacherTab("questions");
                 setStudentAttempts([]);
@@ -203,6 +206,7 @@ export default function QuizzesPanel({
                             score: attemptData.attempt.score ?? 0,
                             max_score: attemptData.attempt.max_score ?? 0,
                         });
+                        setAttemptResponses(attemptData.responses || []);
                     }
                 }
             }
@@ -329,6 +333,14 @@ export default function QuizzesPanel({
                 score: data.attempt.score ?? 0,
                 max_score: data.attempt.max_score ?? 0,
             });
+            // Fetch the responses for the result screen to handle 0-point quizzes
+            const attRes = await fetch(`${apiUrl}/quizzes/${selectedQuiz.id}/my-attempt`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (attRes.ok) {
+                const attData = await attRes.json();
+                setAttemptResponses(attData.responses || []);
+            }
             setAttemptId(null);
             setStudentQuizMode(false);
         } catch {
@@ -442,7 +454,21 @@ export default function QuizzesPanel({
 
     // ── STUDENT: Quiz result screen ────────────────────────────────────────────
     if (isStudent && selectedQuiz && attemptResult) {
-        const pct = Math.round((attemptResult.score / Math.max(attemptResult.max_score, 1)) * 100);
+        let displayScore = attemptResult.score;
+        let displayMax = attemptResult.max_score;
+        let pct = displayMax > 0 ? Math.round((displayScore / displayMax) * 100) : 0;
+
+        // If it's a feedback quiz or max score is 0, use correct response count
+        if (displayMax === 0 && attemptResponses.length > 0) {
+            const correctCount = attemptResponses.filter(r => r.is_correct).length;
+            displayScore = correctCount;
+            displayMax = attemptResponses.length;
+            pct = Math.round((displayScore / displayMax) * 100);
+        } else if (displayMax === 0 && selectedQuiz.questions.length > 0) {
+            // Fallback for cases with no responses loaded yet
+            displayMax = selectedQuiz.questions.length;
+        }
+
         const grade = pct >= 90 ? "Excellent!" : pct >= 70 ? "Good job!" : pct >= 50 ? "Keep it up!" : "Better luck next time!";
         const gradeColor = pct >= 70 ? "text-emerald-400" : pct >= 50 ? "text-amber-400" : "text-red-400";
 
@@ -459,13 +485,17 @@ export default function QuizzesPanel({
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl px-12 py-6 text-center">
                     <p className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Your Score</p>
                     <p className="text-5xl font-bold text-white">
-                        {attemptResult.score}
-                        <span className="text-2xl text-zinc-500">/{attemptResult.max_score}</span>
+                        {displayScore}
+                        <span className="text-2xl text-zinc-500">/{displayMax}</span>
                     </p>
                     <p className={`text-xl font-semibold mt-2 ${gradeColor}`}>{pct}%</p>
                 </div>
                 <button
-                    onClick={() => setSelectedQuiz(null)}
+                    onClick={() => {
+                        setSelectedQuiz(null);
+                        setAttemptResult(null);
+                        setAttemptResponses([]);
+                    }}
                     className="px-5 py-2 bg-zinc-800 text-white text-sm rounded-lg hover:bg-zinc-700 transition-colors"
                 >
                     ← Back to quizzes

@@ -46,6 +46,47 @@ async function fetchCourses(token: string) {
     return null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchAttendanceStats(token: string, courseId: string): Promise<{ totalSessions: number; presentCount: number }> {
+    const apiUrl = process.env.API_URL || "http://localhost:3001";
+    try {
+        const [attRes, sessRes] = await Promise.all([
+            fetch(`${apiUrl}/attendance/student/${courseId}`, { headers: { Authorization: `Bearer ${token}` } }),
+            fetch(`${apiUrl}/sessions/course/${courseId}`, { headers: { Authorization: `Bearer ${token}` } })
+        ]);
+        
+        let records = [];
+        let sessions = [];
+        
+        if (attRes.ok) {
+            const data = await attRes.json();
+            records = data.attendance || [];
+        }
+        if (sessRes.ok) {
+            const data = await sessRes.json();
+            sessions = data.sessions || [];
+        }
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const nonCancelledSessions = sessions.filter((s: any) => !s.is_cancelled);
+        
+        let presentCount = 0;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        records.forEach((r: any) => {
+            if (r.status === 'present' || r.status === 'late') {
+                presentCount++;
+            }
+        });
+        
+        return {
+            totalSessions: nonCancelledSessions.length,
+            presentCount: presentCount
+        };
+    } catch {
+        return { totalSessions: 0, presentCount: 0 };
+    }
+}
+
 export default async function DashboardPage() {
     const user = await currentUser();
 
@@ -78,6 +119,8 @@ export default async function DashboardPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let teacherCourses: any[] = [];
     let myUserId: string | null = null;
+    let totalTotalSessions = 0;
+    let totalPresentCount = 0;
 
     if (token) {
         const meData = await fetchMe(token);
@@ -93,6 +136,15 @@ export default async function DashboardPage() {
         if (roleName === "student") {
             const enrollData = await fetchMyEnrollments(token);
             enrolledCourses = enrollData?.enrollments || [];
+
+            const statsPromises = enrolledCourses.map((e: any) => fetchAttendanceStats(token, e.course?.id || e.course_id));
+            const stats = await Promise.all(statsPromises);
+            
+            enrolledCourses.forEach((e: any, idx: number) => {
+                e.attendanceStats = stats[idx];
+                totalTotalSessions += stats[idx].totalSessions;
+                totalPresentCount += stats[idx].presentCount;
+            });
         }
 
         if (roleName === "teacher" || roleName === "admin") {
@@ -126,21 +178,46 @@ export default async function DashboardPage() {
                 <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8">
                     <h2 className="text-xl font-semibold text-white mb-6">Your Profile</h2>
                     <div className="space-y-4">
-                        <div className="flex items-center gap-4">
-                            {user.imageUrl && (
-                                <Image src={user.imageUrl} alt="Avatar" width={64} height={64}
-                                    className="w-16 h-16 rounded-full border-2 border-zinc-700" />
-                            )}
-                            <div>
-                                <p className="text-white font-medium text-lg">{displayName}</p>
-                                {aliasName && roleName === "student" && (
-                                    <p className="text-indigo-400 text-sm">Alias: {aliasName}</p>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                {user.imageUrl && (
+                                    <Image src={user.imageUrl} alt="Avatar" width={64} height={64}
+                                        className="w-16 h-16 rounded-full border-2 border-zinc-700" />
                                 )}
-                                {teacherTitle && roleName === "teacher" && (
-                                    <p className="text-indigo-400 text-sm">{teacherTitle}</p>
-                                )}
-                                <p className="text-zinc-400 text-sm">{user.emailAddresses[0]?.emailAddress}</p>
+                                <div>
+                                    <p className="text-white font-medium text-lg">{displayName}</p>
+                                    {aliasName && roleName === "student" && (
+                                        <p className="text-indigo-400 text-sm">Alias: {aliasName}</p>
+                                    )}
+                                    {teacherTitle && roleName === "teacher" && (
+                                        <p className="text-indigo-400 text-sm">{teacherTitle}</p>
+                                    )}
+                                    <p className="text-zinc-400 text-sm">{user.emailAddresses[0]?.emailAddress}</p>
+                                </div>
                             </div>
+
+                            {roleName === "student" && totalTotalSessions > 0 && (
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right hidden sm:block">
+                                        <p className="text-sm font-medium text-white">Total Attendance</p>
+                                        <p className="text-xs text-zinc-400">{totalPresentCount} / {totalTotalSessions} sessions</p>
+                                    </div>
+                                    <div className="relative w-16 h-16 flex items-center justify-center">
+                                        <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
+                                            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent" className="text-zinc-800" />
+                                            <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="8" fill="transparent"
+                                                strokeDasharray={2 * Math.PI * 40}
+                                                strokeDashoffset={(2 * Math.PI * 40) * (1 - (totalPresentCount / totalTotalSessions))}
+                                                strokeLinecap="round"
+                                                className="text-indigo-500 transition-all duration-1000 ease-out" 
+                                            />
+                                        </svg>
+                                        <div className="absolute flex items-center justify-center">
+                                            <span className="text-sm font-bold text-white">{Math.round((totalPresentCount / totalTotalSessions) * 100)}%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         <div className="pt-4 border-t border-zinc-800">
@@ -198,7 +275,14 @@ export default async function DashboardPage() {
                                                     {enrollment.course?.department && <span>{enrollment.course.department}</span>}
                                                 </div>
                                             </div>
-                                            <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Enrolled</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Enrolled</span>
+                                                {enrollment.attendanceStats?.totalSessions > 0 && (
+                                                    <span className="font-mono text-xs text-indigo-400 bg-zinc-800 px-2 py-1 rounded">
+                                                        {Math.round((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100)}%
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </Link>
                                 ))}

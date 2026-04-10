@@ -10,6 +10,7 @@ export const createSessionSchema = z.object({
         question_text: z.string(),
         options: z.array(z.string()),
         correct_index: z.number().int().min(0).default(0),
+        points: z.number().int().min(0).default(1),
     })).optional(),
 });
 
