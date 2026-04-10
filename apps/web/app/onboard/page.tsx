@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -59,50 +61,60 @@ export default function OnboardPage() {
     if (step === "complete") {
         return (
             <AuthGate>
-                <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
-                    <div className="w-full max-w-md">
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl text-center">
-                            <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-                                <svg
-                                    className="w-8 h-8 text-emerald-400"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={2}
-                                    stroke="currentColor"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M4.5 12.75l6 6 9-13.5"
-                                    />
-                                </svg>
-                            </div>
-
-                            <h1 className="text-2xl font-bold text-white tracking-tight mb-2">
-                                You&apos;re all set
+                <div className="min-h-screen flex w-full bg-[#0d0d0d]">
+                    <div className="hidden lg:flex relative w-1/2 justify-center items-center overflow-hidden">
+                        <Image src="/auth-bg.png" alt="Onboarding Auth" fill priority className="object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0d0d0d]/40 to-[#0d0d0d]" />
+                        <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
+                            <h1 className="text-5xl font-medium text-white tracking-tight mb-4 drop-shadow-lg">
+                                Ready to deploy.
                             </h1>
-                            <p className="text-zinc-400 text-sm mb-8">
-                                Your anonymous identity has been assigned
+                            <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">
+                                Your anonymous management identity is initialized.
                             </p>
+                        </div>
+                    </div>
 
-                            <div className="bg-zinc-800 border border-zinc-700 rounded-xl p-6 mb-8">
-                                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">
-                                    Your alias
+                    <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
+                        <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
+
+                        <div className="w-full max-w-md z-10 relative">
+                            <div className="bg-zinc-950/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-10 shadow-2xl text-center relative overflow-hidden">
+                                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+
+                                <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)] relative">
+                                    <div className="absolute inset-0 rounded-full border border-emerald-400/30 animate-ping opacity-20"></div>
+                                    <svg className="w-10 h-10 text-emerald-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                                    </svg>
+                                </div>
+
+                                <h1 className="text-3xl font-semibold text-white tracking-tight mb-2">
+                                    You&apos;re all set
+                                </h1>
+                                <p className="text-zinc-400 text-sm mb-8">
+                                    Your anonymous identity has been assigned
                                 </p>
-                                <p className="text-2xl font-bold text-indigo-400 tracking-tight">
-                                    {aliasName}
-                                </p>
-                                <p className="text-xs text-zinc-500 mt-2">
-                                    This is how others will see you. Your real identity is private.
-                                </p>
+
+                                <div className="bg-black/30 border border-white/5 rounded-xl p-6 mb-8 relative">
+                                    <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2">
+                                        Your Alias
+                                    </p>
+                                    <p className="text-3xl font-medium text-emerald-400 tracking-tight drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                        {aliasName}
+                                    </p>
+                                    <p className="text-xs text-zinc-500 mt-4 leading-relaxed font-light">
+                                        This is how others will see you. Your real identity is securely encrypted and isolated.
+                                    </p>
+                                </div>
+
+                                <button
+                                    onClick={() => router.push("/dashboard")}
+                                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                >
+                                    Proceed to Dashboard
+                                </button>
                             </div>
-
-                            <button
-                                onClick={() => router.push("/dashboard")}
-                                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
-                            >
-                                Go to Dashboard
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -113,75 +125,94 @@ export default function OnboardPage() {
     // Details form
     return (
         <AuthGate>
-            <div className="min-h-screen flex items-center justify-center bg-zinc-950 px-4">
-                <div className="w-full max-w-md">
-                    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 shadow-2xl">
-                        <div className="text-center mb-8">
-                            <h1 className="text-2xl font-bold text-white tracking-tight">
-                                Complete your profile
-                            </h1>
-                            <p className="text-zinc-400 mt-2 text-sm">
-                                We need a few more details to get you started
-                            </p>
-                        </div>
+            <div className="min-h-screen flex w-full bg-[#0d0d0d]">
+                <div className="hidden lg:flex relative w-1/2 justify-center items-center overflow-hidden">
+                    <Image src="/auth-bg.png" alt="Onboarding Details" fill priority className="object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0d0d0d]/40 to-[#0d0d0d]" />
+                    <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
+                        <h1 className="text-5xl font-medium text-white tracking-tight mb-4 drop-shadow-lg">
+                            Identity Core.
+                        </h1>
+                        <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">
+                            Provide your secure credentials to generate your encrypted alias.
+                        </p>
+                    </div>
+                </div>
 
-                        <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-lg p-3 mb-6">
-                            <p className="text-xs text-indigo-300">
-                                Your real name and phone number are kept private. You will be assigned a random anonymous alias that others will see.
-                            </p>
-                        </div>
+                <div className="w-full lg:w-1/2 flex items-center justify-center px-4 relative">
+                    <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
 
-                        <form action={handleSubmit} className="space-y-5">
-                            <div>
-                                <label
-                                    htmlFor="realName"
-                                    className="block text-sm font-medium text-zinc-300 mb-1.5"
-                                >
-                                    Full name
-                                </label>
-                                <input
-                                    id="realName"
-                                    name="realName"
-                                    type="text"
-                                    required
-                                    minLength={1}
-                                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                    placeholder="Your full name"
-                                />
+                    <div className="w-full max-w-md z-10 relative">
+                        <div className="bg-zinc-950/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-10 shadow-2xl relative overflow-hidden">
+                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+
+                            <div className="text-center mb-8">
+                                <h1 className="text-2xl font-semibold text-white tracking-tight">
+                                    Secure Verification
+                                </h1>
+                                <p className="text-zinc-400 mt-2 text-sm">
+                                    Final details required for your secure profile
+                                </p>
                             </div>
 
-                            <div>
-                                <label
-                                    htmlFor="realPhone"
-                                    className="block text-sm font-medium text-zinc-300 mb-1.5"
-                                >
-                                    Phone number
-                                </label>
-                                <input
-                                    id="realPhone"
-                                    name="realPhone"
-                                    type="tel"
-                                    required
-                                    minLength={10}
-                                    className="w-full px-4 py-2.5 bg-zinc-800 border border-zinc-700 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-                                    placeholder="+91 9876543210"
-                                />
+                            <div className="bg-emerald-900/20 border border-emerald-500/20 rounded-xl p-4 mb-8">
+                                <p className="text-xs text-emerald-400/90 font-light leading-relaxed">
+                                    Your real name and phone number are encrypted. You will be assigned a random anonymous alias for public interactions.
+                                </p>
                             </div>
 
-                            {error && (
-                                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
-                                    <p className="text-sm text-red-400">{error}</p>
+                            <form action={handleSubmit} className="space-y-6">
+                                <div>
+                                    <label
+                                        htmlFor="realName"
+                                        className="block text-sm font-medium text-zinc-300 mb-2"
+                                    >
+                                        Full Name
+                                    </label>
+                                    <input
+                                        id="realName"
+                                        name="realName"
+                                        type="text"
+                                        required
+                                        minLength={1}
+                                        className="w-full px-4 py-3 bg-black/20 border border-white/5 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:bg-black/40 transition-all font-light"
+                                        placeholder="Your full name"
+                                    />
                                 </div>
-                            )}
 
-                            <button
-                                type="submit"
-                                disabled={loading}
-                                className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-zinc-900"
-                            >
-                                {loading ? "Setting up..." : "Continue"}
-                            </button>
-                        </form>
+                                <div>
+                                    <label
+                                        htmlFor="realPhone"
+                                        className="block text-sm font-medium text-zinc-300 mb-2"
+                                    >
+                                        Phone Number
+                                    </label>
+                                    <input
+                                        id="realPhone"
+                                        name="realPhone"
+                                        type="tel"
+                                        required
+                                        minLength={10}
+                                        className="w-full px-4 py-3 bg-black/20 border border-white/5 rounded-xl text-white placeholder:text-zinc-600 focus:outline-none focus:border-emerald-500/50 focus:bg-black/40 transition-all font-light"
+                                        placeholder="+91 9876543210"
+                                    />
+                                </div>
+
+                                {error && (
+                                    <div className="p-4 bg-red-950/30 border border-red-900/30 rounded-xl text-red-400 text-sm font-medium">
+                                        <p>{error}</p>
+                                    </div>
+                                )}
+
+                                <button
+                                    type="submit"
+                                    disabled={loading}
+                                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl text-white font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 mt-4"
+                                >
+                                    {loading ? "Initializing..." : "Generate Alias"}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

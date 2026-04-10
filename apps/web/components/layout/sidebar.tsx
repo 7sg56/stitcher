@@ -21,8 +21,8 @@ export function Sidebar() {
     const pathname = usePathname();
 
     return (
-        <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col border-r border-border bg-background sm:flex">
-            <div className="flex h-14 items-center border-b border-border px-6">
+        <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col bg-muted sm:flex">
+            <div className="flex h-14 items-center px-6">
                 <Link href="/" className="flex items-center gap-2 font-semibold">
                     {/* Using a sleek, abstract SVG for logo */}
                     <svg
@@ -37,7 +37,7 @@ export function Sidebar() {
                     >
                         <path d="M12 2L2 22h20L12 2z" />
                     </svg>
-                    <span className="text-lg tracking-tight">Stitcher</span>
+                    <span className="text-xl tracking-tight font-serif text-primary">Stitcher</span>
                 </Link>
             </div>
 
@@ -63,7 +63,7 @@ export function Sidebar() {
                 })}
             </nav>
 
-            <div className="p-4 border-t border-border">
+            <div className="p-4 mt-auto">
                 {/* Minimal User Profile placeholder or UserButton for Clerk will go here */}
             </div>
         </aside>

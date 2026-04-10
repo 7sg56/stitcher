@@ -2,51 +2,45 @@
 
 @plugin "tailwindcss-animate";
 
-@custom-variant dark (&:is(.dark *));
-
+/* The Digital Atelier (Indigo Scholar) */
 :root {
-  --background: #fafaf9; /* stone-50 */
-  --foreground: #1c1917; /* stone-900 */
-  --card: #ffffff;
-  --card-foreground: #1c1917;
-  --popover: #ffffff;
-  --popover-foreground: #1c1917;
-  --primary: #047857; /* emerald-700 */
-  --primary-foreground: #ffffff;
-  --secondary: #f5f5f4; /* stone-100 */
-  --secondary-foreground: #1c1917;
-  --muted: #f5f5f4;
-  --muted-foreground: #78716c; /* stone-500 */
-  --accent: #f5f5f4;
-  --accent-foreground: #1c1917;
-  --destructive: #ef4444;
-  --destructive-foreground: #fafaf9;
-  --border: #e7e5e4; /* stone-200 */
-  --input: #e7e5e4;
-  --ring: #047857;
-  --radius: 0rem; /* hard edges */
-}
+  /* Core Surfaces */
+  --background: #0b1326;
+  /* surface */
+  --foreground: #dae2fd;
+  /* on_surface */
+  --card: #171f33;
+  /* surface_container */
+  --card-foreground: #dae2fd;
+  /* on_surface */
+  --popover: #060e20;
+  /* surface_container_lowest */
+  --popover-foreground: #dae2fd;
 
-.dark {
-  --background: #0c0a09; /* stone-950 */
-  --foreground: #fafaf9; /* stone-50 */
-  --card: #1c1917; /* stone-900 */
-  --card-foreground: #fafaf9;
-  --popover: #1c1917;
-  --popover-foreground: #fafaf9;
-  --primary: #10b981; /* emerald-500 */
-  --primary-foreground: #0c0a09; /* stone-950 */
-  --secondary: #292524; /* stone-800 */
-  --secondary-foreground: #fafaf9;
-  --muted: #292524;
-  --muted-foreground: #a8a29e; /* stone-400 */
-  --accent: #292524;
-  --accent-foreground: #fafaf9;
-  --destructive: #7f1d1d;
-  --destructive-foreground: #fafaf9;
-  --border: #292524;
-  --input: #292524;
-  --ring: #10b981;
+  /* Accents & States */
+  --primary: #bbc3ff;
+  --primary-foreground: #001e92;
+  --secondary: #3e495d;
+  /* secondary_container */
+  --secondary-foreground: #dae2fd;
+  --muted: #131b2e;
+  /* surface_container_low */
+  --muted-foreground: #c5c5d6;
+  /* on_surface_variant */
+  --accent: #222a3d;
+  /* surface_container_high */
+  --accent-foreground: #dae2fd;
+
+  /* Utils */
+  --destructive: #ffb4ab;
+  --destructive-foreground: #690005;
+  --border: #454653;
+  /* outline_variant */
+  --input: #171f33;
+  /* surface_container */
+  --ring: #bbc3ff;
+  --radius: 0.5rem;
+  /* ROUND_FOUR */
 }
 
 @theme inline {
@@ -71,8 +65,9 @@
   --color-ring: var(--ring);
   --radius: var(--radius);
 
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-newsreader);
 }
 
 * {
