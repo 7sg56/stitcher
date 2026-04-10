@@ -1,12 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
 import {
     MessageSquare,
     BookOpen,
     Settings,
-    LayoutDashboard
+    LayoutDashboard,
+    LogOut
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +21,8 @@ const sidebarLinks = [
 
 export function Sidebar() {
     const pathname = usePathname();
+    const router = useRouter();
+    const { signOut } = useClerk();
 
     return (
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col bg-muted sm:flex">
@@ -64,7 +68,13 @@ export function Sidebar() {
             </nav>
 
             <div className="p-4 mt-auto">
-                {/* Minimal User Profile placeholder or UserButton for Clerk will go here */}
+                <button
+                    onClick={() => signOut(() => router.push("/sign-in"))}
+                    className="flex w-full items-center gap-3 px-3 py-2 text-sm font-medium transition-colors hover:text-destructive text-muted-foreground hover:bg-destructive/10 rounded-md"
+                >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                </button>
             </div>
         </aside>
     );

@@ -96,12 +96,12 @@ export default function SignUpPage() {
         signUp.missingFields.length === 0
     ) {
         return (
-            <div className="min-h-screen flex w-full bg-[#0d0d0d]">
+            <div className="min-h-screen flex w-full bg-background">
                 <div className="hidden lg:flex relative w-1/2 justify-center items-center overflow-hidden">
                     <Image src="/auth-bg.png" alt="Verification background" fill priority className="object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0d0d0d]/40 to-[#0d0d0d]" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/40 to-background" />
                     <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
-                        <h1 className="text-5xl font-medium text-white tracking-tight mb-4 drop-shadow-lg">
+                        <h1 className="text-5xl font-serif text-white tracking-tight mb-4 drop-shadow-lg">
                             Secure your access.
                         </h1>
                         <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">
@@ -114,14 +114,13 @@ export default function SignUpPage() {
                     <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
 
                     <div className="w-full max-w-md z-10 relative">
-                        <div className="bg-zinc-950/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-10 shadow-2xl relative overflow-hidden">
-                            <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+                        <div className="bg-card rounded-[1.5rem] p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.06)] relative overflow-hidden">
 
                             <div className="text-center mb-10">
-                                <h2 className="text-2xl font-semibold text-white tracking-tight">
+                                <h2 className="text-3xl font-serif text-foreground tracking-tight mb-2">
                                     Verify Email
                                 </h2>
-                                <p className="text-zinc-400 mt-2 text-sm tracking-wide">
+                                <p className="text-muted-foreground mt-2 text-sm font-light tracking-wide">
                                     Enter the code sent to your email
                                 </p>
                             </div>
@@ -202,15 +201,13 @@ export default function SignUpPage() {
                 <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
 
                 <div className="w-full max-w-md z-10 relative">
-                    <div className="bg-zinc-950/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-10 shadow-2xl relative overflow-hidden">
-                        {/* Inner glow accent at top of the card */}
-                        <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+                    <div className="bg-card rounded-[1.5rem] p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.06)] relative overflow-hidden">
 
                         <div className="text-center mb-10">
-                            <h2 className="text-2xl font-semibold text-white tracking-tight">
+                            <h2 className="text-3xl font-serif text-foreground tracking-tight mb-2">
                                 Create Account
                             </h2>
-                            <p className="text-zinc-400 mt-2 text-sm tracking-wide">
+                            <p className="text-muted-foreground mt-2 text-sm font-light tracking-wide">
                                 Get started with Stitcher
                             </p>
                         </div>
@@ -218,7 +215,7 @@ export default function SignUpPage() {
                         {/* Google sign-up */}
                         <button
                             onClick={handleGoogleSignUp}
-                            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-white font-medium transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/50 mb-8 backdrop-blur-md"
+                            className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-muted hover:bg-accent border-none rounded-xl text-foreground font-medium transition-all focus:outline-none focus:ring-2 focus:ring-primary/50 mb-8 backdrop-blur-md"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path

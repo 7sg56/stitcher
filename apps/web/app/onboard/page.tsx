@@ -79,8 +79,8 @@ export default function OnboardPage() {
                         <div className="absolute top-1/4 -right-20 w-96 h-96 bg-emerald-900/20 blur-[120px] rounded-full pointer-events-none"></div>
 
                         <div className="w-full max-w-md z-10 relative">
-                            <div className="bg-zinc-950/40 backdrop-blur-2xl border border-white/5 rounded-3xl p-10 shadow-2xl text-center relative overflow-hidden">
-                                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent"></div>
+                            <div className="bg-card rounded-[1.5rem] p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.06)] text-center relative overflow-hidden">
+
 
                                 <div className="w-20 h-20 bg-emerald-500/10 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)] relative">
                                     <div className="absolute inset-0 rounded-full border border-emerald-400/30 animate-ping opacity-20"></div>
@@ -89,28 +89,28 @@ export default function OnboardPage() {
                                     </svg>
                                 </div>
 
-                                <h1 className="text-3xl font-semibold text-white tracking-tight mb-2">
+                                <h1 className="text-3xl font-serif text-foreground tracking-tight mb-2">
                                     You&apos;re all set
                                 </h1>
-                                <p className="text-zinc-400 text-sm mb-8">
+                                <p className="text-muted-foreground font-light text-sm mb-8">
                                     Your anonymous identity has been assigned
                                 </p>
 
-                                <div className="bg-black/30 border border-white/5 rounded-xl p-6 mb-8 relative">
+                                <div className="bg-muted rounded-xl p-6 mb-8 relative">
                                     <p className="text-xs font-semibold text-zinc-500 uppercase tracking-widest mb-2">
                                         Your Alias
                                     </p>
                                     <p className="text-3xl font-medium text-emerald-400 tracking-tight drop-shadow-[0_0_15px_rgba(16,185,129,0.3)]">
                                         {aliasName}
                                     </p>
-                                    <p className="text-xs text-zinc-500 mt-4 leading-relaxed font-light">
+                                    <p className="text-xs text-muted-foreground mt-4 leading-relaxed font-light">
                                         This is how others will see you. Your real identity is securely encrypted and isolated.
                                     </p>
                                 </div>
 
                                 <button
                                     onClick={() => router.push("/dashboard")}
-                                    className="w-full py-3.5 px-4 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-medium tracking-wide shadow-[0_0_20px_rgba(16,185,129,0.2)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                                    className="w-full py-3.5 px-4 bg-primary hover:bg-primary/90 rounded-xl text-primary-foreground font-medium tracking-wide shadow-md transition-all focus:outline-none focus:ring-2 focus:ring-primary"
                                 >
                                     Proceed to Dashboard
                                 </button>
@@ -125,12 +125,12 @@ export default function OnboardPage() {
     // Details form
     return (
         <AuthGate>
-            <div className="min-h-screen flex w-full bg-[#0d0d0d]">
+            <div className="min-h-screen flex w-full bg-background">
                 <div className="hidden lg:flex relative w-1/2 justify-center items-center overflow-hidden">
                     <Image src="/auth-bg.png" alt="Onboarding Details" fill priority className="object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#0d0d0d]/40 to-[#0d0d0d]" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-background/40 to-background" />
                     <div className="relative z-10 p-12 w-full max-w-xl left-0 absolute bottom-32">
-                        <h1 className="text-5xl font-medium text-white tracking-tight mb-4 drop-shadow-lg">
+                        <h1 className="text-5xl font-serif text-white tracking-tight mb-4 drop-shadow-lg">
                             Identity Core.
                         </h1>
                         <p className="text-xl text-zinc-300 font-light tracking-wide max-w-md drop-shadow-md">

@@ -2,7 +2,6 @@ import { currentUser, auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import SignOutButton from "./sign-out-button";
 import TeacherPortfolio from "./TeacherPortfolio";
 
 async function syncUserToDb(token: string, userData: { real_name?: string; real_email?: string }) {
@@ -187,15 +186,6 @@ export default async function DashboardPage() {
 
     return (
         <div className="space-y-8">
-            <header className="flex items-center justify-between pb-6">
-                <h1 className="text-3xl font-serif text-foreground">Dashboard</h1>
-                <div className="flex items-center gap-4">
-                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-widest bg-secondary px-3 py-1">
-                        {roleName}
-                    </span>
-                    <SignOutButton />
-                </div>
-            </header>
 
             {/* Profile Card */}
             <div className="bg-card rounded-[1.5rem] p-8 lg:p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.02)] relative overflow-hidden">
