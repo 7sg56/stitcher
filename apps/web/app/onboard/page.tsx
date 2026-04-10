@@ -15,17 +15,14 @@ interface OnboardResult {
 }
 
 export default function OnboardPage() {
-    const { getToken, isSignedIn } = useAuth();
+    const { getToken } = useAuth();
     const router = useRouter();
     const [step, setStep] = useState<Step>("details");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [aliasName, setAliasName] = useState("");
 
-    if (!isSignedIn) {
-        router.push("/sign-in");
-        return null;
-    }
+    // Auth state is checked safely inside the AuthGate component
 
     const handleSubmit = async (formData: FormData) => {
         setLoading(true);
