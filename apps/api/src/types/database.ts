@@ -314,3 +314,36 @@ export interface DoubtMessageWithSender extends DoubtMessage {
 export interface DoubtThreadWithMessages extends DoubtThread {
     messages: DoubtMessageWithSender[];
 }
+
+// ============================================
+// Phase 5: Moderation, Dashboards & Analytics
+// ============================================
+
+export interface TeacherRating {
+    id: string;
+    teacher_id: string;
+    course_id: string;
+    weighted_avg_rating: number;
+    total_reviews: number;
+    is_flagged: boolean;
+    last_aggregated_at: string;
+}
+
+export interface SessionInsight {
+    id: string;
+    session_id: string;
+    weak_concepts: { concept: string; source: string; detail?: string }[];
+    quiz_accuracy_pct: number | null;
+    avg_rating: number | null;
+    total_feedback: number;
+    aggregated_at: string;
+}
+
+export interface AggregationJob {
+    id: string;
+    session_id: string;
+    status: "pending" | "processing" | "done" | "failed";
+    queued_at: string;
+    completed_at: string | null;
+    error: string | null;
+}

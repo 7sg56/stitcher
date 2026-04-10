@@ -2,6 +2,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { Session } from "../../types/database";
 import { CreateSessionInput } from "./sessions.schema";
 import { QuizzesService } from "../quizzes/quizzes.service";
+import { enqueueSessionAggregation } from "../../core/queue/queue";
 
 export class SessionsService {
     constructor(private supabase: SupabaseClient) { }
@@ -76,6 +77,12 @@ export class SessionsService {
             .single();
 
         if (error) throw error;
+
+        // Enqueue async aggregation job
+        enqueueSessionAggregation(sessionId).catch(err =>
+            console.error("Failed to enqueue aggregation for session", sessionId, err)
+        );
+
         return session as Session;
     }
 
@@ -118,8 +125,17 @@ export class SessionsService {
                 const startedAt = new Date(session.started_at).getTime();
                 const durationMs = (session.duration_minutes ?? 60) * 60 * 1000;
                 if (Date.now() > startedAt + durationMs) {
-                    await this.endSession(session.id);
+                    await this.supabase
+                        .from("sessions")
+                        .update({ ended_at: new Date(startedAt + durationMs).toISOString() })
+                        .eq("id", session.id)
+                        .is("ended_at", null);
                     session.ended_at = new Date(startedAt + durationMs).toISOString();
+
+                    // Enqueue aggregation for auto-ended session
+                    enqueueSessionAggregation(session.id).catch(err =>
+                        console.error("Failed to enqueue aggregation for auto-ended session", session.id, err)
+                    );
                 }
             }
             validSessions.push(session);

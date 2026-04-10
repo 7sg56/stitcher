@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import SignOutButton from "./sign-out-button";
+import TeacherPortfolio from "./TeacherPortfolio";
 
 async function syncUserToDb(token: string, userData: { real_name?: string; real_email?: string }) {
     const apiUrl = process.env.API_URL || "http://localhost:3001";
@@ -46,7 +47,15 @@ async function fetchCourses(token: string) {
     return null;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function fetchStudentDashboard(token: string) {
+    const apiUrl = process.env.API_URL || "http://localhost:3001";
+    try {
+        const res = await fetch(`${apiUrl}/dashboard/student`, { headers: { Authorization: `Bearer ${token}` } });
+        if (res.ok) return await res.json();
+    } catch { /* ignore */ }
+    return null;
+}
+
 async function fetchAttendanceStats(token: string, courseId: string): Promise<{ totalSessions: number; presentCount: number }> {
     const apiUrl = process.env.API_URL || "http://localhost:3001";
     try {
@@ -54,10 +63,10 @@ async function fetchAttendanceStats(token: string, courseId: string): Promise<{ 
             fetch(`${apiUrl}/attendance/student/${courseId}`, { headers: { Authorization: `Bearer ${token}` } }),
             fetch(`${apiUrl}/sessions/course/${courseId}`, { headers: { Authorization: `Bearer ${token}` } })
         ]);
-        
+
         let records = [];
         let sessions = [];
-        
+
         if (attRes.ok) {
             const data = await attRes.json();
             records = data.attendance || [];
@@ -66,10 +75,10 @@ async function fetchAttendanceStats(token: string, courseId: string): Promise<{ 
             const data = await sessRes.json();
             sessions = data.sessions || [];
         }
-        
+
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const nonCancelledSessions = sessions.filter((s: any) => !s.is_cancelled);
-        
+
         let presentCount = 0;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         records.forEach((r: any) => {
@@ -77,7 +86,7 @@ async function fetchAttendanceStats(token: string, courseId: string): Promise<{ 
                 presentCount++;
             }
         });
-        
+
         return {
             totalSessions: nonCancelledSessions.length,
             presentCount: presentCount
@@ -137,13 +146,29 @@ export default async function DashboardPage() {
             const enrollData = await fetchMyEnrollments(token);
             enrolledCourses = enrollData?.enrollments || [];
 
+            // Fetch enhanced dashboard data
+            const dashData = await fetchStudentDashboard(token);
+            const dashCourses = dashData?.dashboard?.courses || [];
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const statsPromises = enrolledCourses.map((e: any) => fetchAttendanceStats(token, e.course?.id || e.course_id));
             const stats = await Promise.all(statsPromises);
-            
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             enrolledCourses.forEach((e: any, idx: number) => {
                 e.attendanceStats = stats[idx];
                 totalTotalSessions += stats[idx].totalSessions;
                 totalPresentCount += stats[idx].presentCount;
+
+                // Merge dashboard data (teacher name, violation count)
+                const courseId = e.course?.id || e.course_id;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const dashCourse = dashCourses.find((dc: any) => dc.course_id === courseId);
+                if (dashCourse) {
+                    e.teacherName = dashCourse.teacher_name;
+                    e.className = dashCourse.class_name;
+                    e.violationCount = dashCourse.violation_count;
+                }
             });
         }
 
@@ -209,7 +234,7 @@ export default async function DashboardPage() {
                                                 strokeDasharray={2 * Math.PI * 40}
                                                 strokeDashoffset={(2 * Math.PI * 40) * (1 - (totalPresentCount / totalTotalSessions))}
                                                 strokeLinecap="round"
-                                                className="text-indigo-500 transition-all duration-1000 ease-out" 
+                                                className="text-indigo-500 transition-all duration-1000 ease-out"
                                             />
                                         </svg>
                                         <div className="absolute flex items-center justify-center">
@@ -271,12 +296,20 @@ export default async function DashboardPage() {
                                                 <h3 className="text-white font-medium">{enrollment.course?.name || "Course"}</h3>
                                                 <div className="flex items-center gap-3 mt-1 text-xs text-zinc-400">
                                                     <span className="font-mono">{enrollment.course?.code}</span>
+                                                    {enrollment.className && <span>{enrollment.className}</span>}
                                                     <span>Semester {enrollment.course?.semester_number}</span>
                                                     {enrollment.course?.department && <span>{enrollment.course.department}</span>}
                                                 </div>
+                                                {enrollment.teacherName && (
+                                                    <p className="text-xs text-zinc-500 mt-1">Faculty: {enrollment.teacherName}</p>
+                                                )}
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <span className="text-xs text-emerald-400 bg-emerald-900/30 px-2 py-0.5 rounded">Enrolled</span>
+                                                {enrollment.violationCount > 0 && (
+                                                    <span className="text-xs text-amber-400 bg-amber-900/30 px-2 py-0.5 rounded">
+                                                        {enrollment.violationCount} violation{enrollment.violationCount !== 1 ? "s" : ""}
+                                                    </span>
+                                                )}
                                                 {enrollment.attendanceStats?.totalSessions > 0 && (
                                                     <span className="font-mono text-xs text-indigo-400 bg-zinc-800 px-2 py-1 rounded">
                                                         {Math.round((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100)}%
@@ -336,6 +369,11 @@ export default async function DashboardPage() {
                             </div>
                         )}
                     </div>
+                )}
+
+                {/* Teacher Portfolio -- ratings and insights */}
+                {(roleName === "teacher") && (
+                    <TeacherPortfolio />
                 )}
             </main>
         </div>

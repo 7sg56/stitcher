@@ -1,5 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { DoubtThread, DoubtMessage, DoubtThreadWithMessages } from "../../types/database";
+import { checkProfanity } from "../../core/utils/profanity";
+import { ViolationsService } from "../violations/violations.service";
 
 export class DoubtsService {
     constructor(private supabase: SupabaseClient) { }
@@ -135,19 +137,46 @@ export class DoubtsService {
         } as DoubtThreadWithMessages;
     }
 
-    async addMessage(threadId: string, senderId: string, content: string): Promise<DoubtMessage> {
+    async addMessage(threadId: string, senderId: string, content: string): Promise<DoubtMessage & { was_filtered?: boolean }> {
+        // Run profanity filter
+        const profanityResult = checkProfanity(content);
+        const finalContent = profanityResult.cleaned;
+        let wasFiltered = false;
+
+        if (profanityResult.isProfane) {
+            wasFiltered = true;
+
+            // Get the thread's course_id for violation scoping
+            const { data: thread } = await this.supabase
+                .from("doubt_threads")
+                .select("course_id")
+                .eq("id", threadId)
+                .single();
+
+            if (thread) {
+                const violationsService = new ViolationsService(this.supabase);
+                await violationsService.logViolation(
+                    senderId,
+                    thread.course_id,
+                    "profanity",
+                    1,
+                    profanityResult.original
+                );
+            }
+        }
+
         const { data: message, error } = await this.supabase
             .from("doubt_messages")
             .insert({
                 thread_id: threadId,
                 sender_id: senderId,
-                content,
+                content: finalContent,
             })
             .select("*")
             .single();
 
         if (error) throw error;
-        return message as DoubtMessage;
+        return { ...(message as DoubtMessage), was_filtered: wasFiltered };
     }
 
     async resolveThread(threadId: string): Promise<DoubtThread> {
