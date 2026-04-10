@@ -37,7 +37,7 @@ export class SessionsService {
                 await quizzesSvc.addQuestion(quiz.id, {
                     question_text: q.question_text,
                     question_type: "mcq",
-                    points: 0,
+                    points: q.points ?? 1,
                     order_index: i + 1,
                     options: q.options.map((opt, o_i) => ({
                         option_text: opt,

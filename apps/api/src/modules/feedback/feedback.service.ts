@@ -67,12 +67,55 @@ export class FeedbackService {
             throw new Error("You have already submitted feedback for this session");
         }
 
+        // Calculate weighted rating based on quiz performance
+        let finalRating = rating;
+        try {
+            const { data: session } = await this.supabase
+                .from("sessions")
+                .select("quiz_id")
+                .eq("id", sessionId)
+                .single();
+
+            if (session?.quiz_id) {
+                const { data: attempt } = await this.supabase
+                    .from("quiz_attempts")
+                    .select("*")
+                    .eq("quiz_id", session.quiz_id)
+                    .eq("student_id", studentId)
+                    .single();
+
+                if (attempt && attempt.submitted_at) {
+                    let multiplier = 0;
+                    if (attempt.max_score && attempt.max_score > 0) {
+                        multiplier = (attempt.score || 0) / attempt.max_score;
+                    } else {
+                        // Handle legacy or 0-point quizzes
+                        const { data: responses } = await this.supabase
+                            .from("quiz_responses")
+                            .select("is_correct")
+                            .eq("attempt_id", attempt.id);
+                        
+                        if (responses && responses.length > 0) {
+                            const correctCount = responses.filter(r => r.is_correct).length;
+                            multiplier = correctCount / responses.length;
+                        } else {
+                            multiplier = 1; // Default to full rating if no responses (though shouldn't happen)
+                        }
+                    }
+                    finalRating = rating * multiplier;
+                }
+            }
+        } catch (e) {
+            console.error("Error calculating weighted rating:", e);
+            // Fallback to original rating on error
+        }
+
         const { data: feedback, error } = await this.supabase
             .from("feedback")
             .insert({
                 student_id: studentId,
                 session_id: sessionId,
-                rating,
+                rating: finalRating,
                 comment: comment ?? null,
                 is_anonymous: true,
             })
