@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { PageHeader } from "@/components/layout/page-header";
 
 interface Course {
     id: string;
@@ -238,27 +239,22 @@ export default function CoursesPage() {
     const canManage = role === "admin" || role === "teacher";
 
     return (
-        <div className="min-h-screen bg-zinc-950">
-            <nav className="border-b border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-                <div className="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link href="/dashboard" className="text-zinc-400 hover:text-white transition-colors text-sm">
-                            &larr; Dashboard
-                        </Link>
-                        <h1 className="text-lg font-semibold text-white tracking-tight">Courses</h1>
-                    </div>
-                    {canManage && (
-                        <button
-                            onClick={() => { setShowCreateForm(!showCreateForm); setEditingCourse(null); }}
-                            className="px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-500 transition-colors"
-                        >
-                            {showCreateForm ? "Cancel" : "+ New Course"}
-                        </button>
-                    )}
-                </div>
-            </nav>
+        <div className="flex flex-col w-full min-h-screen bg-background">
+            <PageHeader
+                title="Courses"
+                roleName={role}
+                breadcrumbs={[{ label: "Dashboard", href: "/dashboard" }]}
+                action={canManage ? (
+                    <button
+                        onClick={() => { setShowCreateForm(!showCreateForm); setEditingCourse(null); }}
+                        className="px-4 py-2 bg-primary text-primary-foreground text-sm font-medium rounded-xl hover:bg-primary/90 transition-colors shadow-md"
+                    >
+                        {showCreateForm ? "Cancel" : "+ New Course"}
+                    </button>
+                ) : undefined}
+            />
 
-            <main className="max-w-5xl mx-auto px-4 py-8">
+            <main className="w-full max-w-6xl mx-auto p-4 sm:px-6 lg:px-8 py-8">
                 {error && (
                     <div className="mb-4 bg-red-900/30 border border-red-800 text-red-300 px-4 py-3 rounded-lg text-sm">
                         {error}

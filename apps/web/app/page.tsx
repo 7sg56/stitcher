@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
 import { useRef } from "react";
 
 export default function Home() {
@@ -46,16 +45,20 @@ export default function Home() {
 
       {/* Hero Section */}
       <section ref={ref} className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-        {/* Parallax Background */}
-        <motion.div style={{ y, opacity }} className="absolute inset-0 w-full h-[120%] -top-[10%]">
-          <Image
-            src="/home-hero.png"
-            alt="Stitcher Hero Background"
-            fill
-            priority
-            className="object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
+        {/* Pure CSS Algorithmic Background */}
+        <motion.div style={{ y, opacity }} className="absolute inset-0 w-full h-full">
+          {/* Deep Base */}
+          <div className="absolute inset-0 bg-background" />
+
+          {/* Structural Glows */}
+          <div className="absolute top-1/4 -left-[20%] w-[800px] h-[800px] bg-primary/10 blur-[150px] rounded-full pointer-events-none mix-blend-screen" />
+          <div className="absolute bottom-1/4 -right-[20%] w-[1000px] h-[1000px] bg-[#2c42b5]/15 blur-[200px] rounded-full pointer-events-none mix-blend-screen" />
+
+          {/* Geometric Grid Overlay */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black_40%,transparent_100%)]" />
+
+          {/* Bottom Fade out */}
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent opacity-90" />
         </motion.div>
 
         {/* Content */}
