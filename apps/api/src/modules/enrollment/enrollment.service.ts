@@ -172,8 +172,9 @@ export class EnrollmentService {
 
         return items.map((e) => ({
             ...e,
-            student_name: userMap[e.user_id] ?? null,
-            student_alias: callerRole === "admin" ? (aliasMap[e.user_id] ?? null) : null,
+            // Admin: sees real name + alias. Teacher and Student: see alias only.
+            student_name: callerRole === "admin" ? (userMap[e.user_id] ?? null) : null,
+            student_alias: aliasMap[e.user_id] ?? null,
         })) as EnrollmentWithStudent[];
     }
 }

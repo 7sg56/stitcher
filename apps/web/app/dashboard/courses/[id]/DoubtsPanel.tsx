@@ -46,6 +46,15 @@ function IconMessage({ className }: { className?: string }) {
     );
 }
 
+function IconFlag({ className }: { className?: string }) {
+    return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+            <line x1="4" y1="22" x2="4" y2="15" />
+        </svg>
+    );
+}
+
 /* ------------------------------------------------------------------ */
 /*  Types                                                             */
 /* ------------------------------------------------------------------ */
@@ -85,6 +94,7 @@ interface DoubtsPanelProps {
     apiUrl: string;
     getToken: () => Promise<string | null>;
     onRefresh: () => Promise<void>;
+    onProfileClick?: (userId: string) => void;
 }
 
 /* ------------------------------------------------------------------ */
@@ -125,6 +135,7 @@ export default function DoubtsPanel({
     apiUrl,
     getToken,
     onRefresh,
+    onProfileClick,
 }: DoubtsPanelProps) {
     // Local copy for optimistic updates
     const [threads, setThreads] = useState<DoubtThread[]>(externalThreads);
@@ -137,6 +148,10 @@ export default function DoubtsPanel({
     const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
     const [replyingTo, setReplyingTo] = useState<string | null>(null);
     const [replyContent, setReplyContent] = useState("");
+    const [reportTarget, setReportTarget] = useState<{ type: "thread" | "message"; id: string; text: string } | null>(null);
+    const [reportReason, setReportReason] = useState("");
+    const [reportSubmitting, setReportSubmitting] = useState(false);
+    const [reportSuccess, setReportSuccess] = useState<string | null>(null);
 
     const canResolve = role === "teacher" || role === "admin";
 
@@ -295,14 +310,54 @@ export default function DoubtsPanel({
         }
     }
 
+    async function handleReport() {
+        if (!reportTarget) return;
+        setReportSubmitting(true);
+        try {
+            const res = await authFetch(`${apiUrl}/reports`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    course_id: courseId,
+                    content_type: reportTarget.type,
+                    content_id: reportTarget.id,
+                    reason: reportReason.trim() || undefined,
+                }),
+            });
+            if (!res.ok) throw new Error((await res.json()).error);
+            const data = await res.json();
+            const action = data.action === "flagged_and_deleted" ? "Content was flagged and removed." : "Report submitted -- content was not flagged.";
+            setReportSuccess(action);
+            setReportTarget(null);
+            setReportReason("");
+            await onRefresh();
+            setTimeout(() => setReportSuccess(null), 4000);
+        } catch (err: unknown) {
+            setError(err instanceof Error ? err.message : "Failed to submit report");
+        } finally {
+            setReportSubmitting(false);
+        }
+    }
+
     // ---- identity helper ----
 
-    function renderSender(msgRole: string, msgName: string | null, msgAlias: string) {
+    function renderSender(msgSenderId: string, msgRole: string, msgName: string | null, msgAlias: string) {
         const isInstructor = msgRole === "teacher" || msgRole === "admin";
         const name = isInstructor ? (msgName || "Instructor") : msgAlias;
+        const canClickProfile = !isInstructor && onProfileClick;
+
         return (
             <div className="flex items-center gap-2">
-                <span className="text-[13px] font-semibold text-foreground">{name}</span>
+                {canClickProfile ? (
+                    <button
+                        onClick={() => onProfileClick(msgSenderId)}
+                        className="text-[13px] font-semibold text-primary hover:underline"
+                    >
+                        {name}
+                    </button>
+                ) : (
+                    <span className="text-[13px] font-semibold text-foreground">{name}</span>
+                )}
                 {isInstructor && (
                     <span className="text-[10px] font-semibold uppercase tracking-wider text-primary bg-primary text-primary-foreground/10 px-1.5 py-0.5 rounded">
                         {msgRole}
@@ -359,7 +414,7 @@ export default function DoubtsPanel({
                         return (
                             <div
                                 key={thread.id}
-                                className={`bg-card border rounded-lg transition-colors ${isExpanded ? "border-border" : "border-border/60 hover:border-border"}`}
+                                className={`bg-card border rounded-lg transition-colors group ${isExpanded ? "border-border" : "border-border/60 hover:border-border"}`}
                             >
                                 {/* Thread row */}
                                 <div
@@ -401,7 +456,14 @@ export default function DoubtsPanel({
                                                 <IconMessage className="w-3 h-3" />
                                                 {isExpanded && detail ? `${messages.length} replies` : "Replies"}
                                             </span>
-                                            <span className="ml-auto">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); setReportTarget({ type: "thread", id: thread.id, text: thread.title }); }}
+                                                className="ml-auto opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-warning transition-all"
+                                                title="Report this thread"
+                                            >
+                                                <IconFlag className="w-3 h-3" />
+                                            </button>
+                                            <span className={reportTarget ? "" : "ml-auto"}>
                                                 <IconChevron className="w-3.5 h-3.5 text-muted-foreground" open={isExpanded} />
                                             </span>
                                         </div>
@@ -433,7 +495,7 @@ export default function DoubtsPanel({
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
                                                                         <div className="flex items-center gap-2">
-                                                                            {renderSender(msg.sender_role, msg.sender_name, msg.sender_alias)}
+                                                                            {renderSender(msg.sender_id, msg.sender_role, msg.sender_name, msg.sender_alias)}
                                                                             <span className="text-[11px] text-muted-foreground">
                                                                                 {new Date(msg.sent_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                                                                             </span>
@@ -455,6 +517,13 @@ export default function DoubtsPanel({
                                                                                     Reply
                                                                                 </button>
                                                                             )}
+                                                                            <button
+                                                                                onClick={() => setReportTarget({ type: "message", id: msg.id, text: msg.content })}
+                                                                                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-warning transition-all"
+                                                                                title="Report this message"
+                                                                            >
+                                                                                <IconFlag className="w-3 h-3" />
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -506,6 +575,46 @@ export default function DoubtsPanel({
                             </div>
                         );
                     })}
+                </div>
+            )}
+            {/* Report success toast */}
+            {reportSuccess && (
+                <div className="fixed bottom-6 right-6 bg-card border border-border shadow-lg rounded-lg px-4 py-3 text-sm text-foreground z-50 max-w-sm">
+                    {reportSuccess}
+                </div>
+            )}
+
+            {/* Report modal */}
+            {reportTarget && (
+                <div className="fixed inset-0 bg-background/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => { setReportTarget(null); setReportReason(""); }}>
+                    <div className="bg-card border border-border rounded-xl p-6 w-full max-w-md shadow-xl" onClick={(e) => e.stopPropagation()}>
+                        <h3 className="text-base font-semibold text-foreground mb-1">Report Content</h3>
+                        <p className="text-xs text-muted-foreground mb-4">This {reportTarget.type} will be reviewed by AI moderation. If found to violate guidelines, it will be removed and the author will receive a violation.</p>
+                        <div className="bg-muted rounded-lg p-3 mb-4">
+                            <p className="text-sm text-foreground line-clamp-3">&ldquo;{reportTarget.text}&rdquo;</p>
+                        </div>
+                        <textarea
+                            value={reportReason}
+                            onChange={(e) => setReportReason(e.target.value)}
+                            placeholder="Reason for report (optional)..."
+                            className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:border-ring resize-none h-20 mb-4 placeholder:text-muted-foreground"
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <button
+                                onClick={() => { setReportTarget(null); setReportReason(""); }}
+                                className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleReport}
+                                disabled={reportSubmitting}
+                                className="px-4 py-2 bg-warning text-warning-foreground text-sm font-medium rounded-lg hover:bg-warning/90 transition-colors disabled:opacity-50"
+                            >
+                                {reportSubmitting ? "Submitting..." : "Submit Report"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

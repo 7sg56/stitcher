@@ -347,3 +347,34 @@ export interface AggregationJob {
     completed_at: string | null;
     error: string | null;
 }
+
+// ============================================
+// Phase 6: Content Reporting & AI Moderation
+// ============================================
+
+export type ReportContentType = "thread" | "message";
+export type ReportStatus = "pending" | "flagged" | "dismissed";
+
+export interface Report {
+    id: string;
+    reporter_id: string;
+    course_id: string;
+    content_type: ReportContentType;
+    content_id: string;
+    content_text: string | null;
+    reason: string | null;
+    ai_classification: {
+        isFlagged: boolean;
+        category: string;
+        confidence: number;
+        reasoning: string;
+    } | null;
+    status: ReportStatus;
+    created_at: string;
+}
+
+export interface ReportWithDetails extends Report {
+    reporter_alias: string | null;
+    offender_id: string | null;
+    offender_alias: string | null;
+}

@@ -114,12 +114,40 @@ export class ViolationsService {
     async getViolationsByCourse(courseId: string): Promise<any[]> {
         const { data, error } = await this.supabase
             .from("violations")
-            .select("*, users:user_id(real_name, profanity_score)")
+            .select("*")
             .eq("course_id", courseId)
             .order("created_at", { ascending: false });
 
         if (error) throw error;
-        return data ?? [];
+        if (!data || data.length === 0) return [];
+
+        // Fetch aliases for all offenders
+        const userIds = [...new Set(data.map((v: { user_id: string }) => v.user_id))];
+
+        const { data: aliases } = await this.supabase
+            .from("aliases")
+            .select("user_id, display_name")
+            .in("user_id", userIds)
+            .eq("is_active", true);
+
+        const aliasMap = Object.fromEntries(
+            (aliases ?? []).map((a: { user_id: string; display_name: string }) => [a.user_id, a.display_name])
+        );
+
+        const { data: users } = await this.supabase
+            .from("users")
+            .select("id, profanity_score")
+            .in("id", userIds);
+
+        const scoreMap = Object.fromEntries(
+            (users ?? []).map((u: { id: string; profanity_score: number }) => [u.id, u.profanity_score])
+        );
+
+        return data.map((v: any) => ({
+            ...v,
+            student_alias: aliasMap[v.user_id] ?? "Unknown",
+            profanity_score: scoreMap[v.user_id] ?? 0,
+        }));
     }
 
     async getViolationCountByUserAndCourse(userId: string, courseId: string): Promise<number> {

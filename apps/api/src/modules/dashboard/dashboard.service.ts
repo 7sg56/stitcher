@@ -392,4 +392,86 @@ export class DashboardService {
             last_aggregated_at: r.last_aggregated_at,
         }));
     }
+
+    // ---- Student Profile (for teachers/admins) ----
+
+    async getStudentProfileForTeacher(studentId: string, courseId: string) {
+        // 1. Get student alias
+        const { data: alias } = await this.supabase
+            .from("aliases")
+            .select("display_name")
+            .eq("user_id", studentId)
+            .eq("is_active", true)
+            .maybeSingle();
+
+        // 2. Get enrollment info for this course
+        const { data: enrollment } = await this.supabase
+            .from("enrollments")
+            .select("*, course:courses(name, code, class_name)")
+            .eq("user_id", studentId)
+            .eq("course_id", courseId)
+            .eq("status", "active")
+            .single();
+
+        if (!enrollment) return null;
+
+        // 3. Attendance for this course
+        const { data: sessions } = await this.supabase
+            .from("sessions")
+            .select("id")
+            .eq("course_id", courseId)
+            .eq("is_cancelled", false);
+
+        const sessionIds = (sessions ?? []).map((s: { id: string }) => s.id);
+        let presentCount = 0;
+
+        if (sessionIds.length > 0) {
+            const { data: attendance } = await this.supabase
+                .from("attendance")
+                .select("status")
+                .eq("student_id", studentId)
+                .in("session_id", sessionIds);
+
+            presentCount = (attendance ?? []).filter(
+                (a: { status: string }) => a.status === "present" || a.status === "late"
+            ).length;
+        }
+
+        // 4. All enrolled courses (names only)
+        const { data: allEnrollments } = await this.supabase
+            .from("enrollments")
+            .select("course:courses(name, code)")
+            .eq("user_id", studentId)
+            .eq("status", "active");
+
+        // 5. Violation count for this course
+        const { data: violations } = await this.supabase
+            .from("violations")
+            .select("id")
+            .eq("user_id", studentId)
+            .eq("course_id", courseId);
+
+        const totalSessions = sessionIds.length;
+        const attendancePct = totalSessions > 0 ? Math.round((presentCount / totalSessions) * 100) : 0;
+
+        return {
+            alias: alias?.display_name ?? "Anonymous",
+            course: {
+                name: (enrollment as any).course?.name ?? "",
+                code: (enrollment as any).course?.code ?? "",
+                class_name: (enrollment as any).course?.class_name ?? null,
+            },
+            attendance: {
+                present: presentCount,
+                total: totalSessions,
+                percentage: attendancePct,
+            },
+            violation_count: violations?.length ?? 0,
+            enrolled_courses: (allEnrollments ?? []).map((e: any) => ({
+                name: e.course?.name ?? "",
+                code: e.course?.code ?? "",
+            })),
+            enrolled_at: enrollment.enrolled_at,
+        };
+    }
 }

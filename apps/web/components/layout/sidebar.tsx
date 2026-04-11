@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 import {
-    MessageSquare,
     BookOpen,
     Settings,
     LayoutDashboard,
@@ -15,7 +15,6 @@ import { cn } from "@/lib/utils";
 const sidebarLinks = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Courses", href: "/dashboard/courses", icon: BookOpen },
-    { name: "Messages", href: "/dashboard/messages", icon: MessageSquare },
     { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
@@ -24,9 +23,18 @@ export function Sidebar() {
     const router = useRouter();
     const { signOut } = useClerk();
 
+    // Do not render the global sidebar on course detail pages
+    const isCourseDetailPage = pathname?.match(/^\/dashboard\/courses\/[^/]+$/);
+    if (isCourseDetailPage) return null;
+
     return (
         <>
-            <aside className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col bg-muted sm:flex border-r border-border">
+            <motion.aside
+                initial={{ x: -20, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                className="fixed inset-y-0 left-0 z-10 hidden w-60 flex-col bg-muted sm:flex border-r border-border"
+            >
                 <div className="flex h-20 items-center px-6 border-b border-transparent">
                     <Link href="/" className="flex items-center gap-2 font-semibold">
                         {/* Using a sleek, abstract SVG for logo */}
@@ -77,7 +85,7 @@ export function Sidebar() {
                         Sign Out
                     </button>
                 </div>
-            </aside>
+            </motion.aside>
 
             {/* Mobile Bottom Navigation */}
             <nav className="fixed bottom-0 left-0 right-0 z-50 flex sm:hidden border-t border-border bg-background pb-safe items-center justify-around px-2 py-2">

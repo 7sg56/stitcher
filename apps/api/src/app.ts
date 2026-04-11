@@ -36,6 +36,7 @@ import quizzesRoutes from "./modules/quizzes/quizzes.route";
 import doubtsRoutes from "./modules/doubts/doubts.route";
 import feedbackRoutes from "./modules/feedback/feedback.route";
 import violationsRoutes from "./modules/violations/violations.route";
+import reportsRoutes from "./modules/reports/reports.route";
 import dashboardRoutes from "./modules/dashboard/dashboard.route";
 import { startAggregationWorker } from "./core/queue/aggregation.worker";
 
@@ -64,6 +65,7 @@ app.register(quizzesRoutes, { prefix: "/quizzes" });
 app.register(doubtsRoutes, { prefix: "/doubts" });
 app.register(feedbackRoutes, { prefix: "/feedback" });
 app.register(violationsRoutes, { prefix: "/violations" });
+app.register(reportsRoutes, { prefix: "/reports" });
 app.register(dashboardRoutes, { prefix: "/dashboard" });
 
 // --- Health check ---

@@ -120,3 +120,28 @@ export async function getSessionInsights(
 
     return reply.send({ insights });
 }
+
+// GET /dashboard/student-profile/:userId/:courseId
+export async function getStudentProfile(
+    req: FastifyRequest<{ Params: { userId: string; courseId: string } }>,
+    reply: FastifyReply
+) {
+    const me = await getCurrentUser(req, reply);
+    if (!me) return;
+
+    if (me.role.name === "student") {
+        return reply.code(403).send({ error: "Teacher/admin access only" });
+    }
+
+    const service = new DashboardService(req.server.supabase);
+    const profile = await service.getStudentProfileForTeacher(
+        req.params.userId,
+        req.params.courseId
+    );
+
+    if (!profile) {
+        return reply.code(404).send({ error: "Student profile not found" });
+    }
+
+    return reply.send({ profile });
+}
