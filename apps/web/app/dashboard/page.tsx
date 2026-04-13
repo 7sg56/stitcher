@@ -217,7 +217,7 @@ export default async function DashboardPage() {
                                         <p className="text-sm font-medium text-foreground">Total Attendance</p>
                                         <p className="text-xs text-muted-foreground mt-0.5">{totalPresentCount} / {totalTotalSessions} sessions</p>
                                     </div>
-                                    <div className="relative w-16 h-16 flex items-center justify-center bg-secondary">
+                                    <div className="relative w-16 h-16 flex items-center justify-center">
                                         <svg className="w-full h-full transform -rotate-90 p-1" viewBox="0 0 100 100">
                                             <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="6" fill="transparent" className="text-border" />
                                             <circle cx="50" cy="50" r="40" stroke="currentColor" strokeWidth="6" fill="transparent"
