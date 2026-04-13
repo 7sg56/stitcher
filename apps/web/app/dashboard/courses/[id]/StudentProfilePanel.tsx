@@ -121,7 +121,7 @@ export default function StudentProfilePanel({
                                 <div className="bg-card border border-border rounded-lg p-4">
                                     <div className="flex items-end justify-between mb-2">
                                         <span className={`text-2xl font-bold tabular-nums ${profile.attendance.percentage >= 75 ? "text-success" :
-                                                profile.attendance.percentage >= 50 ? "text-warning" : "text-danger"
+                                            profile.attendance.percentage >= 50 ? "text-warning" : "text-danger"
                                             }`}>
                                             {profile.attendance.percentage}%
                                         </span>
@@ -132,11 +132,21 @@ export default function StudentProfilePanel({
                                     <div className="h-1.5 bg-muted rounded-full overflow-hidden">
                                         <div
                                             className={`h-full rounded-full transition-all ${profile.attendance.percentage >= 75 ? "bg-success" :
-                                                    profile.attendance.percentage >= 50 ? "bg-warning" : "bg-danger"
+                                                profile.attendance.percentage >= 50 ? "bg-warning" : "bg-danger"
                                                 }`}
                                             style={{ width: `${profile.attendance.percentage}%` }}
                                         />
                                     </div>
+                                    {profile.attendance.percentage < 75 && profile.attendance.total > 0 && (
+                                        <div className="mt-3 text-xs text-muted-foreground bg-warning/10 border border-warning/20 p-2.5 rounded-md flex items-start gap-2">
+                                            <svg className="w-4 h-4 text-warning shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                            <p>
+                                                Needs to attend the next <strong className="text-warning font-semibold">{Math.max(0, 3 * profile.attendance.total - 4 * profile.attendance.present)}</strong> session{Math.max(0, 3 * profile.attendance.total - 4 * profile.attendance.present) !== 1 ? 's' : ''} to reach 75%.
+                                            </p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

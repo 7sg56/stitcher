@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 export const submitReportSchema = z.object({
-    course_id: z.string().uuid(),
+    course_id: z.string().min(1),
     content_type: z.enum(["thread", "message"]),
-    content_id: z.string().uuid(),
+    content_id: z.string().min(1),
     reason: z.string().max(500).optional(),
 });
 

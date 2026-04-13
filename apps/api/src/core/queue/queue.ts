@@ -16,6 +16,7 @@ function getRedisConnection(): IORedis | null {
         port,
         password: password || undefined,
         tls: {},
+        family: 4,
         maxRetriesPerRequest: null,
     });
 }
@@ -34,6 +35,10 @@ export function getSessionAggregationQueue(): Queue | null {
             removeOnComplete: { count: 100 },
             removeOnFail: { count: 50 },
         },
+    });
+
+    sessionAggregationQueue.on("error", (err) => {
+        console.error("Aggregation queue Redis error:", err.message);
     });
 
     return sessionAggregationQueue;

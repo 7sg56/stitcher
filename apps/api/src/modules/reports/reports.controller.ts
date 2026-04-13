@@ -24,16 +24,16 @@ export async function submitReport(req: FastifyRequest, reply: FastifyReply) {
     const me = await getCurrentUser(req, reply);
     if (!me) return;
 
-    const body = submitReportSchema.parse(req.body);
-    const service = new ReportsService(req.server.supabase);
-
     try {
+        const body = submitReportSchema.parse(req.body);
+        const service = new ReportsService(req.server.supabase);
         const result = await service.submitReport(me.id, body);
         return reply.code(201).send({
             report: result,
             action: result.action_taken,
         });
     } catch (err: unknown) {
+        console.error("Report Validation/Submit Error:", err);
         const message = err instanceof Error ? err.message : "Failed to submit report";
         return reply.code(400).send({ error: message });
     }

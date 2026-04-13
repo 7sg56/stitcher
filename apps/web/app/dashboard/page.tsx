@@ -264,6 +264,53 @@ export default async function DashboardPage() {
                     </div>
                 </div>
 
+                {/* Attendance Prediction Section */}
+                {roleName === "student" && enrolledCourses.length > 0 && (
+                    <div className="bg-card rounded-[1.5rem] p-8 lg:p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.02)] relative overflow-hidden mt-8 border border-border lg:col-span-full">
+                        <div className="flex items-center justify-between mb-6">
+                            <div>
+                                <h2 className="text-2xl font-serif text-foreground">Attendance Prediction</h2>
+                                <p className="text-sm text-muted-foreground mt-1">Track how many upcoming sessions you need to attend to meet minimum criteria.</p>
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                            {enrolledCourses.map((enrollment: any) => {
+                                if (!enrollment.attendanceStats || enrollment.attendanceStats.totalSessions === 0) return null;
+                                const present = enrollment.attendanceStats.presentCount;
+                                const total = enrollment.attendanceStats.totalSessions;
+                                const pct = (present / total) * 100;
+                                const targetSessions = Math.max(0, 3 * total - 4 * present);
+
+                                return (
+                                    <div key={enrollment.id} className="flex flex-col h-full bg-muted rounded-2xl p-6 border border-border">
+                                        <h3 className="font-semibold text-foreground mb-1">{enrollment.course?.name || "Course"}</h3>
+                                        <div className="flex items-center gap-3 mb-4 text-xs">
+                                            <span className="font-mono bg-accent px-2 py-0.5 border border-border rounded-md text-muted-foreground">{enrollment.course?.code}</span>
+                                            <span className={`font-medium ${pct >= 75 ? "text-success" : "text-warning"}`}>Current: {Math.round(pct)}%</span>
+                                        </div>
+                                        {pct < 75 ? (
+                                            <div className="bg-warning/10 border border-warning/20 rounded-lg p-4 mt-auto">
+                                                <p className="text-sm text-foreground">
+                                                    You need to attend the next <strong className="text-warning text-lg">{targetSessions}</strong> consecutive session{targetSessions !== 1 ? 's' : ''} to reach the 75% requirement.
+                                                </p>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-success/10 border border-success/20 rounded-lg p-4 mt-auto">
+                                                <p className="text-sm text-success font-medium">Safe! You are currently above the 75% threshold.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
+                        {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                        {enrolledCourses.every((e: any) => !e.attendanceStats || e.attendanceStats.totalSessions === 0) && (
+                            <p className="text-muted-foreground text-sm">No attendance data available yet to generate predictions.</p>
+                        )}
+                    </div>
+                )}
+
                 {/* Student: Enrolled Courses */}
                 {roleName === "student" && (
                     <div className="bg-card rounded-[1.5rem] p-8 lg:p-10 shadow-[0_32px_64px_-8px_rgba(218,226,253,0.02)] relative overflow-hidden mt-8">
@@ -321,9 +368,19 @@ export default async function DashboardPage() {
                                                 </span>
                                             )}
                                             {enrollment.attendanceStats?.totalSessions > 0 && (
-                                                <span className="font-mono text-xs font-medium text-success bg-success/20 border border-success/50 rounded-full px-4 py-1.5">
-                                                    {Math.round((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100)}% att.
-                                                </span>
+                                                <div className="flex flex-col items-end gap-1">
+                                                    <span className={`font-mono text-xs font-medium px-4 py-1.5 rounded-full border ${(enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100 >= 75
+                                                        ? "text-success bg-success/20 border-success/50"
+                                                        : "text-warning bg-warning/20 border-warning/50"
+                                                        }`}>
+                                                        {Math.round((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100)}% att.
+                                                    </span>
+                                                    {((enrollment.attendanceStats.presentCount / enrollment.attendanceStats.totalSessions) * 100) < 75 && (
+                                                        <span className="text-[10px] text-muted-foreground bg-background/50 px-2 py-0.5 rounded border border-border">
+                                                            Needs {Math.max(0, 3 * enrollment.attendanceStats.totalSessions - 4 * enrollment.attendanceStats.presentCount)} more session{Math.max(0, 3 * enrollment.attendanceStats.totalSessions - 4 * enrollment.attendanceStats.presentCount) !== 1 ? "s" : ""}
+                                                        </span>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
                                     </Link>

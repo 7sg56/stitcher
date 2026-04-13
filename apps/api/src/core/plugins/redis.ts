@@ -23,6 +23,7 @@ export default fp(async (fastify: FastifyInstance) => {
         port,
         password: password || undefined,
         tls: {},
+        family: 4,
         maxRetriesPerRequest: null, // Required by BullMQ
     });
 

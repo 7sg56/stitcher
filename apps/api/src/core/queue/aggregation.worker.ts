@@ -170,6 +170,7 @@ export function startAggregationWorker(): Worker | null {
         port,
         password: password || undefined,
         tls: {},
+        family: 4,
         maxRetriesPerRequest: null,
     });
 
@@ -192,6 +193,10 @@ export function startAggregationWorker(): Worker | null {
 
     worker.on("failed", (job, err) => {
         console.error(`Aggregation job ${job?.id} failed:`, err.message);
+    });
+
+    worker.on("error", (err) => {
+        console.error("Aggregation worker Redis error:", err.message);
     });
 
     console.log("Session aggregation worker started");
